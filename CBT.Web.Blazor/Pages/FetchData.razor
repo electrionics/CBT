@@ -1,0 +1,67 @@
+﻿@page "/fetchdata"
+@using CBT.Web.Blazor.Data
+
+@inject AutomaticThoughtsService AutomaticThoughtsService
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cognitiveError in cognitiveErrors)
+            {
+                <tr>
+                    <td>@cognitiveError.Key</td>
+                    <td>@cognitiveError.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<KeyValuePair<int, string>> cognitiveErrors;
+
+    protected override Task OnInitializedAsync()
+    {
+        cognitiveErrors = GetAllCognitiveErrors();
+        return Task.CompletedTask;
+    }
+
+    #region GetAllCognitiveErrors
+
+    private IEnumerable<KeyValuePair<int, string>> GetAllCognitiveErrors()
+    {
+        return new List<KeyValuePair<int, string>>()
+        {
+            new ((int)CognitiveErrors.AllOrNothing, "Всё или ничего"),
+            new ((int)CognitiveErrors.Overgenersalization, "Сверхобобщение"),
+            new ((int)CognitiveErrors.NegativeFilter, "Негативный фильтр"),
+            new ((int)CognitiveErrors.DepreciationOfPositive, "Обесценивание положительного"),
+            new ((int)CognitiveErrors.HastyCobnclusions, "Поспешные выводы"),
+            new ((int)CognitiveErrors.ExaggerationOrСatastrophization, "Катастрофизавция (преувеличение)"),
+            new ((int)CognitiveErrors.EmotionalJustification, "Эмоциональное  обоснование"),
+            new ((int)CognitiveErrors.StatementWithMustWord, "Утверждения со словом должен"),
+            new ((int)CognitiveErrors.HangingShortcuts, "Навешивание ярлыков"),
+            new ((int)CognitiveErrors.Personalization, "Персонализация"),
+            new ((int)CognitiveErrors.Understatement, "Преуменьшение"),
+        };
+    }
+
+    #endregion
+}
