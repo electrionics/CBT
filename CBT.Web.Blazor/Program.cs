@@ -1,15 +1,18 @@
 using CBT.Web.Blazor.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Syncfusion.Blazor;
+using Syncfusion.Blazor.Popups;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddSyncfusionBlazor();
 builder.Services.AddSingleton<AutomaticThoughtsService>();
+builder.Services.AddScoped<SfDialogService>();
 
 var app = builder.Build();
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzAwNTIyM0AzMjM0MmUzMDJlMzBMWFFSeFJGTjRZRFJhL3JoYzNOdFRESjZ5Q05NcXJnckR1SFp0L0VwQUZFPQ==");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

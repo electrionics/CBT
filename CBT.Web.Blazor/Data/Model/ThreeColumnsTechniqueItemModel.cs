@@ -6,8 +6,14 @@ namespace CBT.Web.Blazor.Data.Model
     {
         public int Id { get;set; }
         public string Thought { get; set; }
-        public List<CognitiveErrors> Errors { get; set; }
+        public List<int> Errors { get; set; }
         public string? RationalAnswer { get; set; }
+
+
+        public ThreeColumnsTechniqueItemModel() 
+        {
+            Errors = new List<int>();
+        }
 
 
         #region Convert
@@ -22,7 +28,7 @@ namespace CBT.Web.Blazor.Data.Model
                 Id = data.Id,
                 Thought = data.Thought,
                 RationalAnswer = data.RationalAnswer,
-                Errors = data.ThoughtCognitiveErrors.Select(y => (CognitiveErrors)y.CognitiveErrorId).ToList()
+                Errors = data.ThoughtCognitiveErrors.Select(y => y.CognitiveErrorId).ToList()
             };
         }
 
@@ -43,9 +49,9 @@ namespace CBT.Web.Blazor.Data.Model
                 .Select(x => new ThoughtCognitiveError
                 {
                     ThoughtId = data.Id,
-                    CognitiveErrorId = (int)x
-                })
-                .ToList();
+                    CognitiveErrorId = x
+                }).ToList();
+            data.UserId = 1;
 
             return data;
         }

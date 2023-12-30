@@ -66,3 +66,8 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+.nav-link.nav-link-2-l
+{
+    line-height: 21.6px!important;
+}

@@ -15,21 +15,21 @@ namespace CBT.Web.Blazor.Data
 
         #region GetAllCognitiveErrors
 
-        public IEnumerable<KeyValuePair<int, string>> GetAllCognitiveErrors()
+        public Dictionary<int, string> GetAllCognitiveErrors()
         {
-            return new List<KeyValuePair<int, string>>()
+            return new Dictionary<int, string>()
             {
-                new ((int)CognitiveErrors.AllOrNothing, "Всё или ничего"),
-                new ((int)CognitiveErrors.Overgenersalization, "Сверхобобщение"),
-                new ((int)CognitiveErrors.NegativeFilter, "Негативный фильтр"),
-                new ((int)CognitiveErrors.DepreciationOfPositive, "Обесценивание положительного"),
-                new ((int)CognitiveErrors.HastyCobnclusions, "Поспешные выводы"),
-                new ((int)CognitiveErrors.ExaggerationOrСatastrophization, "Катастрофизавция (преувеличение)"),
-                new ((int)CognitiveErrors.EmotionalJustification, "Эмоциональное  обоснование"),
-                new ((int)CognitiveErrors.StatementWithMustWord, "Утверждения со словом должен"),
-                new ((int)CognitiveErrors.HangingShortcuts, "Навешивание ярлыков"),
-                new ((int)CognitiveErrors.Personalization, "Персонализация"),
-                new ((int)CognitiveErrors.Understatement, "Преуменьшение"),
+                { (int)CognitiveErrors.AllOrNothing, "Всё или ничего" },
+                { (int)CognitiveErrors.Overgenersalization, "Сверхобобщение" },
+                { (int)CognitiveErrors.NegativeFilter, "Негативный фильтр" },
+                { (int)CognitiveErrors.DepreciationOfPositive, "Обесценивание положительного" },
+                { (int)CognitiveErrors.HastyCobnclusions, "Поспешные выводы" },
+                { (int)CognitiveErrors.ExaggerationOrСatastrophization, "Катастрофизация (преувеличение)" },
+                { (int)CognitiveErrors.EmotionalJustification, "Эмоциональное  обоснование" },
+                { (int)CognitiveErrors.StatementWithMustWord, "Утверждения со словом \"должен\"" },
+                { (int)CognitiveErrors.HangingShortcuts, "Навешивание ярлыков" },
+                { (int)CognitiveErrors.Personalization, "Персонализация" },
+                { (int)CognitiveErrors.Understatement, "Преуменьшение" },
             };
         }
 
@@ -38,17 +38,20 @@ namespace CBT.Web.Blazor.Data
 
         #region GetAllThoughts
 
-        public async Task<List<ThreeColumnsTechniqueItemModel?>> GetAllThoughts()
+        public async Task<List<ThreeColumnsTechniqueItemModel>> GetAllThoughts()
         {
             using (var dataContext = new CBTDataContext())
             {
-                return (await dataContext.Set<ThreeColumnsTechnique>()
-                    .Include(x => x.ThoughtCognitiveErrors)
-                    .AsNoTracking()
-                    .Where(x => x.UserId == 1)
-                    .ToListAsync())
+                var threeColumnsTechniques = await dataContext.Set<ThreeColumnsTechnique>()
+                                    .Include(x => x.ThoughtCognitiveErrors)
+                                    .AsNoTracking()
+                                    .Where(x => x.UserId == 1)
+                                    .ToListAsync();
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+                return threeColumnsTechniques
                     .Select(ThreeColumnsTechniqueItemModel.Convert)
                     .ToList();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
             }
         }
 
@@ -123,9 +126,31 @@ namespace CBT.Web.Blazor.Data
         {
             using (var dataContext = new CBTDataContext())
             {
-                var data = await dataContext.Set<ThreeColumnsTechnique>().FirstAsync(x => x.Id == model.Id);
+                var data = await dataContext.Set<ThreeColumnsTechnique>()
+                    .Include(x => x.ThoughtCognitiveErrors)
+                    .FirstAsync(x => x.Id == model.Id);
 
                 ThreeColumnsTechniqueItemModel.ConvertBack(model, data);
+
+                await dataContext.SaveChangesAsync();
+            }
+        }
+
+        #endregion
+
+
+        #region DeleteThought
+
+        public async Task DeleteThought(int id)
+        {
+            using (var dataContext = new CBTDataContext())
+            {
+                var data = await dataContext.Set<ThreeColumnsTechnique>()
+                    .Include(x => x.ThoughtCognitiveErrors)
+                    .FirstAsync(x => x.Id == id);
+
+                dataContext.Set<ThreeColumnsTechnique>()
+                    .Remove(data);
 
                 await dataContext.SaveChangesAsync();
             }

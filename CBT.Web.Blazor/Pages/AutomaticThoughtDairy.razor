@@ -1,0 +1,110 @@
+﻿@page "/counter"
+
+@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Model;
+
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Popups
+
+@inject AutomaticThoughtsService AutomaticThoughtsService
+@inject SfDialogService SfDialogService;
+
+<PageTitle>Когнитивные ошибки</PageTitle>
+
+<h1>Дневник автоматических мыслей</h1>
+
+<p>Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.</p>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <SfButton Content="Добавить" OnClick="AddBtnClick" IsPrimary="true" IconCss="oi oi-plus" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Автоматическая мысль</th>
+                <th>Когнитивное искажение</th>
+                <th>Рациональный ответ</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>@item.Thought</td>
+                    <td>
+                        @foreach (var error in item.Errors)
+                        {
+                            <span>@cognitiveErrors[(int)error]</span>
+                            <br/>
+                        }
+                    </td>
+                    <td>@item.RationalAnswer</td>
+                    <td>
+                        @*<SfButton OnClick="@(() => DeleteBtnClick(item.Id))" CssClass="btn btn-danger" IconCss="oi oi-trash">
+                            Удалить
+                        </SfButton>*@
+                        <button class="btn btn-danger" @onclick="@(async () => await DeleteBtnClick(item.Id))">
+                            <i class="oi oi-trash"/> Удалить
+                        </button>
+                        <button class="btn btn-success" @onclick="@(async () => await EditBtnClick(item.Id))">
+                            <i class="oi oi-pencil"/> Изменить
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <EditAutomaticThought @ref="EditableThought" CognitiveErrors="cognitiveErrors">
+    </EditAutomaticThought>
+
+}
+
+@code {
+    EditAutomaticThought EditableThought;
+
+    private IEnumerable<ThreeColumnsTechniqueItemModel> items;
+    private Dictionary<int, string> cognitiveErrors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await AutomaticThoughtsService.GetAllThoughts();
+        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+    }
+
+    public void AddBtnClick()
+    {
+        if (EditableThought.IsEdit == true)
+        {
+            EditableThought.Model = new ThreeColumnsTechniqueItemModel();
+        }
+
+        EditableThought.IsEdit = false;
+        EditableThought.IsVisible = true;
+    }
+
+    public async Task DeleteBtnClick(int id)
+    {
+        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия");
+        if (confirmed)
+        {
+            await AutomaticThoughtsService.DeleteThought(id);
+        }
+    }
+
+    public async Task EditBtnClick(int id)
+    {
+        var model = await AutomaticThoughtsService.GetThought(id);
+        if (model != null)
+        {
+            EditableThought.Model = model;
+            EditableThought.IsEdit = true;
+            EditableThought.IsVisible = true;
+        }
+    }
+}

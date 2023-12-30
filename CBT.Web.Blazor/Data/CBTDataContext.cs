@@ -16,7 +16,8 @@ namespace CBT.Web.Blazor.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("server=.;database=CBT;trusted_connection=true;");
+            //https://stackoverflow.com/questions/17615260/the-certificate-chain-was-issued-by-an-authority-that-is-not-trusted-when-conn
+            optionsBuilder.UseSqlServer("server=.;database=CBT;User Id=qqqq;Password=qqqq;TrustServerCertificate=True;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

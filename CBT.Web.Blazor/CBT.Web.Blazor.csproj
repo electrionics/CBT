@@ -9,6 +9,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.14" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="24.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="24.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="24.1.41" />
   </ItemGroup>
 
 </Project>

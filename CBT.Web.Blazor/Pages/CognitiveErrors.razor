@@ -1,0 +1,45 @@
+﻿@page "/fetchdata"
+@using CBT.Web.Blazor.Data
+
+@inject AutomaticThoughtsService AutomaticThoughtsService
+
+<PageTitle>Когнитивные ошибки</PageTitle>
+
+<h1>Когнитивные ошибки</h1>
+
+<p>На этой странице приведен список всевозможных когнитивных ошибок, которые приводят к расстройствам настроения.</p>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Название</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cognitiveError in cognitiveErrors)
+            {
+                <tr>
+                    <td>@cognitiveError.Key</td>
+                    <td>@cognitiveError.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<KeyValuePair<int, string>> cognitiveErrors;
+
+    protected override Task OnInitializedAsync()
+    {
+        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+        return Task.CompletedTask;
+    }
+}

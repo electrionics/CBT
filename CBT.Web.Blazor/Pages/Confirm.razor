@@ -1,0 +1,44 @@
+﻿@using Syncfusion.Blazor.Popups
+
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="Confirmation">
+    <DialogTemplates>
+        <Header>
+            @HeaderText
+        </Header>
+        <Content>
+            @ConfirmationText
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="ОК" IsPrimary="true" CssClass="btn btn-success"
+            OnClick="OkBtnClick"/>
+        <DialogButton Content="Отмена"
+            OnClick="CloseBtnClick"/>
+    </DialogButtons>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public string HeaderText { get; set; } = "Подтверждение действия";
+
+    [Parameter]
+    public string ConfirmationText { get; set; }
+
+    public Action OkCallback { get; set; }
+
+    public bool IsVisible { get; set; } = false;
+
+    private void OkBtnClick()
+    {
+        IsVisible = false;
+        if (OkCallback != null)
+        {
+            OkCallback();
+        }
+    }
+
+    private void CloseBtnClick()
+    {
+        IsVisible = false;
+    }
+}
