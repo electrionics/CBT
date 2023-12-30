@@ -1,13 +1,15 @@
-﻿@page "/fetchdata"
+﻿@page "/common/cognitive-errors"
 @using CBT.Web.Blazor.Data
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
 
-<PageTitle>Когнитивные ошибки</PageTitle>
+<PageTitle>КПТ - Когнитивные ошибки</PageTitle>
 
 <h1>Когнитивные ошибки</h1>
 
-<p>На этой странице приведен список всевозможных когнитивных ошибок, которые приводят к расстройствам настроения.</p>
+<div class="alert alert-secondary mt-4">
+    На этой странице приведен список всевозможных когнитивных ошибок, которые приводят к расстройствам настроения или тревоге.
+</div>
 
 @if (cognitiveErrors == null)
 {

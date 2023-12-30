@@ -1,4 +1,4 @@
-﻿@page "/counter"
+﻿@page "/diary/automatic-thoughts"
 
 @using CBT.Web.Blazor.Data
 @using CBT.Web.Blazor.Data.Model;
@@ -9,11 +9,13 @@
 @inject AutomaticThoughtsService AutomaticThoughtsService
 @inject SfDialogService SfDialogService;
 
-<PageTitle>Когнитивные ошибки</PageTitle>
+<PageTitle>КПТ - Дневник автоматических мыслей</PageTitle>
 
 <h1>Дневник автоматических мыслей</h1>
 
-<p>Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.</p>
+<div class="alert alert-secondary mt-4">
+    Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.
+</div>
 
 @if (cognitiveErrors == null)
 {
@@ -21,7 +23,9 @@
 }
 else
 {
-    <SfButton Content="Добавить" OnClick="AddBtnClick" IsPrimary="true" IconCss="oi oi-plus" />
+    <button class="btn btn-primary" @onclick="AddBtnClick">
+        <i class="oi oi-plus" /> Добавить
+    </button>
     <table class="table">
         <thead>
             <tr>
@@ -90,7 +94,19 @@ else
 
     public async Task DeleteBtnClick(int id)
     {
-        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия");
+        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new ()
+        {
+            ShowCloseIcon = true,
+            PrimaryButtonOptions = new()
+            {
+                IconCss = "oi oi-trash"
+            },
+            CancelButtonOptions = new()
+            {
+                Content = "Отмена",
+            }
+        });
+
         if (confirmed)
         {
             await AutomaticThoughtsService.DeleteThought(id);

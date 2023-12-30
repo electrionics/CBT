@@ -49,10 +49,26 @@ namespace CBT.Web.Blazor.Data
                                     .ToListAsync();
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
                 return threeColumnsTechniques
+                    .OrderBy(CalculateOrderOfThoughts)
                     .Select(ThreeColumnsTechniqueItemModel.Convert)
                     .ToList();
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
             }
+        }
+
+        private static int CalculateOrderOfThoughts(ThreeColumnsTechnique item)
+        {
+            var orderAddition = 0;
+            if (!item.ThoughtCognitiveErrors.Any())
+            {
+                orderAddition += -2_000_000;
+            }
+            if (string.IsNullOrEmpty(item.RationalAnswer))
+            {
+                orderAddition += -1_000_000;
+            }
+
+            return orderAddition + item.Id;
         }
 
         #endregion
