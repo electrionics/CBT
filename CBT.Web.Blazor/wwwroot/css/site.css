@@ -71,3 +71,15 @@ a, .btn-link {
 {
     line-height: 21.6px!important;
 }
+
+.e-grid .e-altrow {
+    background-color: #f7f7f7;
+}
+
+.percent-input-container .e-input-group input.e-input, .percent-input-container .e-input-group.e-control-wrapper input.e-input, .percent-input-container .e-input-group textarea.e-input, .percent-input-container .e-input-group.e-control-wrapper textarea.e-input {
+    width: 40px;
+}
+
+.percent-input-container .e-numeric {
+    width: auto!important;
+} 

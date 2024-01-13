@@ -1,4 +1,5 @@
 ﻿using CBT.Web.Blazor.Data.Entities;
+using CBT.Web.Blazor.Data.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CBT.Web.Blazor.Data
@@ -24,12 +25,17 @@ namespace CBT.Web.Blazor.Data
         {
             #region Three Columns Technique
 
+            modelBuilder.Entity<Emotion>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+            });
+
             modelBuilder.Entity<CognitiveError>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });
 
-            modelBuilder.Entity<ThreeColumnsTechnique>(entity =>
+            modelBuilder.Entity<AuthomaticThoughtDiaryRecord>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });
@@ -42,7 +48,20 @@ namespace CBT.Web.Blazor.Data
                     .HasForeignKey(x => x.ThoughtId);
             });
 
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<ThoughtEmotion>(entity =>
+            {
+                entity.HasKey(x => new { x.ThoughtId, x.EmotionId, x.State });
+                entity.HasOne(x => x.Thought)
+                    .WithMany(x => x.ThoughtEmotions)
+                    .HasForeignKey(x => x.ThoughtId);
+            });
+
+            modelBuilder.Entity<Patient>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+            });
+
+            modelBuilder.Entity<Psychologist>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });
@@ -50,6 +69,4 @@ namespace CBT.Web.Blazor.Data
             #endregion
         }
     }
-
-    
 }

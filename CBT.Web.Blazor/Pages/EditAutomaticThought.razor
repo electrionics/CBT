@@ -4,19 +4,58 @@
 
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs;
+@using CBT.Web.Blazor.Services;
+
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
 
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
+    <DialogEvents Opened="Opened"></DialogEvents>
     <DialogTemplates>
         <Header>
             @(IsEdit ? "Дополнить" : "Добавить") запись
         </Header>
         <Content>
             <div class="mb-4">
-                <label for="thought" class="form-label">Автоматическая мысль</label>
+                <label for="situation" class="form-label">Ситуация</label>
+                <textarea @bind="Model.Situation" class="form-control" id="situation" aria-describedby="situationHelp"></textarea>
+                <div id="thoughtHelp" class="form-text">Кратко опишите события, которые привели к неприятной эмоции.</div>
+            </div>
+            <div class="mb-4">
+                <label for="BindEmotionIds" class="form-label">Эмоции</label>
+                <SfMultiSelect ID="BindEmotionIds"
+                               TValue="List<int>"
+                               TItem="KeyValuePair<int, string>"
+                               DataSource="Emotions"
+                               AllowFiltering="true"
+                               EnableCloseOnSelect="false"
+                               MaximumSelectionLength="4"
+                               @bind-Value="@Model.BindEmotionIds">
+                    <MultiSelectFieldSettings Text="Value" Value="Key">
+                    </MultiSelectFieldSettings>
+                </SfMultiSelect>
+            </div>
+            <div class="mb-4 percent-input-container">
+                @{
+                    foreach (var emotionId in Model.BindEmotionIds)
+                    {
+                        <text>
+                            Эмоция: <span>@(Emotions[emotionId])</span> -
+                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.BeginningEmotionValues[emotionId]" /><br />
+                            <SfSlider @ref="slidersBegin[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.BeginningEmotionValues[emotionId]" Min="0" Max="100" Step="1">
+                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
+                            </SfSlider>
+                        </text>
+                    }
+                }
+            </div>
+            <div class="mb-4">
+                <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
+                <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
+                </SfTooltip>
                 <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
-                <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div>
+                <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div><!--TODO: другой текст (из книги) и тултип-->
             </div>
             <div class="mb-4">
                 <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
@@ -33,11 +72,27 @@
                     <MultiSelectFieldSettings Text="Value" Value="Key">
                     </MultiSelectFieldSettings>
                 </SfMultiSelect>
+                <div class="form-text">Определите искажения для каждой из автоматических мыслей.</div>
             </div>
             <div class="mb-4">
                 <label for="rational" class="form-label">Рациональный ответ</label>
                 <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
-                <div id="rationalHelp" class="form-text">Опровергните негативную мысль.</div>
+                <div id="rationalHelp" class="form-text">Запишите рациональный ответ на автоматические мысли.</div>
+            </div>
+            <div class="mb-4 percent-input-container">
+                <label class="form-label">Результат</label><br/>
+                @{
+                    foreach (var emotionId in Model.BindEmotionIds)
+                    {
+                        <text>
+                            Эмоция: <span>@(Emotions[emotionId])</span> -
+                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.ResultingEmotionValues[emotionId]" /><br />
+                            <SfSlider @ref="slidersResult[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.ResultingEmotionValues[emotionId]" Min="0" Max="100" Step="1">
+                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
+                            </SfSlider>
+                        </text>
+                    }
+                }
             </div>
         </Content>
     </DialogTemplates>
@@ -51,21 +106,49 @@
 
 @code {
     [Parameter]
-    public IEnumerable<KeyValuePair<int, string>> CognitiveErrors { get; set; }
+    public Dictionary<int, string> CognitiveErrors { get; set; }
+
+    [Parameter]
+    public Dictionary<int, string> Emotions { get; set; }
 
     public bool IsEdit { get; set; }
 
     public bool IsVisible { get; set; } = false;
 
-    public ThreeColumnsTechniqueItemModel Model { get; set; }
+    public AutomaticDiaryRecordModel Model { get; set; }
 
+    private void Initialize()
+    {
+    }
+
+    #region Fix Sliders Initialization In Popup
 
     protected override void OnInitialized()
     {
-        Model = new ThreeColumnsTechniqueItemModel();
+        slidersBegin = new Dictionary<int, SfSlider<int>>();
+        slidersResult = new Dictionary<int, SfSlider<int>>();
+
+        Initialize();
 
         base.OnInitialized();
     }
+
+    Dictionary<int, SfSlider<int>> slidersBegin;
+    Dictionary<int, SfSlider<int>> slidersResult;
+
+    public void Opened()
+    {
+        foreach (var sliderObj in slidersBegin)
+        {
+            sliderObj.Value.RepositionAsync();
+        }
+        foreach (var sliderObj in slidersResult)
+        {
+            sliderObj.Value.RepositionAsync();
+        }
+    }
+
+    #endregion
 
     private void CloseBtnClick()
     {
@@ -76,14 +159,13 @@
     {
         if (IsEdit)
         {
-            await AutomaticThoughtsService.EditThoughtFull(Model);
+            await AutomaticThoughtsService.EditAutomaticThoughtFull(Model);
         }
         else
         {
-            await AutomaticThoughtsService.AddThoughtFull(Model);
+            await AutomaticThoughtsService.AddAutomaticThoughtFull(Model);
         }
 
-        Model = new ThreeColumnsTechniqueItemModel();
         IsVisible = false;
     }
 }

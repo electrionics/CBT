@@ -5,6 +5,6 @@
         public int ThoughtId { get; set; }
         public int CognitiveErrorId { get; set; }
 
-        public ThreeColumnsTechnique Thought { get; set; }
+        public AuthomaticThoughtDiaryRecord Thought { get; set; }
     }
 }

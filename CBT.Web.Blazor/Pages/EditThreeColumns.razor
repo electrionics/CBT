@@ -1,0 +1,91 @@
+﻿@using CBT.Web.Blazor;
+@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Model;
+
+@using CBT.Web.Blazor.Services;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.DropDowns
+
+@inject AutomaticThoughtsService AutomaticThoughtsService
+
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
+    <DialogTemplates>
+        <Header>
+            @(IsEdit ? "Дополнить" : "Добавить") запись
+        </Header>
+        <Content>
+            <div class="mb-4">
+                <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
+                <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
+                </SfTooltip>
+                <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
+                <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div>
+            </div>
+            <div class="mb-4">
+                <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
+                <SfMultiSelect ID="CognitiveErrors"
+                               TValue="List<int>"
+                               TItem="KeyValuePair<int,string>"
+                               DataSource="CognitiveErrors"
+                               AllowFiltering="true"
+                               ShowClearButton="true"
+                               EnableCloseOnSelect="false"
+                               MaximumSelectionLength="6"
+                @bind-Value="@Model.Errors">
+                    <MultiSelectFieldSettings Text="Value" Value="Key">
+                    </MultiSelectFieldSettings>
+                </SfMultiSelect>
+            </div>
+            <div class="mb-4">
+                <label for="rational" class="form-label">Рациональный ответ</label>
+                <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
+                <div id="rationalHelp" class="form-text">Опровергните негативную мысль.</div>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="@(IsEdit ? "Сохранить" : "Добавить")" IsPrimary="true" CssClass="btn btn-success"
+                      OnClick="SaveButtonClick" />
+        <DialogButton Content="Отмена"
+                      OnClick="CloseBtnClick" />
+    </DialogButtons>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public IEnumerable<KeyValuePair<int, string>> CognitiveErrors { get; set; }
+
+    public bool IsEdit { get; set; }
+
+    public bool IsVisible { get; set; } = false;
+
+    public ThreeColumnsRecordModel Model { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        Model = new ThreeColumnsRecordModel();
+
+        base.OnInitialized();
+    }
+
+    private void CloseBtnClick()
+    {
+        IsVisible = false;
+    }
+
+    private async Task SaveButtonClick()
+    {
+        if (IsEdit)
+        {
+            await AutomaticThoughtsService.EditThoughtFull(Model);
+        }
+        else
+        {
+            await AutomaticThoughtsService.AddThoughtFull(Model);
+        }
+
+        Model = new ThreeColumnsRecordModel();
+        IsVisible = false;
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <PageTitle>КПТ</PageTitle>
 
 <div class="page">
@@ -9,7 +9,18 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            @{
+                if (IsAuthenticated)
+                {
+
+                    <a href="account/logout">Выйти</a>
+                }
+                else
+                {
+
+                    <a href="account/login">Войти</a>
+                }
+            }
         </div>
 
         <article class="content px-4">
@@ -18,3 +29,17 @@
         </article>
     </main>
 </div>
+
+@code{
+    public bool IsAuthenticated{ get; private set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsAuthenticated = user.Identity is not null && user.Identity.IsAuthenticated;
+
+        await base.OnInitializedAsync();
+    }
+}

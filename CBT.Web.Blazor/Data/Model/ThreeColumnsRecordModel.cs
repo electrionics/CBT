@@ -2,15 +2,16 @@
 
 namespace CBT.Web.Blazor.Data.Model
 {
-    public class ThreeColumnsTechniqueItemModel // техника трех колонок с. 94
+    public class ThreeColumnsRecordModel // техника трех колонок с. 94
     {
         public int Id { get;set; }
+
         public string Thought { get; set; }
         public List<int> Errors { get; set; }
         public string? RationalAnswer { get; set; }
 
 
-        public ThreeColumnsTechniqueItemModel() 
+        public ThreeColumnsRecordModel() 
         {
             Errors = new List<int>();
         }
@@ -18,12 +19,12 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region Convert
 
-        public static ThreeColumnsTechniqueItemModel? Convert(ThreeColumnsTechnique data)
+        public static ThreeColumnsRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
         {
             if (data == null)
                 return null;
 
-            return new ThreeColumnsTechniqueItemModel()
+            return new ThreeColumnsRecordModel()
             {
                 Id = data.Id,
                 Thought = data.Thought,
@@ -37,10 +38,10 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region ConvertBack
 
-        public static ThreeColumnsTechnique ConvertBack(ThreeColumnsTechniqueItemModel model, ThreeColumnsTechnique? data = null)
+        public static AuthomaticThoughtDiaryRecord ConvertBack(ThreeColumnsRecordModel model, int patientId, AuthomaticThoughtDiaryRecord? data = null)
         {
             if (data == null)
-               data = new ThreeColumnsTechnique();
+               data = new AuthomaticThoughtDiaryRecord();
 
             data.Id = model.Id;
             data.Thought = model.Thought;
@@ -51,7 +52,8 @@ namespace CBT.Web.Blazor.Data.Model
                     ThoughtId = data.Id,
                     CognitiveErrorId = x
                 }).ToList();
-            data.UserId = 1;
+            data.ThoughtEmotions = new List<ThoughtEmotion>();
+            data.PatientId = patientId;
 
             return data;
         }
