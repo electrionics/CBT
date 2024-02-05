@@ -1,0 +1,76 @@
+﻿@using CBT.Web.Blazor.Services.Authentication;
+@using Microsoft.AspNetCore.SignalR.Client;
+@using Microsoft.Net.Http.Headers;
+
+@implements IAsyncDisposable
+
+@inject NavigationManager NavigationManager;
+@inject IJSRuntime JSRuntime;
+@inject IHttpContextAccessor HttoContextAccessor;
+
+<div>
+    @_messages.LastOrDefault()<span> </span>
+</div>
+
+@code {
+    private HubConnection? _hubConnection;
+    private List<string> _messages = new();
+    private bool hubRan = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!hubRan)
+        {
+            var cookieValue = HttoContextAccessor?.HttpContext?.Request.Cookies.First();
+            //var authCookieHeaderValue = await JSRuntime.InvokeAsync<string>("readAuthCookie");
+            if (cookieValue != null)
+            {
+                var cookie = new System.Net.Cookie { 
+                    Domain = GetDomain(NavigationManager.BaseUri), 
+                    Name = cookieValue.Value.Key, 
+                    Value = cookieValue.Value.Value, 
+                    Expires = DateTime.Now.AddDays(1) 
+                };
+
+                _hubConnection = new HubConnectionBuilder()
+                    .WithUrl(NavigationManager.ToAbsoluteUri("/notifications"), async options =>
+                     {
+                         //options.UseDefaultCredentials = true;
+
+                         options.Cookies.Add(cookie);
+                     })
+                    .Build();
+
+                _hubConnection.On<string>("ReceiveNotification", message =>
+                {
+                    _messages.Add(message);
+
+                    InvokeAsync(StateHasChanged);
+                });
+
+                hubRan = true;
+                await _hubConnection.StartAsync();
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection != null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    private string GetDomain(string baseUrl)
+    {
+        var domainWithPort = baseUrl
+                        .Replace(Uri.UriSchemeHttps, string.Empty)
+                        .Replace(Uri.UriSchemeHttp, string.Empty)
+                        .Replace("://", string.Empty);
+        var domain = domainWithPort
+           .Substring(0, domainWithPort.LastIndexOf(':'));
+
+           return domain;
+    }
+}

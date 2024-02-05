@@ -1,12 +1,17 @@
 ﻿@using CBT.Web.Blazor;
 @using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Data.Model;
-
 @using CBT.Web.Blazor.Services;
+
+@using Microsoft.AspNetCore.Identity;
+
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
 
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
     <DialogTemplates>
@@ -15,14 +20,14 @@
         </Header>
         <Content>
             <div class="mb-4">
-                <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
+                <label for="thought" class="form-label fw-bold">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
                 <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
                 </SfTooltip>
                 <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
                 <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div>
             </div>
             <div class="mb-4">
-                <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
+                <label for="CognitiveErrors" class="form-label fw-bold">Когнитивные искажения</label>
                 <SfMultiSelect ID="CognitiveErrors"
                                TValue="List<int>"
                                TItem="KeyValuePair<int,string>"
@@ -37,7 +42,7 @@
                 </SfMultiSelect>
             </div>
             <div class="mb-4">
-                <label for="rational" class="form-label">Рациональный ответ</label>
+                <label for="rational" class="form-label fw-bold">Рациональный ответ</label>
                 <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
                 <div id="rationalHelp" class="form-text">Опровергните негативную мысль.</div>
             </div>
@@ -61,6 +66,8 @@
 
     public ThreeColumnsRecordModel Model { get; set; }
 
+    public Action? SuccessCallback{ get; set; }
+
 
     protected override void OnInitialized()
     {
@@ -76,16 +83,26 @@
 
     private async Task SaveButtonClick()
     {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
         if (IsEdit)
         {
-            await AutomaticThoughtsService.EditThoughtFull(Model);
+            await AutomaticThoughtsService.EditThoughtFull(Model, currentUserId);
         }
         else
         {
-            await AutomaticThoughtsService.AddThoughtFull(Model);
+            await AutomaticThoughtsService.AddThoughtFull(Model, currentUserId);
         }
 
         Model = new ThreeColumnsRecordModel();
+
+        if (SuccessCallback != null)
+        {
+            SuccessCallback();
+        }
+
         IsVisible = false;
     }
 }

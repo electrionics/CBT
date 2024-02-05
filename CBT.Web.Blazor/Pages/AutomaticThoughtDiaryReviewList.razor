@@ -1,0 +1,204 @@
+﻿@page "/review/automatic-thoughts"
+
+@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Identity;
+@using CBT.Web.Blazor.Data.Model;
+@using CBT.Web.Blazor.Data.Model.Enums;
+@using CBT.Web.Blazor.Services;
+
+@using Microsoft.AspNetCore.Identity;
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Grids;
+
+@inject PsychologistReviewService PsychologistReviewService
+@inject AutomaticThoughtsService AutomaticThoughtsService
+@inject SfDialogService SfDialogService;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+<PageTitle>КПТ - Техника трёх колонок</PageTitle>
+
+<h1>Кабинет психолога - Дневник автоматических мыслей</h1>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <div class="alert alert-secondary mt-4">
+        Всего @(items.Count) записей.
+    </div>
+
+    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+        <GridColumns>
+            <GridColumn HeaderText=""
+                        Width="100">
+                <Template>
+                    @{
+                        var model = (ThoughtRecordReview<AutomaticDiaryRecordModel>)context;
+                        if (!model.SentBack)
+                        {
+                            if (model.State == ReviewRecordState.Reviewed)
+                            {
+                                <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Value.Id))">
+                                    Отправить
+                                </button>
+                            }
+                            else
+                            {
+
+                                <text>
+                                    <i class="oi oi-circle-check" style="color: blue;" /> Принято
+                                </text>
+                            }
+                        }
+                        else
+                        {
+                            <text>
+                                <i class="oi oi-circle-check" style="color: green;" /> Проверено!
+                            </text>
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.Situation)"
+                        HeaderText="Ситуация"
+                        Width="200" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.BeginningEmotionValues)"
+                HeaderText="Эмоции"
+                Width="150">
+                <Template>
+                    @{
+                        var recordEmotions = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.BeginningEmotionValues;
+                        foreach (var emotion in recordEmotions)
+                        {
+                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.Thought"
+                        HeaderText="Автоматическая мысль"
+                        Width="200" />
+            <GridColumn Field="Value.Errors"
+                        HeaderText="Когнитивные искажения"
+                        Width="200">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.Errors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error]</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.RationalAnswer"
+                        HeaderText="Рациональный ответ"
+                        Width="200" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.ResultingEmotionValues)"
+                        HeaderText="Результат"
+                        Width="150">
+                <Template>
+                    @{
+                        var recordEmotions = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.ResultingEmotionValues;
+                        foreach (var emotion in recordEmotions)
+                        {
+                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.ReviewedErrors)"
+                        HeaderText="Когнитивные искажения"
+                        Width="200">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).ReviewedErrors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error]</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.RationalAnswerComment)"
+                        HeaderText="Комментарий к рациональному ответу"
+                        Width="200" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.Id)"
+                        HeaderText=""
+                        Width="245">
+                <Template>
+                    @{
+                        var id = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.Id;
+
+                        <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
+                            <i class="oi oi-pencil" /> Изменить
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+    <AutomaticThoughtDiaryReviewEdit @ref="EditableThought" CognitiveErrors="cognitiveErrors" Emotions="emotions">
+    </AutomaticThoughtDiaryReviewEdit>
+}
+
+@code {
+    AutomaticThoughtDiaryReviewEdit EditableThought;
+
+    private List<ThoughtRecordReview<AutomaticDiaryRecordModel>> items;
+    private Dictionary<int, string> cognitiveErrors;
+    private Dictionary<int, string> emotions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
+        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+        emotions = await AutomaticThoughtsService.GetAllEmotions();
+    }
+
+    public void EditBtnClick(int id)
+    {
+        var model = items.First(x => x.Value.Id == id); // await PsychologistReviewService.GetThreeColumnRecordReview(id);
+
+        if (model != null)
+        {
+            EditableThought.Model = model;
+            EditableThought.IsVisible = true;
+            EditableThought.SuccessCallback = async () =>
+            {
+                model.State = ReviewRecordState.Reviewed;
+                await Refresh();
+            };
+        }
+    }
+
+    public async Task SendBtnClick(int id)
+    {
+        await PsychologistReviewService.SendRecordToPatient(id);
+
+        var model = items.First(x => x.Value.Id == id);
+        model.SentBack = true;
+    }
+
+    private async Task Refresh()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
+    }
+}

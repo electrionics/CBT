@@ -2,13 +2,15 @@
 
 namespace CBT.Web.Blazor.Data.Model
 {
-    public class ThreeColumnsRecordModel // техника трех колонок с. 94
+    public class ThreeColumnsRecordModel : IThoughtRecordModel<ThreeColumnsRecordModel> // техника трех колонок с. 94
     {
         public int Id { get;set; }
 
         public string Thought { get; set; }
         public List<int> Errors { get; set; }
         public string? RationalAnswer { get; set; }
+
+        public bool Sent { get; set; }
 
 
         public ThreeColumnsRecordModel() 
@@ -19,7 +21,7 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region Convert
 
-        public static ThreeColumnsRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
+        public ThreeColumnsRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
         {
             if (data == null)
                 return null;
@@ -29,7 +31,8 @@ namespace CBT.Web.Blazor.Data.Model
                 Id = data.Id,
                 Thought = data.Thought,
                 RationalAnswer = data.RationalAnswer,
-                Errors = data.ThoughtCognitiveErrors.Select(y => y.CognitiveErrorId).ToList()
+                Errors = data.CognitiveErrors.Where(x => !x.IsReview).Select(y => y.CognitiveErrorId).ToList(),
+                Sent = data.Sent,
             };
         }
 
@@ -38,22 +41,25 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region ConvertBack
 
-        public static AuthomaticThoughtDiaryRecord ConvertBack(ThreeColumnsRecordModel model, int patientId, AuthomaticThoughtDiaryRecord? data = null)
+        public AuthomaticThoughtDiaryRecord ConvertBack(int patientId, AuthomaticThoughtDiaryRecord? data = null)
         {
+            var model = this;
+
             if (data == null)
                data = new AuthomaticThoughtDiaryRecord();
 
             data.Id = model.Id;
             data.Thought = model.Thought;
             data.RationalAnswer = model.RationalAnswer;
-            data.ThoughtCognitiveErrors = model.Errors
+            data.CognitiveErrors = model.Errors?
                 .Select(x => new ThoughtCognitiveError
                 {
                     ThoughtId = data.Id,
                     CognitiveErrorId = x
-                }).ToList();
-            data.ThoughtEmotions = new List<ThoughtEmotion>();
+                }).ToList() ?? new List<ThoughtCognitiveError>();
+            data.Emotions = new List<ThoughtEmotion>();
             data.PatientId = patientId;
+            data.Sent = model.Sent;
 
             return data;
         }

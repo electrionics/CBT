@@ -1,0 +1,56 @@
+﻿@page "/account/logout"
+@using CBT.Web.Blazor.Data.Identity;
+@using CBT.Web.Blazor.Pages;
+@using CBT.Web.Blazor.Pages.Identity;
+@using Microsoft.AspNetCore.Components.WebAssembly.Http;
+@using Microsoft.AspNetCore.Identity;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<User> _signInManager;
+@inject ILogger<Logout> _logger;
+@inject NavigationManager NavigationManager;
+@inject IHttpClientFactory ClientFactory;
+@inject IJSRuntime JSRuntime;
+
+<PageTitle>КПТ - Выход из системы</PageTitle>
+
+<header>
+    <h1>Выход из системы</h1>
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <Authorized>
+                <form class="form-inline" @onsubmit="Submit">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Нажмите для выхода</button>
+                </form>
+            </Authorized>
+            <NotAuthorized>
+                <p>Вы успешно выполнили выход из системы.</p>
+            </NotAuthorized>
+        </AuthorizeView>
+    </CascadingAuthenticationState>
+</header>
+
+@code{
+    private string returnUrl;
+
+    public async Task Submit()
+    {
+        returnUrl = NavigationManager.BaseUri;
+
+        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.BaseUri + "api/account/logout");
+        message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(message);
+
+        _logger.LogInformation("User logged out.");
+
+        var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
+        var authCookie = cookies.First().Value.First();
+        authCookie = authCookie.Replace(" httponly", "");
+
+        await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+
+        NavigationManager.NavigateTo(returnUrl, true);
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using CBT.Web.Blazor.Data.Entities;
-using CBT.Web.Blazor.Data.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CBT.Web.Blazor.Data
@@ -42,9 +41,9 @@ namespace CBT.Web.Blazor.Data
 
             modelBuilder.Entity<ThoughtCognitiveError>(entity =>
             {
-                entity.HasKey(x => new { x.ThoughtId, x.CognitiveErrorId });
+                entity.HasKey(x => new { x.ThoughtId, x.CognitiveErrorId, x.IsReview });
                 entity.HasOne(x => x.Thought)
-                    .WithMany(x => x.ThoughtCognitiveErrors)
+                    .WithMany(x => x.CognitiveErrors)
                     .HasForeignKey(x => x.ThoughtId);
             });
 
@@ -52,8 +51,21 @@ namespace CBT.Web.Blazor.Data
             {
                 entity.HasKey(x => new { x.ThoughtId, x.EmotionId, x.State });
                 entity.HasOne(x => x.Thought)
-                    .WithMany(x => x.ThoughtEmotions)
+                    .WithMany(x => x.Emotions)
                     .HasForeignKey(x => x.ThoughtId);
+            });
+
+            modelBuilder.Entity<ThoughtPsychologistReview>(entity =>
+            {
+                entity.HasKey(x => new { x.ThoughtId });
+
+                entity.HasOne(x => x.Thought)
+                    .WithMany(x => x.PsychologistReviews)
+                    .HasForeignKey(x => x.ThoughtId);
+
+                entity.HasOne(x => x.Psychologist)
+                    .WithMany(x => x.ThoughtReviews)
+                    .HasForeignKey(x => x.PsychologistId);
             });
 
             modelBuilder.Entity<Patient>(entity =>

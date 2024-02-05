@@ -1,0 +1,55 @@
+﻿@using CBT.Web.Blazor;
+@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Model;
+
+@using CBT.Web.Blazor.Services;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.DropDowns
+
+@inject AutomaticThoughtsService AutomaticThoughtsService
+
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="ThoughtReview">
+    <DialogTemplates>
+        <Header>
+            Комментарий психолога
+        </Header>
+        <Content>
+            <div class="mb-4">
+                <label class="form-label fw-bold">Комментарий</label> <span class="oi oi-shield" id="shield"></span>
+                <p>
+                    @Model.RationalAnswerComment
+                </p>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-bold">Когнитивные искажения</label><br/>
+                @{
+                    var errors = Model.ReviewedErrors;
+
+                    foreach (var error in errors)
+                    {
+                        <span>@CognitiveErrors[error]</span>
+                        <br />
+                    }
+                }
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Закрыть" IsPrimary="true" CssClass="btn btn-success"
+                      OnClick="CloseBtnClick" />
+    </DialogButtons>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public Dictionary<int, string> CognitiveErrors { get; set; }
+
+    public RecordReviewModel Model { get; set; }
+
+    public bool IsVisible { get; set; } = false;
+
+    private void CloseBtnClick()
+    {
+        IsVisible = false;
+    }
+}

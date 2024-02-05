@@ -1,14 +1,19 @@
 ﻿@using CBT.Web.Blazor;
 @using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Data.Model;
+@using CBT.Web.Blazor.Services;
+
+@using Microsoft.AspNetCore.Identity;
 
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs;
-@using CBT.Web.Blazor.Services;
 
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
 
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
     <DialogEvents Opened="Opened"></DialogEvents>
@@ -117,6 +122,8 @@
 
     public AutomaticDiaryRecordModel Model { get; set; }
 
+    public Action? SuccessCallback{ get; set; }
+
     private void Initialize()
     {
     }
@@ -157,13 +164,24 @@
 
     private async Task SaveButtonClick()
     {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
         if (IsEdit)
         {
-            await AutomaticThoughtsService.EditAutomaticThoughtFull(Model);
+            await AutomaticThoughtsService.EditAutomaticThoughtFull(Model, currentUserId);
         }
         else
         {
-            await AutomaticThoughtsService.AddAutomaticThoughtFull(Model);
+            await AutomaticThoughtsService.AddAutomaticThoughtFull(Model, currentUserId);
+        }
+
+        Model = new AutomaticDiaryRecordModel();
+
+        if (SuccessCallback != null)
+        {
+            SuccessCallback();
         }
 
         IsVisible = false;

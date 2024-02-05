@@ -1,0 +1,162 @@
+﻿@page "/account/login"
+
+@using CBT.Web.Blazor.Data.Identity;
+@using CBT.Web.Blazor.Data.Model.Identity;
+@using CBT.Web.Blazor.Services.Authentication;
+
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Microsoft.AspNetCore.Components.WebAssembly.Http;
+@using Microsoft.AspNetCore.Identity;
+
+@using System.Text.Json;
+@using System.Text;
+@using System.Security.Claims;
+
+@inject NavigationManager NavigationManager;
+@inject IHttpClientFactory ClientFactory;
+
+@inject ILogger<Login> _logger;
+
+@inject SignInManager<User> _signInManager;
+@inject IJSRuntime JSRuntime;
+
+<PageTitle>КПТ - Вход в систему</PageTitle>
+
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            <EditForm Model="Model" OnValidSubmit="Submit">
+                @*                <h2>Используйте полученный аккаунт для входа.</h2>*@
+                <hr />
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Model.Email" id="email" class="form-control" autocomplete="username" aria-required="true" placeholder="Имя Пользователя" />
+                    <label for="email" class="form-label">Имя пользователя</label>
+                    <ValidationMessage For="@(() => Model.Email)" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Model.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Пароль" />
+                    <label for="password" class="form-label">Пароль</label>
+                    <ValidationMessage For="@(() => Model.Password)" />
+                </div>
+                <div class="checkbox mb-3">
+                    <label for="remember-me" class="form-label">
+                        <InputCheckbox @bind-Value="Model.RememberMe" id="remember-me" class="form-check-input" />
+                        Запомнить меня?
+                    </label>
+                </div>
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Войти</button>
+                </div>
+                @*
+                <div>
+                <p>
+                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                </p>
+                <p>
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                </p>
+                <p>
+                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                </p>
+                </div>
+                *@
+            </EditForm>
+        </section>
+    </div>
+    <div class="col-md-6 col-md-offset-2">
+        <section>
+            <h3>Используйте внешнюю службу для входа.</h3>
+            <hr />
+            <div>
+                <p>
+                    Внешние службы входа в систему в разработке.
+                    @*There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
+                    about setting up this ASP.NET application to support logging in via external services</a>.*@
+                </p>
+            </div>
+            @{
+                //if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                //{
+                //   <div> <p> ...
+                //}
+                //else
+                //{
+                //    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                //        <div>
+                //            <p>
+                //                @foreach (var provider in Model.ExternalLogins!)
+                //                {
+                //                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                //                }
+                //            </p>
+                //        </div>
+                //    </form>
+                //}
+            }
+        </section>
+    </div>
+</div>
+
+@code{
+    private LoginModel Model { get; set; }
+
+    private string returnUrl;
+    private IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model = new();
+
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
+
+        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+    }
+
+    public async Task Submit()
+    {
+        returnUrl = NavigationManager.BaseUri;
+
+        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.BaseUri + "api/account/login");
+        message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        message.Content = new StringContent(JsonSerializer.Serialize(Model), Encoding.UTF8, "application/json");
+
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(message);
+
+        var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("User logged in.");
+
+            var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
+            var authCookie = cookies.First().Value.First();
+            authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
+            await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+
+            NavigationManager.NavigateTo(returnUrl, true);
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
+        }
+        else if (result.IsLockedOut)
+        {
+            _logger.LogWarning("User account locked out.");
+
+            NavigationManager.NavigateTo("./Lockout");
+        }
+        else
+        {
+            messageStore.Add(() => Model, "Неудачная попытка входа.");
+        }
+    }
+}

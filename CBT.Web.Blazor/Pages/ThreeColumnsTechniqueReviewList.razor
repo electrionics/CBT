@@ -1,0 +1,170 @@
+﻿@page "/review/three-columns"
+
+@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Identity;
+@using CBT.Web.Blazor.Data.Model;
+@using CBT.Web.Blazor.Data.Model.Enums;
+@using CBT.Web.Blazor.Services;
+
+@using Microsoft.AspNetCore.Identity;
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Grids;
+
+@inject PsychologistReviewService PsychologistReviewService
+@inject AutomaticThoughtsService AutomaticThoughtsService
+@inject SfDialogService SfDialogService;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+<PageTitle>КПТ - Техника трёх колонок</PageTitle>
+
+<h1>Кабинет психолога - Техника трёх колонок</h1>
+ 
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <div class="alert alert-secondary mt-4">
+        Всего @(items.Count) записей.
+    </div>
+
+    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+        <GridColumns>
+            <GridColumn HeaderText=""
+                        Width="100">
+                <Template>
+                    @{
+                        var model = (ThoughtRecordReview<ThreeColumnsRecordModel>)context;
+                        if (!model.SentBack)
+                        {
+                            if (model.State == ReviewRecordState.Reviewed)
+                            {
+                                <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Value.Id))">
+                                    Отправить
+                                </button>
+                            }
+                            else
+                            {
+
+                                <text>
+                                    <i class="oi oi-circle-check" style="color: blue;" /> Принято
+                                </text>
+                            }
+                        }
+                        else
+                        {
+                            <text>
+                                <i class="oi oi-circle-check" style="color: green;" /> Проверено!
+                            </text>
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.Thought"
+                        HeaderText="Автоматическая мысль"
+                        Width="200" />
+            <GridColumn Field="Value.Errors"
+                        HeaderText="Когнитивные искажения"
+                        Width="200">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).Value.Errors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error]</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.RationalAnswer"
+                        HeaderText="Рациональный ответ"
+                        Width="200" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.ReviewedErrors)"
+                        HeaderText="Когнитивные искажения"
+                        Width="200">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).ReviewedErrors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error]</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.RationalAnswerComment)"
+                        HeaderText="Комментарий к рациональному ответу"
+                        Width="250" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.Value.Id)"
+                        HeaderText=""
+                        Width="245">
+                <Template>
+                    @{
+                        var id = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).Value.Id;
+
+                        <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
+                            <i class="oi oi-pencil" /> Изменить
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+    <ThreeColumnsTechniqueReviewEdit @ref="EditableThought" CognitiveErrors="cognitiveErrors">
+    </ThreeColumnsTechniqueReviewEdit>
+}
+
+@code {
+    ThreeColumnsTechniqueReviewEdit EditableThought;
+
+    private List<ThoughtRecordReview<ThreeColumnsRecordModel>> items;
+    private Dictionary<int, string> cognitiveErrors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+    }
+
+    public void EditBtnClick(int id)
+    {
+        var model = items.First(x => x.Value.Id == id); // await PsychologistReviewService.GetThreeColumnRecordReview(id);
+
+        if (model != null)
+        {
+            EditableThought.Model = model;
+            EditableThought.IsVisible = true;
+            EditableThought.SuccessCallback = async () =>
+            {
+                model.State = ReviewRecordState.Reviewed;
+                await Refresh();
+            };
+        }
+    }
+
+    public async Task SendBtnClick(int id)
+    {
+        await PsychologistReviewService.SendRecordToPatient(id);
+
+        items.First(x => x.Value.Id == id).SentBack = true;
+    }
+
+    private async Task Refresh()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+    }
+}

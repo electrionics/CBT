@@ -3,12 +3,12 @@
 @using CBT.Web.Blazor.Data
 @using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Data.Model;
+@using CBT.Web.Blazor.Services;
 
 @using Microsoft.AspNetCore.Identity;
 @using Syncfusion.Blazor.Buttons;
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.Grids;
-@using CBT.Web.Blazor.Services;
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
 @inject SfDialogService SfDialogService;
@@ -37,12 +37,45 @@ else
     <br />
     <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
         <GridColumns>
+            <GridColumn HeaderText=""
+                        Width="60">
+                <Template>
+                    @{
+                        var model = (ThreeColumnsRecordModel)context;
+                        if (!model.Sent)
+                        {
+                            <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
+                                Отправить
+                            </button>
+                        }
+                        else
+                        {
+                            <text>
+                                <i class="oi oi-circle-check" style="color: blue;" /> Отправлено!
+                            </text>
+                            if (reviewExists.TryGetValue(model.Id, out var exists) && !exists)
+                            {
+                                <text>
+                                    <br />
+                                    <i class="oi oi-circle-check" style="color: red;" /> Недоступно!
+                                </text>
+                            }
+                            else
+                            {
+                                <button class="btn btn-primary" @onclick="@(async () => await CheckReviewBtnClick(model.Id))">
+                                    Проверить
+                                </button>
+                            }
+                        }
+                    }
+                </Template>
+            </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsRecordModel.Thought)"
                         HeaderText="Автоматическая мысль"
-                        Width="250" />
+                        Width="200" />
             <GridColumn Field="@nameof(ThreeColumnsRecordModel.Errors)"
                         HeaderText="Когнитивные искажения"
-                        Width="250">
+                        Width="200">
                 <Template>
                     @{
                         var errors = ((ThreeColumnsRecordModel)context).Errors;
@@ -56,7 +89,7 @@ else
             </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsRecordModel.RationalAnswer)"
                         HeaderText="Рациональный ответ"
-                        Width="250" />
+                        Width="200" />
             <GridColumn Field="@nameof(ThreeColumnsRecordModel.Id)"
                         HeaderText=""
                         Width="245">
@@ -76,24 +109,35 @@ else
         </GridColumns>
     </SfGrid>
 
-    <EditThreeColumns @ref="EditableThought" CognitiveErrors="cognitiveErrors">
-    </EditThreeColumns>
+    <ThreeColumnsTechniqueEdit @ref="EditableThought" CognitiveErrors="cognitiveErrors">
+    </ThreeColumnsTechniqueEdit>
+
+    <ThoughtReviewPopup @ref="ThoughtReview" CognitiveErrors="cognitiveErrors">
+    </ThoughtReviewPopup>
 }
 
 @code {
-    EditThreeColumns EditableThought;
+    ThreeColumnsTechniqueEdit EditableThought;
+    ThoughtReviewPopup ThoughtReview;
 
     private IEnumerable<ThreeColumnsRecordModel> items;
     private Dictionary<int, string> cognitiveErrors;
+
+    private string? currentUserId;
+
+    private Dictionary<int, bool> reviewExists;
 
     protected override async Task OnInitializedAsync()
     {
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
-        var currentUserId = UserManager.GetUserId(user);
+
+        currentUserId = UserManager.GetUserId(user);
 
         items = await AutomaticThoughtsService.GetAllThoughts(currentUserId);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+
+        reviewExists = new Dictionary<int, bool>();
     }
 
     public void AddBtnClick()
@@ -105,6 +149,7 @@ else
 
         EditableThought.IsEdit = false;
         EditableThought.IsVisible = true;
+        EditableThought.SuccessCallback = async () => await Refresh();
     }
 
     public async Task DeleteBtnClick(int id)
@@ -125,6 +170,7 @@ else
         if (confirmed)
         {
             await AutomaticThoughtsService.DeleteThought(id);
+            await Refresh();
         }
     }
 
@@ -136,6 +182,38 @@ else
             EditableThought.Model = model;
             EditableThought.IsEdit = true;
             EditableThought.IsVisible = true;
+            EditableThought.SuccessCallback = async () => await Refresh();
         }
+    }
+
+    public async Task SendBtnClick(int id)
+    {
+        await AutomaticThoughtsService.SendThoughtToPsychologist(id);
+
+        items.First(x => x.Id == id).Sent = true;
+    }
+
+    public async Task CheckReviewBtnClick(int id)
+    {
+        var review = await AutomaticThoughtsService.GetPsychologistReview(id);
+        if (review != null)
+        {
+            ThoughtReview.Model = review;
+            ThoughtReview.IsVisible = true;
+            reviewExists[id] = true;
+        }
+        else
+        {
+            reviewExists[id] = false;
+        }
+    }
+
+    private async Task Refresh()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
     }
 }

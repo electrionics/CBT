@@ -1,10 +1,11 @@
 ﻿using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Data.Entities.Enums;
+using NuGet.Packaging;
 using System.Linq;
 
 namespace CBT.Web.Blazor.Data.Model
 {
-    public class AutomaticDiaryRecordModel : ThreeColumnsRecordModel // техника трех колонок с. 94
+    public class AutomaticDiaryRecordModel : ThreeColumnsRecordModel, IThoughtRecordModel<AutomaticDiaryRecordModel> // TODO: find in the book!!!
     {
         public string? Situation { get; set; }
         public Dictionary<int, int> BeginningEmotionValues { get; set; }
@@ -12,10 +13,16 @@ namespace CBT.Web.Blazor.Data.Model
 
         public List<int> BindEmotionIds { get; set; }
 
-        public AutomaticDiaryRecordModel(Dictionary<int, string>? emotions = null) : base()
+        public AutomaticDiaryRecordModel(Dictionary<int, string> emotions) : this()
         {
-            BeginningEmotionValues = emotions?.ToDictionary(x => x.Key, x => 0) ?? new Dictionary<int, int>();
-            ResultingEmotionValues = emotions?.ToDictionary(x => x.Key, x => 0) ?? new Dictionary<int, int>();
+            BeginningEmotionValues.AddRange(emotions.Select(x => new KeyValuePair<int, int>(x.Key, 0)));
+            ResultingEmotionValues.AddRange(emotions.Select(x => new KeyValuePair<int, int>(x.Key, 0)));
+        }
+
+        public AutomaticDiaryRecordModel() : base()
+        {
+            BeginningEmotionValues = new Dictionary<int, int>();
+            ResultingEmotionValues = new Dictionary<int, int>();
 
             BindEmotionIds = new List<int>();
         }
@@ -23,7 +30,7 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region Convert
 
-        public static new AutomaticDiaryRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
+        public new AutomaticDiaryRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
         {
             if (data == null)
                 return null;
@@ -33,17 +40,18 @@ namespace CBT.Web.Blazor.Data.Model
                 Id = data.Id,
                 Thought = data.Thought,
                 RationalAnswer = data.RationalAnswer,
-                Errors = data.ThoughtCognitiveErrors
+                Errors = data.CognitiveErrors
                     .Select(y => y.CognitiveErrorId).ToList(),
+                Sent = data.Sent,
 
                 Situation = data.Situation,
-                BeginningEmotionValues = data.ThoughtEmotions
+                BeginningEmotionValues = data.Emotions
                     .Where(y => y.State == ThoughtEmotionState.Beginning)
                     .ToDictionary(x => x.EmotionId, x => x.Value),
-                ResultingEmotionValues = data.ThoughtEmotions
+                ResultingEmotionValues = data.Emotions
                     .Where(y => y.State == ThoughtEmotionState.Result)
                     .ToDictionary(x => x.EmotionId, x => x.Value),
-                BindEmotionIds = data.ThoughtEmotions.Select(x => x.EmotionId).Distinct().ToList()
+                BindEmotionIds = data.Emotions.Select(x => x.EmotionId).Distinct().ToList()
             };
         }
 
@@ -52,9 +60,11 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region ConvertBack
 
-        public static AuthomaticThoughtDiaryRecord ConvertBack(AutomaticDiaryRecordModel model, int patientId, AuthomaticThoughtDiaryRecord? data = null)
+        public new AuthomaticThoughtDiaryRecord ConvertBack(int patientId, AuthomaticThoughtDiaryRecord? data = null)
         {
-            data = ThreeColumnsRecordModel.ConvertBack(model, patientId, data);
+            var model = this;
+
+            data = base.ConvertBack(patientId, data);
 
             data.Situation = model.Situation;
  
@@ -67,7 +77,7 @@ namespace CBT.Web.Blazor.Data.Model
                     .Where(x => beginningThoughtEmotionsFiltered.Any(y => y.EmotionId == x.Key))
                     .Select(x => ConvertBack(x, ThoughtEmotionState.Result, data.Id));
 
-            data.ThoughtEmotions = beginningThoughtEmotionsFiltered.Union(resultingThoughtEmotionsFiltered).ToList();
+            data.Emotions = beginningThoughtEmotionsFiltered.Union(resultingThoughtEmotionsFiltered).ToList();
 
             return data;
         }
