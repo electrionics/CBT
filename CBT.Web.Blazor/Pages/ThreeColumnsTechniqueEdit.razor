@@ -30,14 +30,14 @@
                 <label for="CognitiveErrors" class="form-label fw-bold">Когнитивные искажения</label>
                 <SfMultiSelect ID="CognitiveErrors"
                                TValue="List<int>"
-                               TItem="KeyValuePair<int,string>"
+                               TItem="KeyValuePair<int,CognitiveErrorModel>"
                                DataSource="CognitiveErrors"
                                AllowFiltering="true"
                                ShowClearButton="true"
                                EnableCloseOnSelect="false"
                                MaximumSelectionLength="6"
                 @bind-Value="@Model.Errors">
-                    <MultiSelectFieldSettings Text="Value" Value="Key">
+                    <MultiSelectFieldSettings Text="Value.Title" Value="Key">
                     </MultiSelectFieldSettings>
                 </SfMultiSelect>
             </div>
@@ -58,7 +58,7 @@
 
 @code {
     [Parameter]
-    public IEnumerable<KeyValuePair<int, string>> CognitiveErrors { get; set; }
+    public IEnumerable<KeyValuePair<int, CognitiveErrorModel>> CognitiveErrors { get; set; }
 
     public bool IsEdit { get; set; }
 

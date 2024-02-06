@@ -20,7 +20,7 @@ namespace CBT.Web.Blazor.Services.Authentication
         {
             var claims = new Claim[] {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email.ToString())
+                new(JwtRegisteredClaimNames.Email, user?.Email?.ToString() ?? string.Empty)
             };
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(

@@ -33,7 +33,7 @@
                 };
 
                 _hubConnection = new HubConnectionBuilder()
-                    .WithUrl(NavigationManager.ToAbsoluteUri("/notifications"), async options =>
+                    .WithUrl(NavigationManager.ToAbsoluteUri("/notifications"), options =>
                      {
                          //options.UseDefaultCredentials = true;
 

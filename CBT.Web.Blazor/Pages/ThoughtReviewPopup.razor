@@ -27,7 +27,7 @@
 
                     foreach (var error in errors)
                     {
-                        <span>@CognitiveErrors[error]</span>
+                        <span>@CognitiveErrors[error].Title</span>
                         <br />
                     }
                 }
@@ -42,7 +42,7 @@
 
 @code {
     [Parameter]
-    public Dictionary<int, string> CognitiveErrors { get; set; }
+    public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
 
     public RecordReviewModel Model { get; set; }
 

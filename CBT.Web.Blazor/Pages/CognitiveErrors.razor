@@ -1,5 +1,6 @@
 ﻿@page "/common/cognitive-errors"
 @using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data.Model;
 @using CBT.Web.Blazor.Services;
 
 @inject AutomaticThoughtsService AutomaticThoughtsService
@@ -23,6 +24,7 @@ else
             <tr>
                 <th>Номер</th>
                 <th>Название</th>
+                <th>Описание</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +32,8 @@ else
             {
                 <tr>
                     <td>@cognitiveError.Key</td>
-                    <td>@cognitiveError.Value</td>
+                    <td>@cognitiveError.Value.Title</td>
+                    <td>@cognitiveError.Value.Description</td>
                 </tr>
             }
         </tbody>
@@ -38,7 +41,7 @@ else
 }
 
 @code {
-    private IEnumerable<KeyValuePair<int, string>>? cognitiveErrors;
+    private IEnumerable<KeyValuePair<int, CognitiveErrorModel>>? cognitiveErrors;
 
     protected override Task OnInitializedAsync()
     {

@@ -74,14 +74,14 @@
                 <label for="CognitiveErrors" class="form-label">Когнитивные искажения - Ваша версия</label>
                 <SfMultiSelect ID="CognitiveErrors"
                                TValue="List<int>"
-                               TItem="KeyValuePair<int,string>"
+                               TItem="KeyValuePair<int,CognitiveErrorModel>"
                                DataSource="CognitiveErrors"
                                AllowFiltering="true"
                                ShowClearButton="true"
                                EnableCloseOnSelect="false"
                                MaximumSelectionLength="6"
                 @bind-Value="Model.ReviewedErrors">
-                    <MultiSelectFieldSettings Text="Value" Value="Key">
+                    <MultiSelectFieldSettings Text="Value.Title" Value="Key">
                     </MultiSelectFieldSettings>
                 </SfMultiSelect>
             </div>
@@ -101,7 +101,7 @@
 
 @code {
     [Parameter]
-    public Dictionary<int, string> CognitiveErrors { get; set; }
+    public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
     [Parameter]
     public Dictionary<int, string> Emotions { get; set; }
 

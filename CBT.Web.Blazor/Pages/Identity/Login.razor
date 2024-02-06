@@ -27,7 +27,7 @@
     <div class="col-md-4">
         <section>
             <EditForm Model="Model" OnValidSubmit="Submit">
-                @*                <h2>Используйте полученный аккаунт для входа.</h2>*@
+                <h2>Используйте полученный аккаунт для входа.</h2>
                 <hr />
                 <DataAnnotationsValidator />
                 <ValidationSummary />
@@ -124,7 +124,7 @@
     {
         returnUrl = NavigationManager.BaseUri;
 
-        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.BaseUri + "api/account/login");
+        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.ToAbsoluteUri("api/account/login"));
         message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         message.Content = new StringContent(JsonSerializer.Serialize(Model), Encoding.UTF8, "application/json");
 
@@ -133,7 +133,7 @@
 
         var result = await response.Content.ReadFromJsonAsync<LoginResult>();
 
-        if (result.Succeeded)
+        if (result?.Succeeded ?? false)
         {
             _logger.LogInformation("User logged in.");
 
@@ -144,15 +144,17 @@
 
             NavigationManager.NavigateTo(returnUrl, true);
         }
-        else if (result.RequiresTwoFactor)
+        else if (result?.RequiresTwoFactor ?? false)
         {
-            NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
+            throw new NotImplementedException();
+            //NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
         }
-        else if (result.IsLockedOut)
+        else if (result?.IsLockedOut ?? false)
         {
             _logger.LogWarning("User account locked out.");
 
-            NavigationManager.NavigateTo("./Lockout");
+            throw new NotImplementedException();
+            //NavigationManager.NavigateTo("./Lockout");
         }
         else
         {

@@ -1,14 +1,17 @@
 ﻿@page "/account/logout"
+
 @using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Pages;
-@using CBT.Web.Blazor.Pages.Identity;
+@using CBT.Web.Blazor.Pages.Identity;.
+
 @using Microsoft.AspNetCore.Components.WebAssembly.Http;
 @using Microsoft.AspNetCore.Identity;
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<User> _signInManager;
-@inject ILogger<Logout> _logger;
 @inject NavigationManager NavigationManager;
+
+@inject ILogger<Logout> _logger;
 @inject IHttpClientFactory ClientFactory;
 @inject IJSRuntime JSRuntime;
 
@@ -37,7 +40,7 @@
     {
         returnUrl = NavigationManager.BaseUri;
 
-        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.BaseUri + "api/account/logout");
+        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.ToAbsoluteUri("api/account/logout"));
         message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
         var client = ClientFactory.CreateClient();

@@ -17,6 +17,7 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpPost]
         [Route("/api/account/login")]
+        [ValidateAntiForgeryToken]
         public async Task<SignInResult> Login([FromBody] LoginModel model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
@@ -26,6 +27,7 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpPost]
         [Route("/api/account/logout")]
+        [ValidateAntiForgeryToken]
         public async Task Logout()
         {
             await _signInManager.SignOutAsync();

@@ -46,7 +46,7 @@
                 <label for="CognitiveErrors" class="form-label">Когнитивные искажения - Ваша версия</label>
                 <SfMultiSelect ID="CognitiveErrors"
                                TValue="List<int>"
-                               TItem="KeyValuePair<int,string>"
+                               TItem="KeyValuePair<int, CognitiveErrorModel>"
                                DataSource="CognitiveErrors"
                                AllowFiltering="true"
                                ShowClearButton="true"
@@ -73,7 +73,7 @@
 
 @code {
     [Parameter]
-    public Dictionary<int, string> CognitiveErrors { get; set; }
+    public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
 
     public ThoughtRecordReview<ThreeColumnsRecordModel> Model { get; set; }
     public bool IsVisible { get; set; } = false;
