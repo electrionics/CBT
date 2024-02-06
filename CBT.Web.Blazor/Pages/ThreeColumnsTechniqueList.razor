@@ -81,7 +81,7 @@ else
                         var errors = ((ThreeColumnsRecordModel)context).Errors;
                         foreach (var error in errors)
                         {
-                            <span>@cognitiveErrors[(int)error]</span>
+                            <span>@cognitiveErrors[(int)error].Title</span>
                             <br />
                         }
                     }

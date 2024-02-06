@@ -122,7 +122,7 @@ else
                         var errors = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).ReviewedErrors;
                         foreach (var error in errors)
                         {
-                            <span>@cognitiveErrors[(int)error]</span>
+                            <span>@cognitiveErrors[(int)error].Title</span>
                             <br />
                         }
                     }

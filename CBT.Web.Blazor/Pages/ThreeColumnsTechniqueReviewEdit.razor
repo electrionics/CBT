@@ -33,7 +33,7 @@
 
                     foreach (var error in errors)
                     {
-                        <span>@CognitiveErrors[(int)error]</span>
+                        <span>@CognitiveErrors[(int)error].Title</span>
                         <br />
                     }
                 }
@@ -53,7 +53,7 @@
                                EnableCloseOnSelect="false"
                                MaximumSelectionLength="6"
                                @bind-Value="Model.ReviewedErrors">
-                    <MultiSelectFieldSettings Text="Value" Value="Key">
+                    <MultiSelectFieldSettings Text="Value.Title" Value="Key">
                     </MultiSelectFieldSettings>
                 </SfMultiSelect>
             </div>
