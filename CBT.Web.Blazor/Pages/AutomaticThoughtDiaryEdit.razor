@@ -35,7 +35,7 @@
                                DataSource="Emotions"
                                AllowFiltering="true"
                                EnableCloseOnSelect="false"
-                               MaximumSelectionLength="4"
+                               MaximumSelectionLength="5"
                                @bind-Value="@Model.BindEmotionIds">
                     <MultiSelectFieldSettings Text="Value" Value="Key">
                     </MultiSelectFieldSettings>
@@ -122,7 +122,7 @@
 
     public AutomaticDiaryRecordModel Model { get; set; }
 
-    public Action? SuccessCallback{ get; set; }
+    public Action? SuccessCallback { get; set; }
 
     private void Initialize()
     {

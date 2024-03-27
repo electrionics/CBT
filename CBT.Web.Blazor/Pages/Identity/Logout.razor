@@ -49,11 +49,13 @@
         _logger.LogInformation("User logged out.");
 
         var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
-        var authCookie = cookies.First().Value.First();
-        authCookie = authCookie.Replace(" httponly", "");
+        var authCookie = cookies.FirstOrDefault().Value?.FirstOrDefault();
+        authCookie = authCookie?.Replace(" httponly", "");
 
-        await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
-
-        NavigationManager.NavigateTo(returnUrl, true);
+        if (authCookie != null)
+        {
+            await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+            NavigationManager.NavigateTo(returnUrl, true);
+        }
     }
 }

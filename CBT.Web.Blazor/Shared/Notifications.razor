@@ -8,8 +8,14 @@
 @inject IJSRuntime JSRuntime;
 @inject IHttpContextAccessor HttoContextAccessor;
 
-<div>
-    @_messages.LastOrDefault()<span> </span>
+<div style="margin-right: 10px;">
+    @{
+        var count = int.Parse(_messages.LastOrDefault() ?? "0");
+        if (count > 0)
+        {
+            <span style="color: red; font-size: 20px;"><i class="oi oi-bell"></i> @count</span>
+        }
+    }
 </div>
 
 @code {

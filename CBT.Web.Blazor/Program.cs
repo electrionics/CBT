@@ -3,14 +3,12 @@ using Syncfusion.Blazor.Popups;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.CookiePolicy;
 
 using CBT.Web.Blazor.Data.Identity;
 using CBT.Web.Blazor.Services;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
-using CBT.Web.Blazor.Services.Authentication;
-using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CBTIdentityDataContextConnection") ?? throw new InvalidOperationException("Connection string 'CBTIdentityDataContextConnection' not found.");
@@ -71,7 +69,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 //builder.Services.AddScoped<AuthenticationStateProvider, CBTAuthenticationStateProvider>();
 
 var app = builder.Build();
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzA4NTYxNUAzMjM0MmUzMDJlMzBpeGxzb082cEZHalkwdGl1UE5aU25lcGI5R1RqYW5HRG1WTks1anFjN1JRPQ==");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXxednRRRmVcVkJ2V0I=");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
