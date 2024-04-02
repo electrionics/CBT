@@ -34,7 +34,7 @@ namespace CBT.Web.Blazor.Data
                 entity.HasKey(x => x.Id);
             });
 
-            modelBuilder.Entity<AuthomaticThoughtDiaryRecord>(entity =>
+            modelBuilder.Entity<AutomaticThought>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });

@@ -9,6 +9,6 @@ namespace CBT.Web.Blazor.Data.Entities
         public int Value { get; set; }
         public ThoughtEmotionState State { get; set; }
 
-        public AuthomaticThoughtDiaryRecord Thought { get; set; }
+        public AutomaticThought Thought { get; set; }
     }
 }

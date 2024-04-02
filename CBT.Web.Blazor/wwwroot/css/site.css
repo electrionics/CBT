@@ -83,3 +83,7 @@ a, .btn-link {
 .percent-input-container .e-numeric {
     width: auto!important;
 } 
+
+.hidden{
+    display: none!important;
+}

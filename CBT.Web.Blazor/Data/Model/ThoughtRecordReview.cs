@@ -19,7 +19,7 @@ namespace CBT.Web.Blazor.Data.Model
         public string PatientDisplayName { get; set; }
 
 
-        public static ThoughtRecordReview<T>? Convert(AuthomaticThoughtDiaryRecord data)
+        public static ThoughtRecordReview<T>? Convert(AutomaticThought data)
         {
             if (data == null)
                 return null;
@@ -38,7 +38,7 @@ namespace CBT.Web.Blazor.Data.Model
 #pragma warning restore CS8601 // Possible null reference assignment.
         }
 
-        public static AuthomaticThoughtDiaryRecord ConvertBack(ThoughtRecordReview<T> model, int psychologistId, AuthomaticThoughtDiaryRecord data)
+        public static AutomaticThought ConvertBack(ThoughtRecordReview<T> model, int psychologistId, AutomaticThought data)
         {
             data.PsychologistReviews.RemoveAll(x => true);
             data.PsychologistReviews.Add(new ThoughtPsychologistReview

@@ -31,13 +31,12 @@ else
         Всего @(items.Count) записей.
     </div>
 
-    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText=""
-                        Width="100">
+            <GridColumn HeaderText="">
                 <Template>
                     @{
-                        var model = (ThoughtRecordReview<AutomaticDiaryRecordModel>)context;
+                        var model = (ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context;
                         if (!model.SentBack)
                         {
                             if (model.State == ReviewRecordState.Reviewed)
@@ -63,15 +62,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.Situation)"
-                        HeaderText="Ситуация"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.BeginningEmotionValues)"
-                HeaderText="Эмоции"
-                Width="150">
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.Situation)"
+                        HeaderText="Ситуация"/>
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.BeginningEmotionValues)"
+                HeaderText="Эмоции">
                 <Template>
                     @{
-                        var recordEmotions = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.BeginningEmotionValues;
+                        var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.BeginningEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
                             <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
@@ -81,14 +78,12 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.Thought"
-                        HeaderText="Автоматическая мысль"
-                        Width="200" />
+                        HeaderText="Автоматическая мысль" />
             <GridColumn Field="Value.Errors"
-                        HeaderText="Когнитивные искажения"
-                        Width="200">
+                        HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.Errors;
+                        var errors = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.Errors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -98,14 +93,12 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.RationalAnswer"
-                        HeaderText="Рациональный ответ"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.ResultingEmotionValues)"
-                        HeaderText="Результат"
-                        Width="150">
+                        HeaderText="Рациональный ответ" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.ResultingEmotionValues)"
+                        HeaderText="Результат">
                 <Template>
                     @{
-                        var recordEmotions = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.ResultingEmotionValues;
+                        var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.ResultingEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
                             <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
@@ -114,12 +107,11 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.ReviewedErrors)"
-                        HeaderText="Когнитивные искажения"
-                        Width="200">
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.ReviewedErrors)"
+                        HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).ReviewedErrors;
+                        var errors = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).ReviewedErrors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -128,15 +120,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.RationalAnswerComment)"
-                        HeaderText="Комментарий к рациональному ответу"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticDiaryRecordModel>.Value.Id)"
-                        HeaderText=""
-                        Width="245">
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.RationalAnswerComment)"
+                        HeaderText="Комментарий к рациональному ответу" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.Id)"
+                        HeaderText="">
                 <Template>
                     @{
-                        var id = ((ThoughtRecordReview<AutomaticDiaryRecordModel>)context).Value.Id;
+                        var id = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.Id;
 
                         <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
                             <i class="oi oi-pencil" /> Изменить
@@ -152,17 +142,17 @@ else
 }
 
 @code {
+    SfGrid<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>> DataGrid;
+
     AutomaticThoughtDiaryReviewEdit EditableThought;
 
-    private List<ThoughtRecordReview<AutomaticDiaryRecordModel>> items;
+    private List<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
     private Dictionary<int, string> emotions;
 
     protected override async Task OnInitializedAsync()
     {
-        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
-        var user = authstate.User;
-        var currentUserId = UserManager.GetUserId(user);
+        var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
@@ -195,10 +185,20 @@ else
 
     private async Task Refresh()
     {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);
 
-        items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
+        return currentUserId;
     }
 }

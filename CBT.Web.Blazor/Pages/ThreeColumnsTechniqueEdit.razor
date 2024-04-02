@@ -64,14 +64,14 @@
 
     public bool IsVisible { get; set; } = false;
 
-    public ThreeColumnsRecordModel Model { get; set; }
+    public ThreeColumnsTechniqueRecordModel Model { get; set; }
 
     public Action? SuccessCallback{ get; set; }
 
 
     protected override void OnInitialized()
     {
-        Model = new ThreeColumnsRecordModel();
+        Model = new ThreeColumnsTechniqueRecordModel();
 
         base.OnInitialized();
     }
@@ -96,7 +96,7 @@
             await AutomaticThoughtsService.AddThoughtFull(Model, currentUserId);
         }
 
-        Model = new ThreeColumnsRecordModel();
+        Model = new ThreeColumnsTechniqueRecordModel();
 
         if (SuccessCallback != null)
         {

@@ -1,4 +1,5 @@
 ﻿using CBT.Web.Blazor.Data.Entities;
+using CBT.Web.Blazor.Data.Entities.Enums;
 
 namespace CBT.Web.Blazor.Data.Model
 {
@@ -12,7 +13,7 @@ namespace CBT.Web.Blazor.Data.Model
         string? RationalAnswer { get; set; }
 
 
-        T? Convert(AuthomaticThoughtDiaryRecord data);
-        AuthomaticThoughtDiaryRecord ConvertBack(int patientId, AuthomaticThoughtDiaryRecord? data = null);
+        T? Convert(AutomaticThought data);
+        AutomaticThought ConvertBack(int patientId, DiaryType type, AutomaticThought? data = null);
     }
 }

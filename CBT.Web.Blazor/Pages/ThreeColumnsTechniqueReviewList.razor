@@ -31,13 +31,12 @@ else
         Всего @(items.Count) записей.
     </div>
 
-    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText=""
-                        Width="100">
+            <GridColumn HeaderText="">
                 <Template>
                     @{
-                        var model = (ThoughtRecordReview<ThreeColumnsRecordModel>)context;
+                        var model = (ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context;
                         if (!model.SentBack)
                         {
                             if (model.State == ReviewRecordState.Reviewed)
@@ -64,14 +63,12 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.Thought"
-                        HeaderText="Автоматическая мысль"
-                        Width="200" />
+                        HeaderText="Автоматическая мысль" />
             <GridColumn Field="Value.Errors"
-                        HeaderText="Когнитивные искажения"
-                        Width="200">
+                        HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).Value.Errors;
+                        var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Errors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -81,14 +78,12 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.RationalAnswer"
-                        HeaderText="Рациональный ответ"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.ReviewedErrors)"
-                        HeaderText="Когнитивные искажения"
-                        Width="200">
+                        HeaderText="Рациональный ответ"/>
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ReviewedErrors)"
+                        HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).ReviewedErrors;
+                        var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).ReviewedErrors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -97,15 +92,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.RationalAnswerComment)"
-                        HeaderText="Комментарий к рациональному ответу"
-                        Width="250" />
-            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsRecordModel>.Value.Id)"
-                        HeaderText=""
-                        Width="245">
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.RationalAnswerComment)"
+                        HeaderText="Комментарий к рациональному ответу"/>
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Value.Id)"
+                        HeaderText="">
                 <Template>
                     @{
-                        var id = ((ThoughtRecordReview<ThreeColumnsRecordModel>)context).Value.Id;
+                        var id = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Id;
 
                         <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
                             <i class="oi oi-pencil" /> Изменить
@@ -121,16 +114,16 @@ else
 }
 
 @code {
+    SfGrid<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>> DataGrid;
+
     ThreeColumnsTechniqueReviewEdit EditableThought;
 
-    private List<ThoughtRecordReview<ThreeColumnsRecordModel>> items;
+    private List<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
 
     protected override async Task OnInitializedAsync()
     {
-        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
-        var user = authstate.User;
-        var currentUserId = UserManager.GetUserId(user);
+        var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
@@ -161,10 +154,20 @@ else
 
     private async Task Refresh()
     {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);
 
-        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+        return currentUserId;
     }
 }

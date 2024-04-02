@@ -37,14 +37,14 @@ namespace CBT.Web.Blazor.Background
                 using var dbContext = new CBTDataContext();
                 var sw = Stopwatch.StartNew();
 
-                var psychologistNotifications = await dbContext.Set<AuthomaticThoughtDiaryRecord>()
+                var psychologistNotifications = await dbContext.Set<AutomaticThought>()
                     .AsNoTracking()
                     .Where(x => x.Sent && !x.SentBack)
                     .GroupBy(x => x.Patient.PsychologistId)
                     .Select(x => new { PsychologistId = x.Key, Notifications = x.Count() })
                     .ToDictionaryAsync(x => x.PsychologistId, x => x.Notifications, cancellationToken: stoppingToken);
 
-                var patientNotifications = await dbContext.Set<AuthomaticThoughtDiaryRecord>()
+                var patientNotifications = await dbContext.Set<AutomaticThought>()
                     .AsNoTracking()
                     .Where(x => x.SentBack)
                     .GroupBy(x => x.PatientId)

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CBT.Web.Blazor.Data.Model
 {
-    public class AutomaticDiaryRecordModel : ThreeColumnsRecordModel, IThoughtRecordModel<AutomaticDiaryRecordModel> // TODO: find in the book!!!
+    public class AutomaticThoughtDiaryRecordModel : ThreeColumnsTechniqueRecordModel, IThoughtRecordModel<AutomaticThoughtDiaryRecordModel> // TODO: find in the book!!!
     {
         public string? Situation { get; set; }
         public Dictionary<int, int> BeginningEmotionValues { get; set; }
@@ -13,13 +13,13 @@ namespace CBT.Web.Blazor.Data.Model
 
         public List<int> BindEmotionIds { get; set; }
 
-        public AutomaticDiaryRecordModel(Dictionary<int, string> emotions) : this()
+        public AutomaticThoughtDiaryRecordModel(Dictionary<int, string> emotions) : this()
         {
             BeginningEmotionValues.AddRange(emotions.Select(x => new KeyValuePair<int, int>(x.Key, 0)));
             ResultingEmotionValues.AddRange(emotions.Select(x => new KeyValuePair<int, int>(x.Key, 0)));
         }
 
-        public AutomaticDiaryRecordModel() : base()
+        public AutomaticThoughtDiaryRecordModel() : base()
         {
             BeginningEmotionValues = new Dictionary<int, int>();
             ResultingEmotionValues = new Dictionary<int, int>();
@@ -30,12 +30,12 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region Convert
 
-        public new AutomaticDiaryRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
+        public new AutomaticThoughtDiaryRecordModel? Convert(AutomaticThought data)
         {
             if (data == null)
                 return null;
 
-            return new AutomaticDiaryRecordModel()
+            return new AutomaticThoughtDiaryRecordModel()
             {
                 Id = data.Id,
                 Thought = data.Thought,
@@ -60,11 +60,11 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region ConvertBack
 
-        public new AuthomaticThoughtDiaryRecord ConvertBack(int patientId, AuthomaticThoughtDiaryRecord? data = null)
+        public new AutomaticThought ConvertBack(int patientId, DiaryType type, AutomaticThought? data = null)
         {
             var model = this;
 
-            data = base.ConvertBack(patientId, data);
+            data = base.ConvertBack(patientId, type, data);
 
             data.Situation = model.Situation;
  

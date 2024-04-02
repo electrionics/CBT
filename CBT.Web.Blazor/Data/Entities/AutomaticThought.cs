@@ -1,8 +1,11 @@
-﻿namespace CBT.Web.Blazor.Data.Entities
+﻿using CBT.Web.Blazor.Data.Entities.Enums;
+
+namespace CBT.Web.Blazor.Data.Entities
 {
-    public class AuthomaticThoughtDiaryRecord
+    public class AutomaticThought
     {
         public int Id { get; set; }
+        public DiaryType Type { get; set; }
 
         public string? Situation { get; set; }
         public string Thought { get; set; }

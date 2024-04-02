@@ -120,7 +120,7 @@
 
     public bool IsVisible { get; set; } = false;
 
-    public AutomaticDiaryRecordModel Model { get; set; }
+    public AutomaticThoughtDiaryRecordModel Model { get; set; }
 
     public Action? SuccessCallback { get; set; }
 
@@ -177,7 +177,7 @@
             await AutomaticThoughtsService.AddAutomaticThoughtFull(Model, currentUserId);
         }
 
-        Model = new AutomaticDiaryRecordModel();
+        Model = new AutomaticThoughtDiaryRecordModel();
 
         if (SuccessCallback != null)
         {

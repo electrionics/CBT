@@ -1,8 +1,9 @@
 ﻿using CBT.Web.Blazor.Data.Entities;
+using CBT.Web.Blazor.Data.Entities.Enums;
 
 namespace CBT.Web.Blazor.Data.Model
 {
-    public class ThreeColumnsRecordModel : IThoughtRecordModel<ThreeColumnsRecordModel> // техника трех колонок с. 94
+    public class ThreeColumnsTechniqueRecordModel : IThoughtRecordModel<ThreeColumnsTechniqueRecordModel> // техника трех колонок с. 94
     {
         public int Id { get;set; }
 
@@ -13,7 +14,7 @@ namespace CBT.Web.Blazor.Data.Model
         public bool Sent { get; set; }
 
 
-        public ThreeColumnsRecordModel() 
+        public ThreeColumnsTechniqueRecordModel() 
         {
             Errors = new List<int>();
         }
@@ -21,12 +22,12 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region Convert
 
-        public ThreeColumnsRecordModel? Convert(AuthomaticThoughtDiaryRecord data)
+        public ThreeColumnsTechniqueRecordModel? Convert(AutomaticThought data)
         {
             if (data == null)
                 return null;
 
-            return new ThreeColumnsRecordModel()
+            return new ThreeColumnsTechniqueRecordModel()
             {
                 Id = data.Id,
                 Thought = data.Thought,
@@ -41,12 +42,12 @@ namespace CBT.Web.Blazor.Data.Model
 
         #region ConvertBack
 
-        public AuthomaticThoughtDiaryRecord ConvertBack(int patientId, AuthomaticThoughtDiaryRecord? data = null)
+        public AutomaticThought ConvertBack(int patientId, DiaryType type, AutomaticThought? data = null)
         {
             var model = this;
 
             if (data == null)
-               data = new AuthomaticThoughtDiaryRecord();
+               data = new AutomaticThought();
 
             data.Id = model.Id;
             data.Thought = model.Thought;
@@ -58,6 +59,7 @@ namespace CBT.Web.Blazor.Data.Model
                     CognitiveErrorId = x
                 }).ToList() ?? new List<ThoughtCognitiveError>();
             data.Emotions = new List<ThoughtEmotion>();
+            data.Type = type;
             data.PatientId = patientId;
             data.Sent = model.Sent;
 

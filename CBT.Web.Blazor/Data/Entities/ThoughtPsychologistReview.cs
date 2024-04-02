@@ -9,7 +9,7 @@
         public string RationalAnswerComment { get; set; }
 
 
-        public AuthomaticThoughtDiaryRecord Thought {  get; set; }
+        public AutomaticThought Thought {  get; set; }
 
         public Psychologist Psychologist { get; set; }
     }

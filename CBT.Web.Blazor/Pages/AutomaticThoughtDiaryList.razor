@@ -20,7 +20,15 @@
 <h1>Дневник автоматических мыслей</h1>
 
 <div class="alert alert-secondary mt-4">
-    Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.
+    Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.<br/>
+    @{
+        if (ShowButtons)
+        {
+            <NavLink class="nav-link" href="diary/automatic-thoughts/example">
+                <span class="oi oi-list-rich" aria-hidden="true"></span>  Примеры проработок "Дневника автоматических мыслей"
+            </NavLink>
+        }
+    }
 </div>
 
 @if (cognitiveErrors == null)
@@ -29,17 +37,14 @@
 }
 else
 {
-    <button class="btn btn-primary mt-2 mb-3" @onclick="AddBtnClick">
-        <i class="oi oi-plus" /> Добавить
-    </button>
+    <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(ShowButtons? "" : "hidden")" />
     <br />
-    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText=""
-                        Width="100">
+            <GridColumn Visible="ShowButtons" HeaderText="">
                 <Template>
                     @{
-                        var model = (AutomaticDiaryRecordModel)context;
+                        var model = (AutomaticThoughtDiaryRecordModel)context;
                         if (!model.Sent)
                         {
                             <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
@@ -68,15 +73,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(AutomaticDiaryRecordModel.Situation)"
-                HeaderText="Ситуация"
-                Width="200" />
-            <GridColumn Field="@nameof(AutomaticDiaryRecordModel.BeginningEmotionValues)"
-                HeaderText="Эмоции"
-                Width="200">
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Situation)"
+                HeaderText="Ситуация" />
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.BeginningEmotionValues)"
+                HeaderText="Эмоции">
                 <Template>
                     @{
-                        var recordEmotions = ((AutomaticDiaryRecordModel)context).BeginningEmotionValues;
+                        var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).BeginningEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
                             <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
@@ -85,17 +88,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn 
-                Field="@nameof(AutomaticDiaryRecordModel.Thought)"
-                HeaderText="Автоматическая мысль"
-                Width="200"/>
-            <GridColumn 
-                Field="@nameof(AutomaticDiaryRecordModel.Errors)"
-                HeaderText="Когнитивные искажения"
-                Width="200">
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Thought)"
+                HeaderText="Автоматическая мысль"/>
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Errors)"
+                HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((AutomaticDiaryRecordModel)context).Errors;
+                        var errors = ((AutomaticThoughtDiaryRecordModel)context).Errors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -104,16 +103,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn 
-                Field="@nameof(AutomaticDiaryRecordModel.RationalAnswer)"
-                HeaderText="Рациональный ответ"
-                Width="200"/>
-            <GridColumn Field="@nameof(AutomaticDiaryRecordModel.ResultingEmotionValues)"
-                HeaderText="Результат"
-                Width="200">
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.RationalAnswer)"
+                HeaderText="Рациональный ответ"/>
+            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.ResultingEmotionValues)"
+                HeaderText="Результат">
                 <Template>
                     @{
-                        var recordEmotions = ((AutomaticDiaryRecordModel)context).ResultingEmotionValues;
+                        var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).ResultingEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
                             <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
@@ -122,13 +118,11 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn 
-                Field="@nameof(AutomaticDiaryRecordModel.Id)"
-                HeaderText=""
-                Width="245">
+            <GridColumn Visible="ShowButtons" Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
+                HeaderText="">
                 <Template>
                     @{
-                        var id = ((AutomaticDiaryRecordModel)context).Id;
+                        var id = ((AutomaticThoughtDiaryRecordModel)context).Id;
 
                         <button class="btn btn-danger" @onclick="@(async () => await DeleteBtnClick(id))">
                             <i class="oi oi-trash" /> Удалить
@@ -150,10 +144,12 @@ else
 }
 
 @code {
+    SfGrid<AutomaticThoughtDiaryRecordModel> DataGrid;
+
     AutomaticThoughtDiaryEdit EditableThought;
     ThoughtReviewPopup ThoughtReview;
 
-    private IEnumerable<AutomaticDiaryRecordModel> items;
+    private IEnumerable<AutomaticThoughtDiaryRecordModel> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
     private Dictionary<int, string> emotions;
 
@@ -161,9 +157,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
-        var user = authstate.User;
-        var currentUserId = UserManager.GetUserId(user);
+        var currentUserId = await GetCurrentUserId();
 
         items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
@@ -174,7 +168,7 @@ else
 
     public void AddBtnClick()
     {
-        EditableThought.Model = new AutomaticDiaryRecordModel(emotions);
+        EditableThought.Model = new AutomaticThoughtDiaryRecordModel(emotions);
 
         EditableThought.IsEdit = false;
         EditableThought.IsVisible = true;
@@ -241,10 +235,22 @@ else
 
     private async Task Refresh()
     {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);
 
-        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
+        return currentUserId;
     }
+
+    protected virtual bool ShowButtons => true;
 }

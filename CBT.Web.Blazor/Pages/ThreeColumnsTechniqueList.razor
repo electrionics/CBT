@@ -22,7 +22,15 @@
 <h1>Техника трёх колонок</h1>
 
 <div class="alert alert-secondary mt-4">
-    Используйте технику трёх колонок каждый раз, когда у Вас портится настроение или возникает тревога.
+    Используйте технику трёх колонок каждый раз, когда у Вас портится настроение или возникает тревога.<br/>
+    @{
+        if (ShowButtons)
+        {
+            <NavLink class="nav-link" href="diary/three-columns/example">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Примеры проработок "Техники трех колонок"
+            </NavLink>
+        }
+    }
 </div>
 
 @if (cognitiveErrors == null)
@@ -31,17 +39,14 @@
 }
 else
 {
-    <button class="btn btn-primary mt-2 mb-3" @onclick="AddBtnClick">
-        <i class="oi oi-plus" /> Добавить
-    </button>
+    <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(ShowButtons? "" : "hidden")" />
     <br />
-    <SfGrid EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText=""
-                        Width="60">
+            <GridColumn Visible="ShowButtons" HeaderText="">
                 <Template>
                     @{
-                        var model = (ThreeColumnsRecordModel)context;
+                        var model = (ThreeColumnsTechniqueRecordModel)context;
                         if (!model.Sent)
                         {
                             <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
@@ -70,15 +75,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThreeColumnsRecordModel.Thought)"
-                        HeaderText="Автоматическая мысль"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThreeColumnsRecordModel.Errors)"
-                        HeaderText="Когнитивные искажения"
-                        Width="200">
+            <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Thought)"
+                        HeaderText="Автоматическая мысль" />
+            <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Errors)"
+                        HeaderText="Когнитивные искажения">
                 <Template>
                     @{
-                        var errors = ((ThreeColumnsRecordModel)context).Errors;
+                        var errors = ((ThreeColumnsTechniqueRecordModel)context).Errors;
                         foreach (var error in errors)
                         {
                             <span>@cognitiveErrors[(int)error].Title</span>
@@ -87,15 +90,13 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(ThreeColumnsRecordModel.RationalAnswer)"
-                        HeaderText="Рациональный ответ"
-                        Width="200" />
-            <GridColumn Field="@nameof(ThreeColumnsRecordModel.Id)"
-                        HeaderText=""
-                        Width="245">
+            <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.RationalAnswer)"
+                        HeaderText="Рациональный ответ" />
+            <GridColumn Visible="ShowButtons" Field="@nameof(ThreeColumnsTechniqueRecordModel.Id)"
+                        HeaderText="">
                 <Template>
                     @{
-                        var id = ((ThreeColumnsRecordModel)context).Id;
+                        var id = ((ThreeColumnsTechniqueRecordModel)context).Id;
 
                         <button class="btn btn-danger" @onclick="@(async () => await DeleteBtnClick(id))">
                             <i class="oi oi-trash" /> Удалить
@@ -117,10 +118,12 @@ else
 }
 
 @code {
+    SfGrid<ThreeColumnsTechniqueRecordModel> DataGrid;
+
     ThreeColumnsTechniqueEdit EditableThought;
     ThoughtReviewPopup ThoughtReview;
 
-    private IEnumerable<ThreeColumnsRecordModel> items;
+    private IEnumerable<ThreeColumnsTechniqueRecordModel> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
 
     private string? currentUserId;
@@ -129,10 +132,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
-        var user = authstate.User;
-
-        currentUserId = UserManager.GetUserId(user);
+        currentUserId = await GetCurrentUserId();
 
         items = await AutomaticThoughtsService.GetAllThoughts(currentUserId);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
@@ -144,7 +144,7 @@ else
     {
         if (EditableThought.IsEdit == true)
         {
-            EditableThought.Model = new ThreeColumnsRecordModel();
+            EditableThought.Model = new ThreeColumnsTechniqueRecordModel();
         }
 
         EditableThought.IsEdit = false;
@@ -210,10 +210,22 @@ else
 
     private async Task Refresh()
     {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);
 
-        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
+        return currentUserId;
     }
+
+    protected virtual bool ShowButtons => true;
 }

@@ -7,6 +7,6 @@
         public bool IsReview { get; set; }
         public int? PsychologistId { get; set; }
 
-        public AuthomaticThoughtDiaryRecord Thought { get; set; }
+        public AutomaticThought Thought { get; set; }
     }
 }
