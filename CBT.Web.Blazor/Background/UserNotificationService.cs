@@ -14,11 +14,13 @@ namespace CBT.Web.Blazor.Background
         private static readonly TimeSpan Period = TimeSpan.FromSeconds(3);
         private readonly ILogger<UserNotificationService> _logger;
         private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
+        private readonly DatabaseConfig databaseConfig;
 
-        public UserNotificationService(ILogger<UserNotificationService> logger, IHubContext<NotificationHub, INotificationClient> hubContext)
+        public UserNotificationService(ILogger<UserNotificationService> logger, IHubContext<NotificationHub, INotificationClient> hubContext, DatabaseConfig databaseConfig)
         {
             _logger = logger;
             _hubContext = hubContext;
+            this.databaseConfig = databaseConfig;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,7 +36,8 @@ namespace CBT.Web.Blazor.Background
                 _logger.LogInformation($"Executing {nameof(UserNotificationService)} {time}");
 #pragma warning restore CA2254 // Template should be a static expression
 
-                using var dbContext = new CBTDataContext();
+                using var dbContext = new CBTDataContext(databaseConfig.SingleConnectionString);
+
                 var sw = Stopwatch.StartNew();
 
                 var psychologistNotifications = await dbContext.Set<AutomaticThought>()

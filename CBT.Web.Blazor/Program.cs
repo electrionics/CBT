@@ -9,14 +9,25 @@ using CBT.Web.Blazor.Data.Identity;
 using CBT.Web.Blazor.Services;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
+using CBT.Web.Blazor;
+using CBT.Web.Blazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("CBTIdentityDataContextConnection") ?? throw new InvalidOperationException("Connection string 'CBTIdentityDataContextConnection' not found.");
+var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
 
-builder.Services.AddDbContext<CBTIdentityDataContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddSingleton(databaseConfig!);
+
+builder.Services.AddDbContext<CBTIdentityDataContext>(options =>
+{
+    options.UseSqlServer(databaseConfig?.SingleConnectionString);
+});
+builder.Services.AddDbContext<CBTDataContext>((options) =>
+{
+    options.UseSqlServer(databaseConfig?.SingleConnectionString);
+});
+
 builder.Services.AddIdentity<User, Role>()
-                .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
-
+    .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
 
 builder.Services.AddCors(options =>
 {
@@ -44,8 +55,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSyncfusionBlazor();
 
-builder.Services.AddSingleton<AutomaticThoughtsService>();
-builder.Services.AddSingleton<PsychologistReviewService>(); 
+builder.Services.AddScoped<AutomaticThoughtsService>();
+builder.Services.AddScoped<PsychologistReviewService>(); 
 builder.Services.AddScoped<SfDialogService>();
 builder.Services.AddScoped<UserManager<User>>();
 

@@ -10,11 +10,13 @@ namespace CBT.Web.Blazor.Services
     public class AutomaticThoughtsService
     {
         private readonly ILogger<AutomaticThoughtsService> _logger; //TODO: use logger in this class
+        private readonly CBTDataContext dataContext;
         private const string DemoUserId = "DemoClient";
 
-        public AutomaticThoughtsService(ILogger<AutomaticThoughtsService> logger)
+        public AutomaticThoughtsService(ILogger<AutomaticThoughtsService> logger, CBTDataContext dataContext)
         {
             _logger = logger;
+            this.dataContext = dataContext;
         }
 
         #region GetAllCognitiveErrors
@@ -66,7 +68,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<Dictionary<int, string>> GetAllEmotions()
         {
-            using var dataContext = new CBTDataContext();
             var emotions = await dataContext.Set<Emotion>()
                 .AsNoTracking().ToListAsync();
 
@@ -82,7 +83,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<List<ThreeColumnsTechniqueRecordModel>> GetAllThoughts(string? userId = null)
         {
-            using var dataContext = new CBTDataContext();
             var threeColumnsTechniques = await dataContext.Set<AutomaticThought>()
                                 .Include(x => x.CognitiveErrors)
                                 .AsNoTracking()
@@ -119,7 +119,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<int> AddThought(string thought)
         {
-            using var dataContext = new CBTDataContext();
             var data = new AutomaticThought
             {
                 PatientId = 1,
@@ -144,7 +143,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<int> AddThoughtFull(ThreeColumnsTechniqueRecordModel model, string? userId)
         {
-            using var dataContext = new CBTDataContext();
             var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
             var data = model.ConvertBack(patient.Id, DiaryType.ThreeColumnsTechnique);
@@ -164,7 +162,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<ThreeColumnsTechniqueRecordModel?> GetThought(int id)
         {
-            using var dataContext = new CBTDataContext();
             return new ThreeColumnsTechniqueRecordModel().Convert(await dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .AsNoTracking()
@@ -178,7 +175,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task EditThoughtFull(ThreeColumnsTechniqueRecordModel model, string? userId)
         {
-            using var dataContext = new CBTDataContext();
             var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
             var data = await dataContext.Set<AutomaticThought>()
@@ -197,7 +193,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task DeleteThought(int id)
         {
-            using var dataContext = new CBTDataContext();
             var data = await dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Emotions)
@@ -216,7 +211,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task SendThoughtToPsychologist(int id)
         {
-            using var dataContext = new CBTDataContext();
             var data = await dataContext.Set<AutomaticThought>()
                 .FirstAsync(x => x.Id == id);
 
@@ -234,7 +228,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<RecordReviewModel?> GetPsychologistReview(int id)
         {
-            using var dataContext = new CBTDataContext();
             var data = await dataContext.Set<ThoughtPsychologistReview>()
                 .Include(x => x.Thought).ThenInclude(x => x.CognitiveErrors)
                 .FirstOrDefaultAsync(x => x.ThoughtId == id && x.Thought.Sent && x.Thought.SentBack);
@@ -257,7 +250,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<List<AutomaticThoughtDiaryRecordModel>> GetAllAutomaticThoughts(string? userId = null)
         {
-            using var dataContext = new CBTDataContext();
             var threeColumnsTechniques = await dataContext.Set<AutomaticThought>()
                                 .Include(x => x.CognitiveErrors)
                                 .Include(x => x.Emotions)
@@ -280,7 +272,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<int> AddAutomaticThoughtFull(AutomaticThoughtDiaryRecordModel model, string? userId)
         {
-            using var dataContext = new CBTDataContext();
             var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
             var data = model.ConvertBack(patient.Id, DiaryType.AutomaticThoughtDiary);
@@ -300,7 +291,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<AutomaticThoughtDiaryRecordModel?> GetAutomaticThought(int id)
         {
-            using var dataContext = new CBTDataContext();
             return new AutomaticThoughtDiaryRecordModel().Convert(await dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Emotions)
@@ -315,7 +305,6 @@ namespace CBT.Web.Blazor.Services
 
         public async Task EditAutomaticThoughtFull(AutomaticThoughtDiaryRecordModel model, string? userId)
         {
-            using var dataContext = new CBTDataContext();
             var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
             var data = await dataContext.Set<AutomaticThought>()

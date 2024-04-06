@@ -5,19 +5,29 @@ namespace CBT.Web.Blazor.Data
 {
     public class CBTDataContext : DbContext
     {
-        public CBTDataContext(DbContextOptions<CBTDataContext> options) : base(options)
-        {
-        }
+        private readonly string? _connectionString;
 
-        public CBTDataContext()
+        public CBTDataContext(DbContextOptions<CBTDataContext> options) : base(options)
         {
             
         }
 
+        public CBTDataContext()
+        {
+
+        }
+
+        public CBTDataContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //https://stackoverflow.com/questions/17615260/the-certificate-chain-was-issued-by-an-authority-that-is-not-trusted-when-conn
-            optionsBuilder.UseSqlServer("server=.;database=CBTShared;User Id=qqqq;Password=qqqq;TrustServerCertificate=True;");
+            if (!string.IsNullOrEmpty(_connectionString))
+            {
+                optionsBuilder.UseSqlServer(_connectionString);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

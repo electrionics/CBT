@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a016d3a8-9b17-4648-96ac-f0911c8a17f5</UserSecretsId>
+	<SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,5 +35,4 @@
   <ItemGroup>
     <Folder Include="Pages\Shared\" />
   </ItemGroup>
-
 </Project>
