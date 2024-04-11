@@ -30,62 +30,69 @@ namespace CBT.Web.Blazor.Background
             while (!stoppingToken.IsCancellationRequested &&
                 await timer.WaitForNextTickAsync(stoppingToken)) 
             {
-                var time = DateTime.Now;
+                try
+                {
+                    var time = DateTime.Now;
 
 #pragma warning disable CA2254 // Template should be a static expression
-                _logger.LogInformation($"Executing {nameof(UserNotificationService)} {time}");
+                    _logger.LogInformation($"Executing {nameof(UserNotificationService)} {time}");
 #pragma warning restore CA2254 // Template should be a static expression
 
-                using var dbContext = new CBTDataContext(databaseConfig.SingleConnectionString);
+                    using var dbContext = new CBTDataContext(databaseConfig.SingleConnectionString);
 
-                var sw = Stopwatch.StartNew();
+                    var sw = Stopwatch.StartNew();
 
-                var psychologistNotifications = await dbContext.Set<AutomaticThought>()
-                    .AsNoTracking()
-                    .Where(x => x.Sent && !x.SentBack)
-                    .GroupBy(x => x.Patient.PsychologistId)
-                    .Select(x => new { PsychologistId = x.Key, Notifications = x.Count() })
-                    .ToDictionaryAsync(x => x.PsychologistId, x => x.Notifications, cancellationToken: stoppingToken);
+                    var psychologistNotifications = await dbContext.Set<AutomaticThought>()
+                        .AsNoTracking()
+                        .Where(x => x.Sent && !x.SentBack)
+                        .GroupBy(x => x.Patient.PsychologistId)
+                        .Select(x => new { PsychologistId = x.Key, Notifications = x.Count() })
+                        .ToDictionaryAsync(x => x.PsychologistId, x => x.Notifications, cancellationToken: stoppingToken);
 
-                var patientNotifications = await dbContext.Set<AutomaticThought>()
-                    .AsNoTracking()
-                    .Where(x => x.SentBack)
-                    .GroupBy(x => x.PatientId)
-                    .Select(x => new { PatientId = x.Key, Notifications = x.Count() })
-                    .ToDictionaryAsync(x => x.PatientId, x => x.Notifications, cancellationToken: stoppingToken);
+                    var patientNotifications = await dbContext.Set<AutomaticThought>()
+                        .AsNoTracking()
+                        .Where(x => x.SentBack)
+                        .GroupBy(x => x.PatientId)
+                        .Select(x => new { PatientId = x.Key, Notifications = x.Count() })
+                        .ToDictionaryAsync(x => x.PatientId, x => x.Notifications, cancellationToken: stoppingToken);
 
-                var psychologists = await dbContext.Set<Psychologist>()
-                    .AsNoTracking()
-                    .Where(x => psychologistNotifications.Keys.Contains(x.Id))
-                    .ToListAsync(cancellationToken: stoppingToken);
+                    var psychologists = await dbContext.Set<Psychologist>()
+                        .AsNoTracking()
+                        .Where(x => psychologistNotifications.Keys.Contains(x.Id))
+                        .ToListAsync(cancellationToken: stoppingToken);
 
-                var patients = await dbContext.Set<Patient>()
-                    .AsNoTracking()
-                    .Where(x => patientNotifications.Keys.Contains(x.Id))
-                    .ToListAsync(cancellationToken: stoppingToken);
+                    var patients = await dbContext.Set<Patient>()
+                        .AsNoTracking()
+                        .Where(x => patientNotifications.Keys.Contains(x.Id))
+                        .ToListAsync(cancellationToken: stoppingToken);
 
-                sw.Stop();
+                    sw.Stop();
 
-                var usersThatAlreadyReceivedNotifications = new HashSet<string>();
+                    var usersThatAlreadyReceivedNotifications = new HashSet<string>();
 
-                foreach (var psychologist in psychologists)
-                {
-                    usersThatAlreadyReceivedNotifications.Add(psychologist.UserId);
-                    var count = psychologistNotifications[psychologist.Id];
-                    await _hubContext.Clients
-                        .User(psychologist.UserId)
-                        .ReceiveNotification(count.ToString());
-                }
-
-                foreach (var patient in patients)
-                {
-                    if (!usersThatAlreadyReceivedNotifications.Contains(patient.UserId))
+                    foreach (var psychologist in psychologists)
                     {
-                        var count = patientNotifications[patient.Id];
+                        usersThatAlreadyReceivedNotifications.Add(psychologist.UserId);
+                        var count = psychologistNotifications[psychologist.Id];
                         await _hubContext.Clients
-                            .User(patient.UserId)
+                            .User(psychologist.UserId)
                             .ReceiveNotification(count.ToString());
                     }
+
+                    foreach (var patient in patients)
+                    {
+                        if (!usersThatAlreadyReceivedNotifications.Contains(patient.UserId))
+                        {
+                            var count = patientNotifications[patient.Id];
+                            await _hubContext.Clients
+                                .User(patient.UserId)
+                                .ReceiveNotification(count.ToString());
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Notifications error.");
                 }
 
                 //await _hubContext.Clients.All;

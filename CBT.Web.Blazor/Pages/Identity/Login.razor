@@ -16,8 +16,6 @@
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
 
-@inject ILogger<Login> _logger;
-
 @inject SignInManager<User> _signInManager;
 @inject IJSRuntime JSRuntime;
 
@@ -131,12 +129,10 @@
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(message);
 
-        var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+        var result = response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<LoginResult>() : null;
 
         if (result?.Succeeded ?? false)
         {
-            _logger.LogInformation("User logged in.");
-
             var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
             var authCookie = cookies.First().Value.First();
             authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
@@ -151,8 +147,6 @@
         }
         else if (result?.IsLockedOut ?? false)
         {
-            _logger.LogWarning("User account locked out.");
-
             throw new NotImplementedException();
             //NavigationManager.NavigateTo("./Lockout");
         }

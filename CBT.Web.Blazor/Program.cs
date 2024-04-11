@@ -11,6 +11,7 @@ using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
 using CBT.Web.Blazor;
 using CBT.Web.Blazor.Data;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
@@ -44,7 +45,10 @@ builder.Services.AddAuthentication();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR((options) =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
@@ -77,6 +81,14 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.CheckConsentNeeded = _ => false;
 });
 
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+builder.Host.UseSerilog(logger);
+
 //builder.Services.AddScoped<AuthenticationStateProvider, CBTAuthenticationStateProvider>();
 
 var app = builder.Build();
@@ -97,7 +109,7 @@ app.UseAuthentication();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-
+app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseAuthorization();
 

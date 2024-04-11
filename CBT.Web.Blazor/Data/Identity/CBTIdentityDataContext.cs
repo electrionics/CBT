@@ -28,11 +28,4 @@ public class CBTIdentityDataContext : IdentityDbContext<User, Role, string, User
 
         #endregion
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer("server=.;database=CBT;User Id=qqqq;Password=qqqq;TrustServerCertificate=True;");
-
-        base.OnConfiguring(optionsBuilder);
-    }
 }

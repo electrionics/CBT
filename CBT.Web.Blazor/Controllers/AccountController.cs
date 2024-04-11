@@ -9,10 +9,12 @@ namespace CBT.Web.Blazor.Controllers
     public class AccountController : Controller
     {
         private readonly SignInManager<User> _signInManager;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(SignInManager<User> signInManager)
+        public AccountController(SignInManager<User> signInManager, ILogger<AccountController> logger)
         {
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [HttpPost]

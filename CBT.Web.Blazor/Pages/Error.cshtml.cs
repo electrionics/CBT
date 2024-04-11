@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Diagnostics;
 
@@ -9,6 +10,7 @@ namespace CBT.Web.Blazor.Pages
     public class ErrorModel : PageModel
     {
         public string? RequestId { get; set; }
+        public Exception? LastException { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
@@ -22,6 +24,7 @@ namespace CBT.Web.Blazor.Pages
         public void OnGet()
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            LastException = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;
         }
     }
 }

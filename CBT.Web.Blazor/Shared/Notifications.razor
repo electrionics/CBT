@@ -27,35 +27,43 @@
     {
         if (!hubRan)
         {
-            var cookieValue = HttoContextAccessor?.HttpContext?.Request.Cookies.First();
-            //var authCookieHeaderValue = await JSRuntime.InvokeAsync<string>("readAuthCookie");
-            if (cookieValue != null)
+            try
             {
-                var cookie = new System.Net.Cookie { 
-                    Domain = GetDomain(NavigationManager.BaseUri), 
-                    Name = cookieValue.Value.Key, 
-                    Value = cookieValue.Value.Value, 
-                    Expires = DateTime.Now.AddDays(1) 
-                };
-
-                _hubConnection = new HubConnectionBuilder()
-                    .WithUrl(NavigationManager.ToAbsoluteUri("/notifications"), options =>
-                     {
-                         //options.UseDefaultCredentials = true;
-
-                         options.Cookies.Add(cookie);
-                     })
-                    .Build();
-
-                _hubConnection.On<string>("ReceiveNotification", message =>
+                var cookieValue = HttoContextAccessor?.HttpContext?.Request.Cookies.First();
+                //var authCookieHeaderValue = await JSRuntime.InvokeAsync<string>("readAuthCookie");
+                if (cookieValue != null)
                 {
-                    _messages.Add(message);
+                    var cookie = new System.Net.Cookie
+                        {
+                            Domain = GetDomain(NavigationManager.BaseUri),
+                            Name = cookieValue.Value.Key,
+                            Value = cookieValue.Value.Value,
+                            Expires = DateTime.Now.AddDays(1)
+                        };
 
-                    InvokeAsync(StateHasChanged);
-                });
+                    _hubConnection = new HubConnectionBuilder()
+                        .WithUrl(NavigationManager.ToAbsoluteUri("/notifications"), options =>
+                         {
+                             //options.UseDefaultCredentials = true;
 
-                hubRan = true;
-                await _hubConnection.StartAsync();
+                             options.Cookies.Add(cookie);
+                         })
+                        .Build();
+
+                    _hubConnection.On<string>("ReceiveNotification", message =>
+                    {
+                        _messages.Add(message);
+
+                        InvokeAsync(StateHasChanged);
+                    });
+
+                    hubRan = true;
+                    await _hubConnection.StartAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                _messages.Add(ex.ToString());
             }
         }
     }
@@ -74,9 +82,15 @@
                         .Replace(Uri.UriSchemeHttps, string.Empty)
                         .Replace(Uri.UriSchemeHttp, string.Empty)
                         .Replace("://", string.Empty);
-        var domain = domainWithPort
-           .Substring(0, domainWithPort.LastIndexOf(':'));
+        var domainEndIndex = domainWithPort.LastIndexOf(':');
+        if (domainEndIndex == -1)
+        {
+            domainEndIndex = domainWithPort.Length - 1;
+        }
 
-           return domain;
+        var domain = domainWithPort
+           .Substring(0, domainEndIndex);
+
+        return domain;
     }
 }
