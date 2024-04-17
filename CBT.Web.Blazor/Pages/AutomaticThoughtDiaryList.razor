@@ -159,6 +159,8 @@ else
     {
         var currentUserId = await GetCurrentUserId();
 
+        await InitShowButtons();
+
         items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
         cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
         emotions = await AutomaticThoughtsService.GetAllEmotions();
@@ -252,5 +254,9 @@ else
         return currentUserId;
     }
 
-    protected virtual bool ShowButtons => true;
+    protected virtual bool ShowButtons => _showButtons;
+
+    private bool _showButtons;
+
+    private async Task<bool> InitShowButtons() => _showButtons = await GetCurrentUserId() != null;
 }
