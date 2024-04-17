@@ -23,10 +23,11 @@
                     <Authorized>
                         <Notifications />
                         Здравствуйте, @context.User?.Identity?.Name 
-                        <a href="account/logout">Выйти</a>
+                        <a href="account/logout">Выход</a>
                     </Authorized>
                     <NotAuthorized>
-                        <a href="account/login">Войти</a>
+                        <a href="account/login">Вход</a>
+                        <a href="account/register">Регистрация</a>
                     </NotAuthorized>
                 </AuthorizeView>
             </CascadingAuthenticationState>

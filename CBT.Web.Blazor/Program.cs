@@ -12,6 +12,9 @@ using CBT.Web.Blazor.Background;
 using CBT.Web.Blazor;
 using CBT.Web.Blazor.Data;
 using Serilog;
+using FluentValidation;
+using CBT.Web.Blazor.Data.Model.Validators;
+using CBT.Web.Blazor.Data.Model.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
@@ -45,6 +48,18 @@ builder.Services.AddAuthentication();
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Default Password settings.
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 0;
+});
+
+
 builder.Services.AddSignalR((options) =>
 {
     options.EnableDetailedErrors = true;
@@ -63,6 +78,9 @@ builder.Services.AddScoped<AutomaticThoughtsService>();
 builder.Services.AddScoped<PsychologistReviewService>(); 
 builder.Services.AddScoped<SfDialogService>();
 builder.Services.AddScoped<UserManager<User>>();
+
+builder.Services.AddScoped<IValidator<LoginModel>, LoginModelValidator>();
+builder.Services.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
 
 builder.Services.AddHostedService<UserNotificationService>();
 

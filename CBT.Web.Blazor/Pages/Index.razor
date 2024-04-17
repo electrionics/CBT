@@ -5,5 +5,23 @@
 <h1>Когнитивно-поведенческая терапия</h1>
 
 <div class="alert alert-secondary mt-4">
-    Добро пожаловать на наш сайт о когнитивно-поведенческой терапии.
+    Добро пожаловать на наш сайт о когнитивно-поведенческой терапии. 
+    Здесь вы найдете популярные дневники, разработанные ведущими психологами и психотерапевтами.
+    Заполняйте дневники и отслеживайте своё состояние!
+</div>
+
+<div class="mt-4">
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <Authorized>
+                <Notifications />
+                Здравствуйте, @context.User?.Identity?.Name
+                <a href="account/logout">Выход</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="account/login">Вход</a><br/>
+                <a href="account/register">Регистрация</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </CascadingAuthenticationState>
 </div>
