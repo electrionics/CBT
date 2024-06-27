@@ -10,6 +10,9 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using CBT.Scaffolding.Areas.Identity.Data;
+using Microsoft.IdentityModel.Logging;
+
+IdentityModelEventSource.ShowPII = true;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CBTScaffoldingContextConnection") ?? throw new InvalidOperationException("Connection string 'CBTScaffoldingContextConnection' not found.");
