@@ -39,7 +39,20 @@ else
 {
     <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(ShowButtons? "" : "hidden")" />
     <br />
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    @code{
+        private string? activeBreakpoint;
+        private RowDirection rowDirection;
+    }
+    <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+    {
+        rowDirection = RowDirection.Vertical;
+    }
+    else
+    {
+        rowDirection = RowDirection.Horizontal;
+    }
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
         <GridColumns>
             <GridColumn Visible="ShowButtons" HeaderText="">
                 <Template>
@@ -48,7 +61,7 @@ else
                         if (!model.Sent)
                         {
                             <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
-                                Отправить
+                                Психологу
                             </button>
                         }
                         else

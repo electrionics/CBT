@@ -13,11 +13,6 @@
 <div class="mt-4">
     <CascadingAuthenticationState>
         <AuthorizeView>
-            <Authorized>
-                <Notifications />
-                Здравствуйте, @context.User?.Identity?.Name
-                <a href="account/logout">Выход</a>
-            </Authorized>
             <NotAuthorized>
                 <a href="account/login">Вход</a><br/>
                 <a href="account/register">Регистрация</a>

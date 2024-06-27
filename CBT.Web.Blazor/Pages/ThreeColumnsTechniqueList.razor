@@ -41,16 +41,32 @@ else
 {
     <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(ShowButtons? "" : "hidden")" />
     <br />
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    @code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
+    }
+    <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+    {
+        rowDirection = RowDirection.Vertical;
+    }
+    else
+    {
+        rowDirection = RowDirection.Horizontal;
+    }
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
         <GridColumns>
-            <GridColumn Visible="ShowButtons" HeaderText="">
+            <GridColumn 
+                Visible="ShowButtons" 
+                HeaderText="" 
+                Width="100">
                 <Template>
                     @{
                         var model = (ThreeColumnsTechniqueRecordModel)context;
                         if (!model.Sent)
                         {
                             <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
-                                Отправить
+                                Психологу
                             </button>
                         }
                         else
@@ -76,9 +92,11 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Thought)"
-                        HeaderText="Автоматическая мысль" />
+                        HeaderText="Автоматическая мысль"
+                        Width="100" />
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Errors)"
-                        HeaderText="Когнитивные искажения">
+                        HeaderText="Когнитивные искажения"
+                        Width="100">
                 <Template>
                     @{
                         var errors = ((ThreeColumnsTechniqueRecordModel)context).Errors;
@@ -91,9 +109,11 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.RationalAnswer)"
-                        HeaderText="Рациональный ответ" />
+                        HeaderText="Рациональный ответ"
+                        Width="100" />
             <GridColumn Visible="ShowButtons" Field="@nameof(ThreeColumnsTechniqueRecordModel.Id)"
-                        HeaderText="">
+                        HeaderText=""
+                        Width="100">
                 <Template>
                     @{
                         var id = ((ThreeColumnsTechniqueRecordModel)context).Id;

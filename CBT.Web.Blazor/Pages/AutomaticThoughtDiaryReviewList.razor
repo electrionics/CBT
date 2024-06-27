@@ -30,8 +30,20 @@ else
     <div class="alert alert-secondary mt-4">
         Всего @(items.Count) записей.
     </div>
-
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" DataSource="items" AllowTextWrap="true">
+    @code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
+    }
+    <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+    {
+        rowDirection = RowDirection.Vertical;
+    }
+    else
+    {
+        rowDirection = RowDirection.Horizontal;
+    }
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
         <GridColumns>
             <GridColumn HeaderText="">
                 <Template>
@@ -42,7 +54,7 @@ else
                             if (model.State == ReviewRecordState.Reviewed)
                             {
                                 <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Value.Id))">
-                                    Отправить
+                                    Клиенту
                                 </button>
                             }
                             else
