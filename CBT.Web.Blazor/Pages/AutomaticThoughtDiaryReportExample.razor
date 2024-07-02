@@ -1,5 +1,5 @@
-﻿@page "/diary/three-columns/example"
-@inherits ThreeColumnsTechniqueList
+﻿@page "/diary/automatic-thoughts/report/example"
+@inherits AutomaticThoughtDiaryReport
 @{
     base.BuildRenderTree(__builder);
 }
@@ -8,6 +8,6 @@
     {
         return Task.FromResult<string?>(null);
     }
-    
+
     protected override bool ReadOnly => true;
 }

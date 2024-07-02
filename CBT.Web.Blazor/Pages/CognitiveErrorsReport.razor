@@ -1,0 +1,48 @@
+﻿@using CBT.Web.Blazor.Data.Identity
+@using CBT.Web.Blazor.Data.Model
+@using CBT.Web.Blazor.Services
+@using Microsoft.AspNetCore.Identity
+@using Syncfusion.Blazor.Charts
+
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+@inject CognitiveErrorsService CognitiveErrorsService;
+
+<SfChart @ref="DataChart" Title="График когнтитиных искажений">
+    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+
+    <ChartSeriesCollection>
+        <ChartSeries 
+            DataSource="@items" 
+            XName="Name"
+            YName="UserCount"
+            Type="ChartSeriesType.StackingBar"
+            Name="По версии клиента"
+            Fill="orange"
+            StackingGroup="Client">
+        </ChartSeries>
+        <ChartSeries 
+            DataSource="@items"
+            XName="Name"
+            YName="ReviewCount"
+            Type="ChartSeriesType.StackingBar"
+            Name="По версии психологов"
+            Fill="green"
+            StackingGroup="Psychologist">
+        </ChartSeries>
+    </ChartSeriesCollection>
+</SfChart>
+
+@code {
+    SfChart DataChart;
+
+    private IEnumerable<CognitiveErrorReportItem> items;
+
+    [Parameter]
+    public string? UserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await CognitiveErrorsService.GetErrorsReport(UserId);
+    }
+}

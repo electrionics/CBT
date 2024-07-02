@@ -10,7 +10,9 @@
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.Grids;
 
-@inject AutomaticThoughtsService AutomaticThoughtsService
+@inject AutomaticThoughtsService AutomaticThoughtsService;
+@inject CognitiveErrorsService CognitiveErrorsService;
+@inject EmotionsService EmotionsService;
 @inject SfDialogService SfDialogService;
 @inject AuthenticationStateProvider GetAuthenticationStateAsync
 @inject UserManager<User> UserManager;
@@ -22,10 +24,19 @@
 <div class="alert alert-secondary mt-4">
     Заполняйте дневник автоматических мыслей каждый раз, когда у Вас портится настроение или возникает тревога.<br/>
     @{
-        if (ShowButtons)
+        if (!ReadOnly)
         {
             <NavLink class="nav-link" href="diary/automatic-thoughts/example">
                 <span class="oi oi-list-rich" aria-hidden="true"></span>  Примеры проработок "Дневника автоматических мыслей"
+            </NavLink>
+            <NavLink class="nav-link" href="diary/automatic-thoughts/report">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Мой отчет когнитивных ошибок и эмоций
+            </NavLink>
+        }
+        else
+        {
+            <NavLink class="nav-link" href="diary/automatic-thoughts/report/example">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Пример отчета когнитивных ошибок и эмоций
             </NavLink>
         }
     }
@@ -37,7 +48,7 @@
 }
 else
 {
-    <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(ShowButtons? "" : "hidden")" />
+    <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(!ReadOnly? "" : "hidden")" />
     <br />
     @code{
         private string? activeBreakpoint;
@@ -52,9 +63,9 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn Visible="ShowButtons" HeaderText="">
+            <GridColumn Visible="!ReadOnly" HeaderText="">
                 <Template>
                     @{
                         var model = (AutomaticThoughtDiaryRecordModel)context;
@@ -131,7 +142,7 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Visible="ShowButtons" Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
+            <GridColumn Visible="!ReadOnly" Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
                 HeaderText="">
                 <Template>
                     @{
@@ -175,8 +186,8 @@ else
         await InitShowButtons();
 
         items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
-        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
-        emotions = await AutomaticThoughtsService.GetAllEmotions();
+        cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
+        emotions = await EmotionsService.GetAllEmotions();
 
         reviewExists = new Dictionary<int, bool>();
     }
@@ -267,9 +278,9 @@ else
         return currentUserId;
     }
 
-    protected virtual bool ShowButtons => _showButtons;
+    protected virtual bool ReadOnly => _readOnly;
 
-    private bool _showButtons;
+    private bool _readOnly;
 
-    private async Task<bool> InitShowButtons() => _showButtons = await GetCurrentUserId() != null;
+    private async Task<bool> InitShowButtons() => _readOnly = await GetCurrentUserId() == null;
 }

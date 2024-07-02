@@ -29,6 +29,11 @@ builder.Services.AddDbContext<CBTDataContext>((options) =>
 {
     options.UseSqlServer(databaseConfig?.SingleConnectionString);
 });
+builder.Services.AddDbContext<CBTDataContextMARS>((options) =>
+{
+    options.UseSqlServer(databaseConfig?.SingleConnectionStringMARS);
+});
+
 
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
@@ -75,7 +80,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddScoped<AutomaticThoughtsService>();
-builder.Services.AddScoped<PsychologistReviewService>(); 
+builder.Services.AddScoped<PsychologistReviewService>();
+builder.Services.AddScoped<CognitiveErrorsService>();
+builder.Services.AddScoped<EmotionsService>(); 
 builder.Services.AddScoped<SfDialogService>();
 builder.Services.AddScoped<UserManager<User>>();
 
@@ -110,7 +117,8 @@ builder.Host.UseSerilog(logger);
 //builder.Services.AddScoped<AuthenticationStateProvider, CBTAuthenticationStateProvider>();
 
 var app = builder.Build();
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXxednRRRmVcVkJ2V0I=");
+// old Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXxednRRRmVcVkJ2V0I=
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

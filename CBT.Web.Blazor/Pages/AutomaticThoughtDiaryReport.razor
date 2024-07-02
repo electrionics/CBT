@@ -1,0 +1,43 @@
+﻿@page "/diary/automatic-thoughts/report"
+
+@using CBT.Web.Blazor.Data.Identity
+@using Microsoft.AspNetCore.Identity
+
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+
+<PageTitle>КПТ - Дневник автоматических мыслей - Персональный отчет</PageTitle>
+
+<h1>Дневник автоматических мыслей - Персональный отчет</h1>
+
+<CognitiveErrorsReport UserId="UserIdDisplayFor"></CognitiveErrorsReport>
+<EmotionsReport UserId="UserIdDisplayFor"></EmotionsReport>
+
+
+@code{
+    protected string? UserIdDisplayFor { get; set; }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        return currentUserId;
+    }
+
+    protected virtual bool ReadOnly => _readOnly;
+
+    private bool _readOnly;
+
+    private async Task<bool> InitReadOnly() => _readOnly = await GetCurrentUserId() == null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitReadOnly();
+        UserIdDisplayFor = ReadOnly 
+            ? null 
+            : await GetCurrentUserId();
+    }
+}

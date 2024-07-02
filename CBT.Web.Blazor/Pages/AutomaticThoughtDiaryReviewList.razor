@@ -13,6 +13,9 @@
 
 @inject PsychologistReviewService PsychologistReviewService
 @inject AutomaticThoughtsService AutomaticThoughtsService
+@inject CognitiveErrorsService CognitiveErrorsService;
+@inject EmotionsService EmotionsService;
+
 @inject SfDialogService SfDialogService;
 @inject AuthenticationStateProvider GetAuthenticationStateAsync
 @inject UserManager<User> UserManager;
@@ -43,9 +46,9 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText="">
+            <GridColumn HeaderText="Клиент">
                 <Template>
                     @{
                         var model = (ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context;
@@ -71,6 +74,7 @@ else
                                 <i class="oi oi-circle-check" style="color: green;" /> Проверено!
                             </text>
                         }
+                        <br/><span>@model.PatientDisplayName</span>
                     }
                 </Template>
             </GridColumn>
@@ -167,8 +171,8 @@ else
         var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);
-        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
-        emotions = await AutomaticThoughtsService.GetAllEmotions();
+        cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
+        emotions = await EmotionsService.GetAllEmotions();
     }
 
     public void EditBtnClick(int id)

@@ -13,6 +13,7 @@
 
 @inject PsychologistReviewService PsychologistReviewService
 @inject AutomaticThoughtsService AutomaticThoughtsService
+@inject CognitiveErrorsService CognitiveErrorsService;
 @inject SfDialogService SfDialogService;
 @inject AuthenticationStateProvider GetAuthenticationStateAsync
 @inject UserManager<User> UserManager;
@@ -20,7 +21,7 @@
 <PageTitle>КПТ - Техника трёх колонок</PageTitle>
 
 <h1>Кабинет психолога - Техника трёх колонок</h1>
- 
+
 @if (cognitiveErrors == null)
 {
     <p><em>Загрузка...</em></p>
@@ -43,9 +44,9 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items">
+    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
         <GridColumns>
-            <GridColumn HeaderText="">
+            <GridColumn HeaderText="Клиент">
                 <Template>
                     @{
                         var model = (ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context;
@@ -70,6 +71,7 @@ else
                                 <i class="oi oi-circle-check" style="color: green;" /> Проверено!
                             </text>
                         }
+                        <br/><span>@model.PatientDisplayName</span>
                     }
                 </Template>
             </GridColumn>
@@ -137,7 +139,7 @@ else
         var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
-        cognitiveErrors = AutomaticThoughtsService.GetAllCognitiveErrors();
+        cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
     }
 
     public void EditBtnClick(int id)

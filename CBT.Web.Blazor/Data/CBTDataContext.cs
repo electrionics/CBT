@@ -22,6 +22,11 @@ namespace CBT.Web.Blazor.Data
             _connectionString = connectionString;
         }
 
+        protected CBTDataContext(DbContextOptions options) : base(options) 
+        {
+
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!string.IsNullOrEmpty(_connectionString))
