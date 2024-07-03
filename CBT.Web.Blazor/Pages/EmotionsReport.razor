@@ -15,7 +15,8 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="BeforePercent"
-                     Type="ChartSeriesType.StackingBar"
+                     Type="ChartSeriesType.Column"
+                     EnableTooltip="true"
                      Name="До проработки"
                      Fill="orange"
                      StackingGroup="Before">
@@ -23,12 +24,14 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="AfterPercent"
-                     Type="ChartSeriesType.StackingBar"
+                     Type="ChartSeriesType.Column"
+                     EnableTooltip="true"
                      Name="После проработки"
                      Fill="green"
                      StackingGroup="After">
         </ChartSeries>
     </ChartSeriesCollection>
+    <ChartTooltipSettings Header="<b>${point.tooltip}</b>" Enable="true" Shared="true"></ChartTooltipSettings>
 </SfChart>
 
 <SfChart @ref="DataChart2" Title="График испытанных эмоций">
@@ -38,11 +41,12 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="Count"
-                     Type="ChartSeriesType.StackingBar"
+                     Type="ChartSeriesType.Column"
                      Name="До проработки"
                      Fill="green">
         </ChartSeries>
     </ChartSeriesCollection>
+    <ChartTooltipSettings Header="<b>${point.tooltip}</b>" Enable="true" Shared="true"></ChartTooltipSettings>
 </SfChart>
 
 @code {
