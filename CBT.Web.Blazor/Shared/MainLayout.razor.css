@@ -2,6 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    background-color: lightyellow;
 }
 
 main {
@@ -9,11 +10,11 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(180deg, rgb(125 191 11) 0%, #57b4b8 70%);
 }
 
 .top-row {
-    background-color: #f7f7f7;
+    background-image: linear-gradient(90deg, rgb(125 191 11) 0%, #57b4b8 70%);
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 3.5rem;
@@ -30,6 +31,10 @@ main {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+.content {
+    
+}
 
 @media (max-width: 640.98px) {
     .top-row:not(.auth) {
