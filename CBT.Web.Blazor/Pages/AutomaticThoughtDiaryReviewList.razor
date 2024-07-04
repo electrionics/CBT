@@ -47,9 +47,23 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" 
+            EnableAdaptiveUI="true" 
+            AdaptiveUIMode="AdaptiveMode.Both" 
+            RowRenderingMode="@rowDirection" 
+            Height="100%" 
+            Width="100%" 
+            DataSource="items" 
+            AllowTextWrap="true"
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
-            <GridColumn HeaderText="Клиент">
+            <GridColumn HeaderText="Клиент"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var model = (ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context;
@@ -80,9 +94,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.Situation)"
-                        HeaderText="Ситуация"/>
+                        HeaderText="Ситуация"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.BeginningEmotionValues)"
-                HeaderText="Эмоции">
+                        HeaderText="Эмоции"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.BeginningEmotionValues;
@@ -95,9 +113,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.Thought"
-                        HeaderText="Автоматическая мысль" />
+                        HeaderText="Автоматическая мысль"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="Value.Errors"
-                        HeaderText="Когнитивные искажения">
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.Errors;
@@ -110,9 +132,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.RationalAnswer"
-                        HeaderText="Рациональный ответ" />
+                        HeaderText="Рациональный ответ"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.ResultingEmotionValues)"
-                        HeaderText="Результат">
+                        HeaderText="Результат"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.ResultingEmotionValues;
@@ -125,7 +151,9 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.ReviewedErrors)"
-                        HeaderText="Когнитивные искажения">
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).ReviewedErrors;
@@ -138,9 +166,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.RationalAnswerComment)"
-                        HeaderText="Комментарий к рациональному ответу" />
+                        HeaderText="Комментарий к рациональному ответу"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Value.Id)"
-                        HeaderText="">
+                        HeaderText=""
+                        AllowFiltering="true"
+                        AllowSorting="true">
                 <Template>
                     @{
                         var id = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.Id;

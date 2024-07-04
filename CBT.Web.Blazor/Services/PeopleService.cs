@@ -8,7 +8,7 @@ namespace CBT.Web.Blazor.Services
     {
         private readonly CBTDataContext dataContext;
 
-        public PeopleService(CBTDataContext dataContext) 
+        public PeopleService(CBTDataContextMARS dataContext) 
         {
             this.dataContext = dataContext;
         }

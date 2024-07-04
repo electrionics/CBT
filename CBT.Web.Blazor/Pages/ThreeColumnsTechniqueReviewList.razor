@@ -45,9 +45,24 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" 
+            EnableAdaptiveUI="true" 
+            AdaptiveUIMode="AdaptiveMode.Both" 
+            RowRenderingMode="@rowDirection" 
+            Height="100%" 
+            Width="100%" 
+            DataSource="items" 
+            AllowTextWrap="true"
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
-            <GridColumn HeaderText="Клиент">
+            <GridColumn 
+                HeaderText="Клиент"
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var model = (ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context;
@@ -77,9 +92,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.Thought"
-                        HeaderText="Автоматическая мысль" />
+                        HeaderText="Автоматическая мысль"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="Value.Errors"
-                        HeaderText="Когнитивные искажения">
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Errors;
@@ -92,9 +111,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="Value.RationalAnswer"
-                        HeaderText="Рациональный ответ"/>
+                        HeaderText="Рациональный ответ"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ReviewedErrors)"
-                        HeaderText="Когнитивные искажения">
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).ReviewedErrors;
@@ -107,9 +130,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.RationalAnswerComment)"
-                        HeaderText="Комментарий к рациональному ответу"/>
+                        HeaderText="Комментарий к рациональному ответу"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Value.Id)"
-                        HeaderText="">
+                        HeaderText=""
+                        AllowFiltering="true"
+                        AllowSorting="true">
                 <Template>
                     @{
                         var id = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Id;

@@ -67,12 +67,26 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" 
+            EnableAdaptiveUI="true" 
+            AdaptiveUIMode="AdaptiveMode.Both" 
+            RowRenderingMode="@rowDirection" 
+            Height="100%" 
+            Width="100%" 
+            DataSource="items" 
+            AllowTextWrap="true"
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
             <GridColumn 
                 Visible="!ReadOnly"
                 HeaderText="" 
-                Width="100">
+                Width="100"
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var model = (ThreeColumnsTechniqueRecordModel)context;
@@ -106,10 +120,14 @@ else
             </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Thought)"
                         HeaderText="Автоматическая мысль"
-                        Width="100" />
+                        Width="100"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.Errors)"
                         HeaderText="Когнитивные искажения"
-                        Width="100">
+                        Width="100"
+                        AllowFiltering="false"
+                        AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((ThreeColumnsTechniqueRecordModel)context).Errors;
@@ -123,10 +141,14 @@ else
             </GridColumn>
             <GridColumn Field="@nameof(ThreeColumnsTechniqueRecordModel.RationalAnswer)"
                         HeaderText="Рациональный ответ"
-                        Width="100" />
+                        Width="100"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
             <GridColumn Visible="!ReadOnly" Field="@nameof(ThreeColumnsTechniqueRecordModel.Id)"
                         HeaderText=""
-                        Width="100">
+                        Width="100"
+                        AllowFiltering="true"
+                        AllowSorting="true">
                 <Template>
                     @{
                         var id = ((ThreeColumnsTechniqueRecordModel)context).Id;

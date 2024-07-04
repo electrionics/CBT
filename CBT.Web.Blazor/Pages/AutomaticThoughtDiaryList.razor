@@ -71,9 +71,25 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" EnableAdaptiveUI="true" AdaptiveUIMode="AdaptiveMode.Both" RowRenderingMode="@rowDirection" Height="100%" Width="100%" DataSource="items" AllowTextWrap="true">
+    <SfGrid @ref="DataGrid" 
+            EnableAdaptiveUI="true" 
+            AdaptiveUIMode="AdaptiveMode.Both" 
+            RowRenderingMode="@rowDirection" 
+            Height="100%" 
+            Width="100%" 
+            DataSource="items" 
+            AllowTextWrap="true" 
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
-            <GridColumn Visible="!ReadOnly" HeaderText="">
+            <GridColumn 
+                Visible="!ReadOnly" 
+                HeaderText=""
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var model = (AutomaticThoughtDiaryRecordModel)context;
@@ -105,10 +121,16 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Situation)"
-                HeaderText="Ситуация" />
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.BeginningEmotionValues)"
-                HeaderText="Эмоции">
+            <GridColumn 
+                Field="@nameof(AutomaticThoughtDiaryRecordModel.Situation)"
+                HeaderText="Ситуация"
+                AllowFiltering="true"
+                AllowSorting="false" />
+            <GridColumn 
+                Field="@nameof(AutomaticThoughtDiaryRecordModel.BeginningEmotionValues)"
+                HeaderText="Эмоции"
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).BeginningEmotionValues;
@@ -121,9 +143,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Thought)"
-                HeaderText="Автоматическая мысль"/>
+                HeaderText="Автоматическая мысль"
+                AllowFiltering="true"
+                AllowSorting="false"/>
             <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Errors)"
-                HeaderText="Когнитивные искажения">
+                HeaderText="Когнитивные искажения"
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var errors = ((AutomaticThoughtDiaryRecordModel)context).Errors;
@@ -136,9 +162,13 @@ else
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.RationalAnswer)"
-                HeaderText="Рациональный ответ"/>
+                HeaderText="Рациональный ответ"
+                AllowFiltering="true"
+                AllowSorting="false"/>
             <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.ResultingEmotionValues)"
-                HeaderText="Результат">
+                HeaderText="Результат"
+                AllowFiltering="false"
+                AllowSorting="false">
                 <Template>
                     @{
                         var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).ResultingEmotionValues;
@@ -150,8 +180,12 @@ else
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Visible="!ReadOnly" Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
-                HeaderText="">
+            <GridColumn 
+                Visible="!ReadOnly" 
+                Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
+                HeaderText=""
+                AllowFiltering="true"
+                AllowSorting="true">
                 <Template>
                     @{
                         var id = ((AutomaticThoughtDiaryRecordModel)context).Id;
