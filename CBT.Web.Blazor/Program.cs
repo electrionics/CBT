@@ -82,14 +82,16 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddScoped<AutomaticThoughtsService>();
 builder.Services.AddScoped<PsychologistReviewService>();
 builder.Services.AddScoped<CognitiveErrorsService>();
-builder.Services.AddScoped<EmotionsService>(); 
+builder.Services.AddScoped<EmotionsService>();
+builder.Services.AddScoped<PeopleService>(); 
+builder.Services.AddScoped<NotificationsService>(); 
 builder.Services.AddScoped<SfDialogService>();
 builder.Services.AddScoped<UserManager<User>>();
 
 builder.Services.AddScoped<IValidator<LoginModel>, LoginModelValidator>();
 builder.Services.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
 
-builder.Services.AddHostedService<UserNotificationService>();
+builder.Services.AddHostedService<UserNotificationBackgroundService>();
 
 //builder.Services.AddScoped<JwtProvider>();
 //builder.Services.ConfigureOptions<JwtOptionsSetup>();

@@ -1,22 +1,21 @@
 ﻿using System.Diagnostics;
 
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 
 using CBT.Web.Blazor.Data;
-using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Hubs;
+using CBT.Web.Blazor.Services;
 
 namespace CBT.Web.Blazor.Background
 {
-    public class UserNotificationService : BackgroundService
+    public class UserNotificationBackgroundService : BackgroundService
     {
-        private static readonly TimeSpan Period = TimeSpan.FromSeconds(3);
-        private readonly ILogger<UserNotificationService> _logger;
+        private static readonly TimeSpan Period = TimeSpan.FromSeconds(30);
+        private readonly ILogger<UserNotificationBackgroundService> _logger;
         private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
         private readonly DatabaseConfig databaseConfig;
 
-        public UserNotificationService(ILogger<UserNotificationService> logger, IHubContext<NotificationHub, INotificationClient> hubContext, DatabaseConfig databaseConfig)
+        public UserNotificationBackgroundService(ILogger<UserNotificationBackgroundService> logger, IHubContext<NotificationHub, INotificationClient> hubContext, DatabaseConfig databaseConfig)
         {
             _logger = logger;
             _hubContext = hubContext;
@@ -35,37 +34,22 @@ namespace CBT.Web.Blazor.Background
                     var time = DateTime.Now;
 
 #pragma warning disable CA2254 // Template should be a static expression
-                    _logger.LogInformation($"Executing {nameof(UserNotificationService)} {time}");
+                    _logger.LogInformation($"Executing {nameof(UserNotificationBackgroundService)} {time}");
 #pragma warning restore CA2254 // Template should be a static expression
 
                     using var dbContext = new CBTDataContext(databaseConfig.SingleConnectionString);
+                    var notificationService = new NotificationsService(dbContext);
 
                     var sw = Stopwatch.StartNew();
 
-                    var psychologistNotifications = await dbContext.Set<AutomaticThought>()
-                        .AsNoTracking()
-                        .Where(x => x.Sent && !x.PsychologistReviews.Any(y => y.SentBack))
-                        .SelectMany(x => x.Patient.Psychologists)
-                        .GroupBy(x => x.PsychologistId)
-                        .Select(x => new { PsychologistId = x.Key, Notifications = x.Count() })
-                        .ToDictionaryAsync(x => x.PsychologistId, x => x.Notifications, cancellationToken: stoppingToken);
+                    var psychologistNotifications = await notificationService.GetPsychologistNotifications(null, stoppingToken);
+                    var patientNotifications = await notificationService.GetPatientNotifications(null, stoppingToken);
 
-                    var patientNotifications = await dbContext.Set<AutomaticThought>()
-                        .AsNoTracking()
-                        .Where(x => x.PsychologistReviews.Any(y => y.SentBack))
-                        .GroupBy(x => x.PatientId)
-                        .Select(x => new { PatientId = x.Key, Notifications = x.Count() })
-                        .ToDictionaryAsync(x => x.PatientId, x => x.Notifications, cancellationToken: stoppingToken);
+                    var psychologistIds = psychologistNotifications.Keys.ToHashSet();
+                    var psychologists = await notificationService.GetPsychologistsToNotify(psychologistIds, stoppingToken);
 
-                    var psychologists = await dbContext.Set<Psychologist>()
-                        .AsNoTracking()
-                        .Where(x => psychologistNotifications.Keys.Contains(x.Id))
-                        .ToListAsync(cancellationToken: stoppingToken);
-
-                    var patients = await dbContext.Set<Patient>()
-                        .AsNoTracking()
-                        .Where(x => patientNotifications.Keys.Contains(x.Id))
-                        .ToListAsync(cancellationToken: stoppingToken);
+                    var patientIds = psychologistNotifications.Keys.ToHashSet();
+                    var patients = await notificationService.GetPatientsToNotify(patientIds, stoppingToken);
 
                     sw.Stop();
 

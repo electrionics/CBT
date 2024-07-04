@@ -1,10 +1,16 @@
-﻿@using Microsoft.AspNetCore.SignalR.Client;
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.SignalR.Client;
 @using Microsoft.Net.Http.Headers;
 
+@using CBT.Web.Blazor.Data.Identity
+@using CBT.Web.Blazor.Services
 @using CBT.Web.Blazor.Services.Authentication;
 
 @implements IAsyncDisposable
 
+@inject NotificationsService NotificationsService;
+@inject PeopleService PeopleService;
+@inject UserManager<User> UserManager;
 @inject NavigationManager NavigationManager;
 @inject IJSRuntime JSRuntime;
 @inject IHttpContextAccessor HttpContextAccessor;
@@ -31,6 +37,48 @@
     private bool hubRan = false;
 
     protected override async Task OnInitializedAsync()
+    {
+        await SingleTimeDirectNotificationSet();
+
+        return;
+
+        //await SignalRConnectionNotificationSet();
+    }
+
+    private async Task SingleTimeDirectNotificationSet()
+    {
+        var principal = HttpContextAccessor.HttpContext?.User;
+        if (principal != null)
+        {
+            var userId = UserManager.GetUserId(principal);
+            var psychologist =
+                await PeopleService.GetPsychoilogist(userId!);
+            var notifications =
+                await NotificationsService.GetPsychologistNotifications(new[] { psychologist.Id });
+
+            if (notifications.TryGetValue(psychologist.Id, out var count))
+            {
+                _messages.Add(count.ToString());
+            }
+            else
+            {
+                var patient =
+                    await PeopleService.GetPatient(userId!);
+                notifications =
+                    await NotificationsService.GetPatientNotifications(new[] { patient.Id });
+                if (notifications.TryGetValue(patient.Id, out count))
+                {
+                    _messages.Add(count.ToString());
+                }
+                else
+                {
+                    _messages.Add("0");
+                }
+            }
+        }
+    }
+
+    private async Task SignalRConnectionNotificationSet()
     {
         if (!hubRan)
         {
