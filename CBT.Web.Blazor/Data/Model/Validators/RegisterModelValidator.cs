@@ -8,8 +8,8 @@ namespace CBT.Web.Blazor.Data.Model.Validators
     {
         public RegisterModelValidator() 
         {
-            RuleFor(m => m.RoleType)
-                .IsInEnum()
+            RuleFor(m => m.RoleTypes)
+                .NotEmpty()
                     .WithMessage("Выберите тип пользователя.");
 
             RuleFor(m => m.Name)

@@ -84,29 +84,25 @@ namespace CBT.Web.Blazor.Controllers
             {
                 try
                 {
-                    switch (model.RoleType)
+                    if (model.RoleTypes.Contains(RoleType.Client))
                     {
-                        case RoleType.Client:
-                            await _userManager.AddToRoleAsync(user, "Client");
-                            _dataContext.Set<Patient>().Add(new Patient
-                            {
-                                DisplayName = model.Name,
-                                UserId = user.Id
-                            });
-                            await _dataContext.SaveChangesAsync();
-                            break;
-                        case RoleType.Psychologist:
-                            await _userManager.AddToRoleAsync(user, "Psychologist");
-                            _dataContext.Set<Psychologist>().Add(new Psychologist
-                            {
-                                DisplayName = model.Name,
-                                UserId = user.Id,
-                            });
-                            await _dataContext.SaveChangesAsync();
-                            break;
-                        default:
-                            throw new InvalidOperationException("Тип пользователя не реализован.");
+                        await _userManager.AddToRoleAsync(user, "Client");
+                        _dataContext.Set<Patient>().Add(new Patient
+                        {
+                            DisplayName = model.Name,
+                            UserId = user.Id
+                        });
                     }
+                    if (model.RoleTypes.Contains(RoleType.Psychologist))
+                    {
+                        await _userManager.AddToRoleAsync(user, "Psychologist");
+                        _dataContext.Set<Psychologist>().Add(new Psychologist
+                        {
+                            DisplayName = model.Name,
+                            UserId = user.Id,
+                        });
+                    }
+                    await _dataContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {

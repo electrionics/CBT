@@ -1,7 +1,7 @@
 ﻿@page "/account/register"
 
-@using System.Text.Json;
 @using System.Text;
+@using System.Text.Json;
 @using System.Security.Claims;
 
 @using Microsoft.AspNetCore.Authentication;
@@ -9,9 +9,11 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Http;
 @using Microsoft.AspNetCore.Identity;
 
+@using Syncfusion.Blazor.Inputs
+
 @using CBT.Web.Blazor.Common
 @using CBT.Web.Blazor.Data.Identity;
-@using CBT.Web.Blazor.Data.Model.Enums
+@using CBT.Web.Blazor.Data.Model.Enums;
 @using CBT.Web.Blazor.Data.Model.Identity;
 @using CBT.Web.Blazor.Data.Model.Validators
 @using CBT.Web.Blazor.Services.Authentication;
@@ -39,45 +41,85 @@
                     </div>
                 }
                 <div class="form-floating mb-3">
+                    <div class="form-label">Я хочу</div>
                     <div>
-                        <label class="form-label">Тип пользователя</label>
+                        <InputCheckbox id="client" @bind-Value="Model.IsClient" />
+                        Получать помощь <span class="oi oi-info" id="infoClient"></span>
                     </div>
-                    <InputRadioGroup @bind-Value="Model.RoleType" TValue="RoleType" id="role" class="form-control" aria-required="true">
-                        <ChildContent>
-                            <div>
-                                <label>
-                                    <InputRadio id="client" Value="@RoleType.Client" />
-                                    Клиент
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <InputRadio id="psy" Value="@RoleType.Psychologist" />
-                                    Психолог
-                                </label>
-                            </div>
-                        </ChildContent>
-                    </InputRadioGroup>
-                    <ValidationMessage For="@(() => Model.RoleType)" />
+                    <SfTooltip Position="Position.TopCenter" 
+                               Target="#infoClient" 
+                               Content="Вам будет доступно ведение личных дневников и своего отслеживание прогресса.">
+                    </SfTooltip>
+                    <div>
+                        <InputCheckbox id="psy" @bind-Value="Model.IsPsychologist" />
+                        Оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
+                    </div>
+                    <SfTooltip Position="Position.TopCenter" 
+                               Target="#infoPsychologist" 
+                               Content="Вам будет доступна проверка дневников ваших подопечных.">
+                    </SfTooltip>
+                    <ValidationMessage For="@(() => Model.RoleTypes)" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Model.Name" id="name" class="form-control" aria-required="true" placeholder="Имя Пользователя" />
-                    <label for="name" class="form-label">Имя Пользователя</label>
+                    <div for="name" class="form-label">Моё имя <span class="oi oi-info" id="infoName"></span></div>
+                    <SfTextBox @bind-Value="Model.Name"
+                               Placeholder="Моё имя"
+                               ID="name" />
+                    <SfTooltip Position="Position.TopCenter" 
+                               Target="#infoName" 
+                               Content="Используется для отображения на сайте.">
+                    </SfTooltip>
                     <ValidationMessage For="@(() => Model.Name)" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Model.Email" id="email" class="form-control" autocomplete="username" aria-required="true" placeholder="Электронная почта" />
-                    <label for="email" class="form-label">Электронная почта</label>
+                    <div for="email" class="form-label">Моя электронная почта <span class="oi oi-shield" id="infoEmail"></span></div>
+                    <SfTextBox Type="InputType.Email" 
+                               Autocomplete="AutoComplete.On"
+                               FloatLabelType="FloatLabelType.Never"
+                               Placeholder="Электронная почта"
+                               ID="email"
+                               @bind-Value="Model.Email" />
+                    <SfTooltip Position="Position.TopCenter" 
+                               Target="#infoEmail" 
+                               Content="Не показываем никому, кроме Вас.">
+                    </SfTooltip>
                     <ValidationMessage For="@(() => Model.Email)" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Model.Password" id="password" class="form-control" aria-required="true" placeholder="Пароль" />
-                    <label for="password" class="form-label">Пароль</label>
+                    <div for="password" class="form-label">Пароль (от 8 символов) <span class="oi oi-shield" id="shieldPassword"></span></div>
+                    <SfTextBox Type="InputType.Password" 
+                               Autocomplete="AutoComplete.On"
+                               FloatLabelType="FloatLabelType.Never"
+                               OnInput="async () => await PasswordChanged()"
+                               Placeholder="Пароль"
+                               ID="password"
+                               @bind-Value="Model.Password"  />
+                    <SfTooltip Position="Position.TopCenter"
+                               Target="#shieldPassword"
+                               Content="Должен содержать не менее 8 символов в длину. Мы не храним пароль в открытом виде.">
+                    </SfTooltip>
+                    @if ((Model.Password ?? string.Empty).Length < 8)
+                    {
+                        <div class="oi oi-x" style="color: red;"> Слабый</div>
+                    }
+                    else if ((Model.Password ?? string.Empty).Length < 12)
+                    {
+                        <div class="oi oi-circle-check" style="color: orange;"> Надежный</div>
+                    }
+                    else
+                    {
+                        <div class="oi oi-circle-check" style="color: green;"> Очень надежный</div>
+                    }
                     <ValidationMessage For="@(() => Model.Password)" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Model.ConfirmPassword" id="confirm-password" class="form-control" aria-required="true" placeholder="Подтвердите пароль" />
-                    <label for="confirm-password" class="form-label">Подтвердите пароль</label>
+                    <div for="confirm-password" class="form-label">Подтвердите пароль</div>
+                    <SfTextBox Type="InputType.Password"
+                               Autocomplete="AutoComplete.Off"
+                               FloatLabelType="FloatLabelType.Never"
+                               @bind-Value="Model.ConfirmPassword" 
+                               id="confirm-password"
+                               placeholder="Подтвердите пароль" />
                     <ValidationMessage For="@(() => Model.ConfirmPassword)" />
                 </div>
                 <div>
@@ -112,7 +154,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Model = new();
+        Model = new() { IsClient = true, IsPsychologist = true };
 
         editContext = new EditContext(Model);
         messageStore = new(editContext);
@@ -145,5 +187,10 @@
             // editContext.NotifyValidationStateChanged();
             LastServerErrorMessage = result.Value?.ErrorMessage ?? "Ошибка на сервере.";
         }
+    }
+
+    public async Task PasswordChanged()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 }
