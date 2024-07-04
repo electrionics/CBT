@@ -70,13 +70,17 @@ namespace CBT.Web.Blazor.Services
 
             var userErrors = await dataContext.Set<ThoughtCognitiveError>()
                 .AsNoTracking()
-                .Where(x => x.Thought.Patient.UserId == (userId ?? DemoUserId) && !x.IsReview)
+                .Where(x => 
+                    x.Thought.Patient.UserId == (userId ?? DemoUserId) &&
+                    x.PsychologistId == null)
                 .GroupBy(x => x.CognitiveErrorId)
                 .ToDictionaryAsync(x => x.Key, x => x.Count());
 
             var reviewUserErrors = (await dataContext.Set<ThoughtCognitiveError>()
                 .AsNoTracking()
-                .Where(x => x.Thought.Patient.UserId == (userId ?? DemoUserId) && x.IsReview)
+                .Where(x => 
+                    x.Thought.Patient.UserId == (userId ?? DemoUserId) && 
+                    x.PsychologistId != null) // is review
                 .ToListAsync())
                     .GroupBy(x => new { x.ThoughtId, x.CognitiveErrorId })
                     .Select(x => x.First())
