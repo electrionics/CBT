@@ -4,6 +4,7 @@ using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Data;
 using CBT.Web.Blazor.Data.Model;
 using CBT.Web.Blazor.Data.Model.Enums;
+using CBT.Web.Blazor.Data.Entities.Enums;
 
 namespace CBT.Web.Blazor.Services
 {
@@ -25,24 +26,34 @@ namespace CBT.Web.Blazor.Services
 
         public async Task<List<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>>> GetAllThreeeColumnsRecordReviews(string? userId, ReviewRecordState? filterState)
         {
+            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+                .FirstAsync(x => x.UserId == userId);
+
             var records = await BuildQuery(dataContext, userId, filterState)
-                    .Where(x => !x.Emotions.Any())
+                    .Where(x => x.Type == DiaryType.ThreeColumnsTechnique)
                     .ToListAsync();
 
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-            return records.Select(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Convert).ToList();
+            return records
+                .Select(record => ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Convert(record, psychologist.Id))
+                .ToList();
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
         public async Task<List<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>>> GetAllAutomaticDiaryRecordReviews(string? userId, ReviewRecordState? filterState)
         {
+            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+                .FirstAsync(x => x.UserId == userId);
+
             var records = await BuildQuery(dataContext, userId, filterState)
                     .Include(x => x.Emotions)
-                    .Where(x => x.Emotions.Any())
+                    .Where(x => x.Type == DiaryType.AutomaticThoughtDiary)
                     .ToListAsync();
 
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-            return records.Select(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Convert).ToList();
+            return records
+                .Select(record => ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Convert(record, psychologist.Id))
+                .ToList();
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
@@ -53,7 +64,7 @@ namespace CBT.Web.Blazor.Services
                                     .Include(x => x.PsychologistReviews)
                                     .Include(x => x.Patient)
                                     .AsNoTracking()
-                                    .Where(x => x.Patient.Psychologist.UserId == (userId ?? DemoUserId) 
+                                    .Where(x => x.Patient.Psychologists.Any(y => y.Psychologist.UserId == (userId ?? DemoUserId))
                                                 && x.Sent);
 
             if (filterState == ReviewRecordState.Pending)
@@ -73,20 +84,33 @@ namespace CBT.Web.Blazor.Services
 
         #region GetRecordReview
 
-        public async Task<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>?> GetThreeColumnRecordReview(int recordId)
+        public async Task<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>?> GetThreeColumnRecordReview(int recordId, string? userId)
         {
-            var record = await dataContext.Set<AutomaticThought>()
-                    .FirstAsync(x => x.Id == recordId);
+            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+                .FirstAsync(x => x.UserId == userId);
 
-            return ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Convert(record);
+            var record = await dataContext.Set<AutomaticThought>()
+                .Include(x => x.PsychologistReviews)
+                .Include(x => x.CognitiveErrors)
+                .Include(x => x.Patient)
+                .FirstAsync(x => x.Id == recordId);
+
+            return ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Convert(record, psychologist.Id);
         }
 
-        public async Task<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>?> GetAutomaticDiaryRecordReview(int recordId)
+        public async Task<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>?> GetAutomaticDiaryRecordReview(int recordId, string? userId)
         {
-            var record = await dataContext.Set<AutomaticThought>()
-                    .FirstAsync(x => x.Id == recordId);
+            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+                .FirstAsync(x => x.UserId == userId);
 
-            return ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Convert(record);
+            var record = await dataContext.Set<AutomaticThought>()
+                .Include(x => x.PsychologistReviews)
+                .Include(x => x.CognitiveErrors)
+                .Include(x => x.Patient)
+                .Include(x => x.Emotions)
+                .FirstAsync(x => x.Id == recordId);
+
+            return ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Convert(record, psychologist.Id);
         }
 
         #endregion
@@ -96,7 +120,9 @@ namespace CBT.Web.Blazor.Services
 
         public async Task SaveThreeColumnRecordReview(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel> model, string? userId)
         {
-            var data = await FetchData(dataContext, model.Value.Id, userId);
+            var data = await FetchData(dataContext, model.Value.Id, userId); 
+            
+            model.State = ReviewRecordState.Reviewed;
 
             ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ConvertBack(model, data.psychologistId, data.record);
 
@@ -134,10 +160,10 @@ namespace CBT.Web.Blazor.Services
 
         #region SendRecordReviewToPatient
 
-        public async Task SendRecordToPatient(int id)
+        public async Task SendRecordToPatient(int thoughtId)
         {
-            var data = await dataContext.Set<AutomaticThought>()
-                    .FirstAsync(x => x.Id == id);
+            var data = await dataContext.Set<ThoughtPsychologistReview>()
+                    .FirstAsync(x => x.ThoughtId == thoughtId);
 
             data.SentBack = true;
 

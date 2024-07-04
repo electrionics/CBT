@@ -145,7 +145,7 @@ else
                     @{
                         var id = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.Id;
 
-                        <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
+                        <button class="btn btn-success" @onclick="@(async () => await EditBtnClick(id))">
                             <i class="oi oi-pencil" /> Изменить
                         </button>
                     }
@@ -176,9 +176,10 @@ else
         emotions = await EmotionsService.GetAllEmotions();
     }
 
-    public void EditBtnClick(int id)
+    public async Task EditBtnClick(int recordId)
     {
-        var model = items.First(x => x.Value.Id == id); // await PsychologistReviewService.GetThreeColumnRecordReview(id);
+        var currentUserId = await GetCurrentUserId();
+        var model = await PsychologistReviewService.GetAutomaticDiaryRecordReview(recordId, currentUserId);
 
         if (model != null)
         {

@@ -1,6 +1,8 @@
-﻿namespace CBT.Web.Blazor.Data.Entities
+﻿using CBT.Web.Blazor.Data.Entities.Base;
+
+namespace CBT.Web.Blazor.Data.Entities
 {
-    public class ThoughtPsychologistReview
+    public class ThoughtPsychologistReview : TrackingEntity
     {
         public int ThoughtId { get; set; }
 
@@ -8,6 +10,7 @@
 
         public string RationalAnswerComment { get; set; }
 
+        public bool SentBack { get; set; }
 
         public AutomaticThought Thought {  get; set; }
 

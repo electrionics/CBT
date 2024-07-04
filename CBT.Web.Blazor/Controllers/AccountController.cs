@@ -91,8 +91,7 @@ namespace CBT.Web.Blazor.Controllers
                             _dataContext.Set<Patient>().Add(new Patient
                             {
                                 DisplayName = model.Name,
-                                UserId = user.Id,
-                                PsychologistId = null
+                                UserId = user.Id
                             });
                             await _dataContext.SaveChangesAsync();
                             break;

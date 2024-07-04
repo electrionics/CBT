@@ -180,23 +180,28 @@ namespace CBT.Web.Blazor.Services
 
 
 
-        #region GetPsychologistReview
+        #region GetPsychologistReviews
 
-        public async Task<RecordReviewModel?> GetPsychologistReview(int id)
+        public async Task<RecordReviewModel[]> GetPsychologistReviews(int thoughtId)
         {
-            var data = await dataContext.Set<ThoughtPsychologistReview>()
+            var data = await dataContext.Set<ThoughtPsychologistReview>().AsNoTracking()
                 .Include(x => x.Thought).ThenInclude(x => x.CognitiveErrors)
-                .FirstOrDefaultAsync(x => x.ThoughtId == id && x.Thought.Sent && x.Thought.SentBack);
+                .Include(x => x.Psychologist)
+                .Where(x => x.SentBack && x.ThoughtId == thoughtId && x.Thought.Sent)
+                .OrderByDescending(x => x.DateCreated)
+                .ToListAsync();
 
-            return data == null ? null : new()
-            {
-                Id = data.ThoughtId,
-                RationalAnswerComment = data.RationalAnswerComment,
-                ReviewedErrors = data.Thought.CognitiveErrors
-                    .Where(x => x.IsReview && x.PsychologistId == data.PsychologistId)
-                    .Select(x => x.CognitiveErrorId)
-                    .ToList(),
-            };
+            return data.Select(d =>
+                new RecordReviewModel
+                {
+                    Id = d.ThoughtId,
+                    RationalAnswerComment = d.RationalAnswerComment,
+                    ReviewedErrors = d.Thought.CognitiveErrors
+                        .Where(x => x.PsychologistId == d.PsychologistId)
+                        .Select(x => x.CognitiveErrorId)
+                        .ToList(),
+                    PsychologistDisplayName = d.Psychologist.DisplayName,
+                }).ToArray();
         }
 
         #endregion

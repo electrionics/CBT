@@ -228,18 +228,18 @@ else
         items.First(x => x.Id == id).Sent = true;
     }
 
-    public async Task CheckReviewBtnClick(int id)
+    public async Task CheckReviewBtnClick(int thoughtId)
     {
-        var review = await AutomaticThoughtsService.GetPsychologistReview(id);
-        if (review != null)
+        var reviews = await AutomaticThoughtsService.GetPsychologistReviews(thoughtId);
+        if (reviews?.Any() ?? false)
         {
-            ThoughtReview.Model = review;
+            ThoughtReview.Model = reviews;
             ThoughtReview.IsVisible = true;
-            reviewExists[id] = true;
+            reviewExists[thoughtId] = true;
         }
         else
         {
-            reviewExists[id] = false;
+            reviewExists[thoughtId] = false;
         }
     }
 

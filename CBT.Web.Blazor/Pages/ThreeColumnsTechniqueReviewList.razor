@@ -114,7 +114,7 @@ else
                     @{
                         var id = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Id;
 
-                        <button class="btn btn-success" @onclick="@(() => EditBtnClick(id))">
+                        <button class="btn btn-success" @onclick="@(async () => await EditBtnClick(id))">
                             <i class="oi oi-pencil" /> Изменить
                         </button>
                     }
@@ -143,9 +143,10 @@ else
         cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
     }
 
-    public void EditBtnClick(int id)
+    public async Task EditBtnClick(int recordId)
     {
-        var model = items.First(x => x.Value.Id == id); // await PsychologistReviewService.GetThreeColumnRecordReview(id);
+        var currentUserId = await GetCurrentUserId();
+        var model = await PsychologistReviewService.GetThreeColumnRecordReview(recordId, currentUserId);
 
         if (model != null)
         {

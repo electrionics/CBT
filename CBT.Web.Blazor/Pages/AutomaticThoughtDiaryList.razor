@@ -254,10 +254,10 @@ else
 
     public async Task CheckReviewBtnClick(int id)
     {
-        var review = await AutomaticThoughtsService.GetPsychologistReview(id);
-        if (review != null)
+        var reviews = await AutomaticThoughtsService.GetPsychologistReviews(id);
+        if (reviews?.Any() ?? false)
         {
-            ThoughtReview.Model = review;
+            ThoughtReview.Model = reviews;
             ThoughtReview.IsVisible = true;
             reviewExists[id] = true;
         }

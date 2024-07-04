@@ -13,7 +13,6 @@ namespace CBT.Web.Blazor.Data.Entities
 
         public int PatientId { get; set; }
         public bool Sent { get; set; }
-        public bool SentBack { get; set; }
 
 
         public List<ThoughtCognitiveError> CognitiveErrors { get; set; }

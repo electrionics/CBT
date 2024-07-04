@@ -19,7 +19,7 @@ namespace CBT.Web.Blazor.Data.Model
         public string PatientDisplayName { get; set; }
 
 
-        public static ThoughtRecordReview<T>? Convert(AutomaticThought data)
+        public static ThoughtRecordReview<T>? Convert(AutomaticThought data, int? psychologistId = null)
         {
             if (data == null)
                 return null;
@@ -31,28 +31,37 @@ namespace CBT.Web.Blazor.Data.Model
                 State = data.PsychologistReviews.Any()
                     ? ReviewRecordState.Reviewed
                     : ReviewRecordState.Pending,
-                SentBack = data.SentBack,
-                RationalAnswerComment = data.PsychologistReviews.FirstOrDefault()?.RationalAnswerComment ?? string.Empty,
-                ReviewedErrors = data.CognitiveErrors.Where(x => x.IsReview).Select(x => x.CognitiveErrorId).ToList(),
+                SentBack = data.PsychologistReviews
+                    .Any(x => x.SentBack && x.PsychologistId == psychologistId),
+                RationalAnswerComment = data.PsychologistReviews
+                    .FirstOrDefault(x => x.PsychologistId == psychologistId)?.RationalAnswerComment ?? string.Empty,
+                ReviewedErrors = data.CognitiveErrors
+                    .Where(x => x.PsychologistId == psychologistId)
+                    .Select(x => x.CognitiveErrorId)
+                    .ToList(),
+                PatientDisplayName = data.Patient.DisplayName
             };
 #pragma warning restore CS8601 // Possible null reference assignment.
         }
 
         public static AutomaticThought ConvertBack(ThoughtRecordReview<T> model, int psychologistId, AutomaticThought data)
         {
-            data.PsychologistReviews.RemoveAll(x => true);
+            data.PsychologistReviews.RemoveAll(x => 
+                x.PsychologistId == psychologistId);
             data.PsychologistReviews.Add(new ThoughtPsychologistReview
             {
                 PsychologistId = psychologistId,
-                RationalAnswerComment = model.RationalAnswerComment,
                 ThoughtId = model.Value.Id,
+                RationalAnswerComment = model.RationalAnswerComment,
             });
-            data.CognitiveErrors.RemoveAll(x => x.IsReview);
+
+            data.CognitiveErrors.RemoveAll(x => 
+                x.PsychologistId == psychologistId);
             data.CognitiveErrors.AddRange(model.ReviewedErrors?.Select(x => new ThoughtCognitiveError
             {
                 CognitiveErrorId = x,
                 PsychologistId = psychologistId,
-                IsReview = true,
+                ReviewerId = psychologistId,
                 ThoughtId = model.Value.Id
             }) ?? Enumerable.Empty<ThoughtCognitiveError>());
 

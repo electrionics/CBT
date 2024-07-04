@@ -4,7 +4,7 @@ namespace CBT.Web.Blazor.Data
 {
     public class CBTDataContextMARS : CBTDataContext
     {
-        public CBTDataContextMARS(DbContextOptions<CBTDataContextMARS> options) : base(options)
+        public CBTDataContextMARS(DbContextOptions<CBTDataContextMARS> options, IHttpContextAccessor contextAccessor) : base(options, contextAccessor)
         {
 
         }

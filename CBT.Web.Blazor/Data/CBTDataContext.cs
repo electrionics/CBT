@@ -1,16 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using CBT.Web.Blazor.Data.Entities;
+using CBT.Web.Blazor.Data.Entities.Base;
 
 namespace CBT.Web.Blazor.Data
 {
     public class CBTDataContext : DbContext
     {
         private readonly string? _connectionString;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public CBTDataContext(DbContextOptions<CBTDataContext> options) : base(options)
+        #region Initialization
+
+        public CBTDataContext(DbContextOptions<CBTDataContext> options, IHttpContextAccessor contextAccessor) : base(options)
         {
-            
+            _contextAccessor = contextAccessor;
         }
 
         public CBTDataContext()
@@ -23,9 +28,9 @@ namespace CBT.Web.Blazor.Data
             _connectionString = connectionString;
         }
 
-        protected CBTDataContext(DbContextOptions options) : base(options) 
+        protected CBTDataContext(DbContextOptions options, IHttpContextAccessor contextAccessor) : base(options) 
         {
-
+            _contextAccessor = contextAccessor;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -34,7 +39,15 @@ namespace CBT.Web.Blazor.Data
             {
                 optionsBuilder.UseSqlServer(_connectionString);
             }
+
+            //optionsBuilder.EnableSensitiveDataLogging();
+            //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor());
         }
+
+        #endregion
+
+
+        #region Mapping
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,7 +70,8 @@ namespace CBT.Web.Blazor.Data
 
             modelBuilder.Entity<ThoughtCognitiveError>(entity =>
             {
-                entity.HasKey(x => new { x.ThoughtId, x.CognitiveErrorId, x.IsReview });
+                entity.HasKey(x => new { x.ThoughtId, x.CognitiveErrorId, x.ReviewerId });
+
                 entity.HasOne(x => x.Thought)
                     .WithMany(x => x.CognitiveErrors)
                     .HasForeignKey(x => x.ThoughtId);
@@ -73,7 +87,7 @@ namespace CBT.Web.Blazor.Data
 
             modelBuilder.Entity<ThoughtPsychologistReview>(entity =>
             {
-                entity.HasKey(x => new { x.ThoughtId });
+                entity.HasKey(x => new { x.ThoughtId, x.PsychologistId });
 
                 entity.HasOne(x => x.Thought)
                     .WithMany(x => x.PsychologistReviews)
@@ -94,7 +108,82 @@ namespace CBT.Web.Blazor.Data
                 entity.HasKey(x => x.Id);
             });
 
+            modelBuilder.Entity<PatientPsychologist>(entity =>
+            {
+                entity.HasKey(x => new { x.PatientId, x.PsychologistId });
+
+                entity.HasOne(x => x.Patient)
+                    .WithMany(x => x.Psychologists)
+                    .HasForeignKey(x => x.PatientId);
+
+                entity.HasOne(x => x.Psychologist)
+                    .WithMany(x => x.Patients)
+                    .HasForeignKey(x => x.PsychologistId);
+            });
+
+            
+
             #endregion
         }
+
+        #endregion
+
+        #region Tracking
+
+        public override EntityEntry Add(object entity)
+        {
+            if (entity is ITrackingCreate trackable)
+                CreateEntity(trackable);
+
+            return base.Add(entity);
+        }
+
+        public override void AddRange(IEnumerable<object> entities)
+        {
+            var now = DateTime.Now;
+            foreach (object entity in entities)
+                if (entity is ITrackingCreate trackable)
+                    CreateEntity(trackable, now);
+
+            base.AddRange(entities);
+        }
+
+        public override EntityEntry Update(object entity)
+        {
+            if (entity is ITrackingUpdate trackable)
+                UpdateEntity(trackable);
+
+            return base.Update(entity);
+        }
+
+        public override void UpdateRange(IEnumerable<object> entities)
+        {
+            var now = DateTime.Now;
+            foreach (object entity in entities)
+                if (entity is ITrackingUpdate trackable)
+                    UpdateEntity(trackable, now);
+
+            base.UpdateRange(entities);
+        }
+
+        #region Helper Methods
+
+        private void CreateEntity(ITrackingCreate trackable, DateTime? now = null)
+        {
+            trackable.DateCreated = now ?? DateTime.Now;
+            trackable.UserCreated = CurrentUserName;
+        }
+
+        private void UpdateEntity(ITrackingUpdate trackable, DateTime? now = null)
+        {
+            trackable.DateUpdated = now ?? DateTime.Now;
+            trackable.UserUpdated = CurrentUserName;
+        }
+
+        private string? CurrentUserName => _contextAccessor?.HttpContext?.User.Identity?.Name;
+
+        #endregion
+
+        #endregion
     }
 }

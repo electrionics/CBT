@@ -44,14 +44,15 @@ namespace CBT.Web.Blazor.Background
 
                     var psychologistNotifications = await dbContext.Set<AutomaticThought>()
                         .AsNoTracking()
-                        .Where(x => x.Sent && !x.SentBack)
-                        .GroupBy(x => x.Patient.PsychologistId)
+                        .Where(x => x.Sent && !x.PsychologistReviews.Any(y => y.SentBack))
+                        .SelectMany(x => x.Patient.Psychologists)
+                        .GroupBy(x => x.PsychologistId)
                         .Select(x => new { PsychologistId = x.Key, Notifications = x.Count() })
-                        .ToDictionaryAsync(x => x.PsychologistId ?? 0, x => x.Notifications, cancellationToken: stoppingToken);
+                        .ToDictionaryAsync(x => x.PsychologistId, x => x.Notifications, cancellationToken: stoppingToken);
 
                     var patientNotifications = await dbContext.Set<AutomaticThought>()
                         .AsNoTracking()
-                        .Where(x => x.SentBack)
+                        .Where(x => x.PsychologistReviews.Any(y => y.SentBack))
                         .GroupBy(x => x.PatientId)
                         .Select(x => new { PatientId = x.Key, Notifications = x.Count() })
                         .ToDictionaryAsync(x => x.PatientId, x => x.Notifications, cancellationToken: stoppingToken);
