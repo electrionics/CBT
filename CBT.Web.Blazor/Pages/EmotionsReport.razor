@@ -8,6 +8,20 @@
 @inject UserManager<User> UserManager;
 @inject EmotionsService EmotionsService;
 
+@code {
+    private string? activeBreakpoint;
+    private ChartSeriesType chartType;
+}
+<SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+@if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+{
+    chartType = ChartSeriesType.StackingBar;
+}
+else
+{
+    chartType = ChartSeriesType.StackingColumn;
+}
+
 <SfChart @ref="DataChart1" Title="График изменения эмоций">
     <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" />
 
@@ -15,7 +29,7 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="BeforePercent"
-                     Type="ChartSeriesType.Column"
+                     Type="@chartType"
                      EnableTooltip="true"
                      Name="До проработки"
                      Fill="orange"
@@ -24,7 +38,7 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="AfterPercent"
-                     Type="ChartSeriesType.Column"
+                     Type="@chartType"
                      EnableTooltip="true"
                      Name="После проработки"
                      Fill="green"
@@ -41,7 +55,7 @@
         <ChartSeries DataSource="@items"
                      XName="Name"
                      YName="Count"
-                     Type="ChartSeriesType.Column"
+                     Type="@chartType"
                      Name="До проработки"
                      Fill="green">
         </ChartSeries>

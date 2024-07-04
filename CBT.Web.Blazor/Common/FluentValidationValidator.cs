@@ -1,6 +1,7 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+
+using FluentValidation;
 
 namespace CBT.Web.Blazor.Common
 {

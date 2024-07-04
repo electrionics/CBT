@@ -1,19 +1,19 @@
 ﻿@page "/account/login"
 
-@using CBT.Web.Blazor.Common
-@using CBT.Web.Blazor.Data.Identity;
-@using CBT.Web.Blazor.Data.Model.Identity;
-@using CBT.Web.Blazor.Data.Model.Validators
-@using CBT.Web.Blazor.Services.Authentication;
+@using System.Text.Json;
+@using System.Text;
+@using System.Security.Claims;
 
 @using Microsoft.AspNetCore.Authentication;
 @using Microsoft.AspNetCore.Components.Authorization;
 @using Microsoft.AspNetCore.Components.WebAssembly.Http;
 @using Microsoft.AspNetCore.Identity;
 
-@using System.Text.Json;
-@using System.Text;
-@using System.Security.Claims;
+@using CBT.Web.Blazor.Common
+@using CBT.Web.Blazor.Data.Identity;
+@using CBT.Web.Blazor.Data.Model.Identity;
+@using CBT.Web.Blazor.Data.Model.Validators
+@using CBT.Web.Blazor.Services.Authentication;
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
@@ -21,7 +21,7 @@
 @inject SignInManager<User> _signInManager;
 @inject IJSRuntime JSRuntime;
 
-<PageTitle>КПТ - Вход в систему</PageTitle>
+<PageTitle>Псионик - Вход в систему</PageTitle>
 
 <div class="row">
     <div class="col-md-4">
@@ -84,30 +84,26 @@
     {
         returnUrl = NavigationManager.BaseUri;
 
-        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.ToAbsoluteUri("api/account/login"));
-        message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-        message.Content = new StringContent(JsonSerializer.Serialize(Model), Encoding.UTF8, "application/json");
-
+        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/login");
         var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(message);
 
-        var result = response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<LoginResult>() : null;
+        var result = await client.PostResultAsJsonAsync<LoginResult?, LoginModel>(apiUrl, Model);
 
-        if (result?.Succeeded ?? false)
+        if (result.Value?.Succeeded ?? false)
         {
-            var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
+            var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
             var authCookie = cookies.First().Value.First();
             authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
             await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
 
             NavigationManager.NavigateTo(returnUrl, true);
         }
-        else if (result?.RequiresTwoFactor ?? false)
+        else if (result.Value?.RequiresTwoFactor ?? false)
         {
             throw new NotImplementedException();
             //NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
         }
-        else if (result?.IsLockedOut ?? false)
+        else if (result.Value?.IsLockedOut ?? false)
         {
             throw new NotImplementedException();
             //NavigationManager.NavigateTo("./Lockout");

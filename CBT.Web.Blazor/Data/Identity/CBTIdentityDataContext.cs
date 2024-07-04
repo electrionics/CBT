@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using MedExpert.Domain.Identity;
 
 namespace CBT.Web.Blazor.Data.Identity;
 

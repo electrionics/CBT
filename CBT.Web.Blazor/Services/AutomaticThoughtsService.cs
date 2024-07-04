@@ -1,9 +1,9 @@
-﻿using CBT.Web.Blazor.Data;
+﻿using Microsoft.EntityFrameworkCore;
+
+using CBT.Web.Blazor.Data;
 using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Data.Entities.Enums;
 using CBT.Web.Blazor.Data.Model;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace CBT.Web.Blazor.Services
 {

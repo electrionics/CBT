@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using System.Security.Claims;
+
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using System.Security.Claims;
 
 namespace CBT.Web.Blazor.Services.Authentication
 {

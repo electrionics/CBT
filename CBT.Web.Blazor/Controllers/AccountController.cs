@@ -1,11 +1,14 @@
-﻿using CBT.Web.Blazor.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+using FluentValidation;
+
+using CBT.Web.Blazor.Data;
 using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Data.Identity;
 using CBT.Web.Blazor.Data.Model.Enums;
 using CBT.Web.Blazor.Data.Model.Identity;
-using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace CBT.Web.Blazor.Controllers
@@ -50,9 +53,10 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpPost]
         [Route("/api/account/logout")]
-        public async Task Logout()
+        public async Task<bool> Logout()
         {
             await _signInManager.SignOutAsync();
+            return true;
         }
 
         [HttpPost]

@@ -1,13 +1,28 @@
-﻿@using CBT.Web.Blazor.Data.Identity
+﻿@using Microsoft.AspNetCore.Identity
+
+@using Syncfusion.Blazor.Charts
+
+@using CBT.Web.Blazor.Data.Identity
 @using CBT.Web.Blazor.Data.Model
 @using CBT.Web.Blazor.Services
-@using Microsoft.AspNetCore.Identity
-@using Syncfusion.Blazor.Charts
 
 @inject AuthenticationStateProvider GetAuthenticationStateAsync
 @inject UserManager<User> UserManager;
 @inject CognitiveErrorsService CognitiveErrorsService;
 
+@code {
+    private string? activeBreakpoint;
+    private ChartSeriesType chartType;
+}
+<SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+@if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+{
+    chartType = ChartSeriesType.StackingBar;
+}
+else
+{
+    chartType = ChartSeriesType.StackingColumn;
+}
 <SfChart @ref="DataChart" Title="График когнтитиных искажений">
     <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
 
@@ -16,7 +31,7 @@
             DataSource="@items" 
             XName="Name"
             YName="UserCount"
-            Type="ChartSeriesType.StackingBar"
+            Type="@chartType"
             Name="По версии клиента"
             Fill="orange"
             StackingGroup="Client">
@@ -25,7 +40,7 @@
             DataSource="@items"
             XName="Name"
             YName="ReviewCount"
-            Type="ChartSeriesType.StackingBar"
+            Type="@chartType"
             Name="По версии психологов"
             Fill="green"
             StackingGroup="Psychologist">

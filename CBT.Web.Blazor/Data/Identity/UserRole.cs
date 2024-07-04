@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace MedExpert.Domain.Identity
+namespace CBT.Web.Blazor.Data.Identity
 {
     public class UserRole:IdentityUserRole<string>
     {

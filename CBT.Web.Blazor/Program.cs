@@ -1,18 +1,18 @@
-using Syncfusion.Blazor;
-using Syncfusion.Blazor.Popups;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.CookiePolicy;
 
-using CBT.Web.Blazor.Data.Identity;
+using Syncfusion.Blazor;
+using Syncfusion.Blazor.Popups;
+using Serilog;
+using FluentValidation;
+
+using CBT.Web.Blazor;
 using CBT.Web.Blazor.Services;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
-using CBT.Web.Blazor;
 using CBT.Web.Blazor.Data;
-using Serilog;
-using FluentValidation;
+using CBT.Web.Blazor.Data.Identity;
 using CBT.Web.Blazor.Data.Model.Validators;
 using CBT.Web.Blazor.Data.Model.Identity;
 

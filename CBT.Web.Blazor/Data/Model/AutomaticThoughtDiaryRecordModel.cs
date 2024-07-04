@@ -1,7 +1,7 @@
-﻿using CBT.Web.Blazor.Data.Entities;
+﻿using NuGet.Packaging;
+
+using CBT.Web.Blazor.Data.Entities;
 using CBT.Web.Blazor.Data.Entities.Enums;
-using NuGet.Packaging;
-using System.Linq;
 
 namespace CBT.Web.Blazor.Data.Model
 {

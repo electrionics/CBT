@@ -1,5 +1,6 @@
-﻿using CBT.Web.Blazor.Data.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+
+using CBT.Web.Blazor.Data.Entities;
 
 namespace CBT.Web.Blazor.Data
 {

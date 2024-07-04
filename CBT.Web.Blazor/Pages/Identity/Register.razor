@@ -1,5 +1,14 @@
 ﻿@page "/account/register"
 
+@using System.Text.Json;
+@using System.Text;
+@using System.Security.Claims;
+
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Microsoft.AspNetCore.Components.WebAssembly.Http;
+@using Microsoft.AspNetCore.Identity;
+
 @using CBT.Web.Blazor.Common
 @using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Data.Model.Enums
@@ -7,22 +16,13 @@
 @using CBT.Web.Blazor.Data.Model.Validators
 @using CBT.Web.Blazor.Services.Authentication;
 
-@using Microsoft.AspNetCore.Authentication;
-@using Microsoft.AspNetCore.Components.Authorization;
-@using Microsoft.AspNetCore.Components.WebAssembly.Http;
-@using Microsoft.AspNetCore.Identity;
-
-@using System.Text.Json;
-@using System.Text;
-@using System.Security.Claims;
-
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
 
 @inject SignInManager<User> _signInManager;
 @inject IJSRuntime JSRuntime;
 
-<PageTitle>КПТ - Регистрация</PageTitle>
+<PageTitle>Псионик - Регистрация</PageTitle>
 
 <div class="row">
     <div class="col-md-4">
@@ -125,20 +125,14 @@
         returnUrl = NavigationManager.BaseUri;
         LastServerErrorMessage = null;
 
-        var message = new HttpRequestMessage(HttpMethod.Post, NavigationManager.ToAbsoluteUri("api/account/register"));
-        message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-        message.Content = new StringContent(JsonSerializer.Serialize(Model), Encoding.UTF8, "application/json");
-
         var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(message);
+        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/register");
 
-        var result = response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<RegisterResult>()
-            : null;
+        var result = await client.PostResultAsJsonAsync<RegisterResult, RegisterModel>(apiUrl, Model);
 
-        if (result?.Succeeded ?? false)
+        if (result.Value?.Succeeded ?? false)
         {
-            var cookies = response.Headers.Where(x => x.Key == "Set-Cookie");
+            var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
             var authCookie = cookies.First().Value.First();
             authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
             await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
@@ -149,7 +143,7 @@
         {
             // messageStore.Add(() => Model, result?.ErrorMessage ?? "Ошибка на сервере.");
             // editContext.NotifyValidationStateChanged();
-            LastServerErrorMessage = result?.ErrorMessage ?? "Ошибка на сервере.";
+            LastServerErrorMessage = result.Value?.ErrorMessage ?? "Ошибка на сервере.";
         }
     }
 }

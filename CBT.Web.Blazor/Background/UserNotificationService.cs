@@ -1,11 +1,11 @@
-﻿using CBT.Web.Blazor.Data;
-using CBT.Web.Blazor.Data.Entities;
-using CBT.Web.Blazor.Hubs;
+﻿using System.Diagnostics;
 
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
-using System.Diagnostics;
+using CBT.Web.Blazor.Data;
+using CBT.Web.Blazor.Data.Entities;
+using CBT.Web.Blazor.Hubs;
 
 namespace CBT.Web.Blazor.Background
 {
