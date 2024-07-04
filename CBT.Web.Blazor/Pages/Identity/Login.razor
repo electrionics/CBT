@@ -87,8 +87,7 @@
         var apiUrl = NavigationManager.ToAbsoluteUri("api/account/login");
         var client = ClientFactory.CreateClient();
 
-        var result = await client.PostResultAsJsonAsync<LoginResult?, LoginModel>(apiUrl, Model);
-
+        var result = await client.PostResultAsJsonAsync<LoginResult, LoginModel>(apiUrl, Model);
         if (result.Value?.Succeeded ?? false)
         {
             var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
