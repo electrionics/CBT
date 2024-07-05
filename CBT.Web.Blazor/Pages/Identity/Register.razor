@@ -46,16 +46,18 @@
                         <InputCheckbox id="client" @bind-Value="Model.IsClient" />
                         Получать помощь <span class="oi oi-info" id="infoClient"></span>
                     </div>
-                    <SfTooltip Position="Position.TopCenter" 
+                    <SfTooltip Position="Position.RightCenter" 
                                Target="#infoClient" 
+                               CssClass="fontTooltip"
                                Content="Вам будет доступно ведение личных дневников и своего отслеживание прогресса.">
                     </SfTooltip>
                     <div>
                         <InputCheckbox id="psy" @bind-Value="Model.IsPsychologist" />
                         Оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
                     </div>
-                    <SfTooltip Position="Position.TopCenter" 
+                    <SfTooltip Position="Position.RightCenter"
                                Target="#infoPsychologist" 
+                               CssClass="fontTooltip"
                                Content="Вам будет доступна проверка дневников ваших подопечных.">
                     </SfTooltip>
                     <ValidationMessage For="@(() => Model.RoleTypes)" />
@@ -65,8 +67,9 @@
                     <SfTextBox @bind-Value="Model.Name"
                                Placeholder="Моё имя"
                                ID="name" />
-                    <SfTooltip Position="Position.TopCenter" 
+                    <SfTooltip Position="Position.RightCenter"
                                Target="#infoName" 
+                               CssClass="fontTooltip"
                                Content="Используется для отображения на сайте.">
                     </SfTooltip>
                     <ValidationMessage For="@(() => Model.Name)" />
@@ -79,8 +82,9 @@
                                Placeholder="Электронная почта"
                                ID="email"
                                @bind-Value="Model.Email" />
-                    <SfTooltip Position="Position.TopCenter" 
+                    <SfTooltip Position="Position.RightCenter"
                                Target="#infoEmail" 
+                               CssClass="fontTooltip"
                                Content="Не показываем никому, кроме Вас.">
                     </SfTooltip>
                     <ValidationMessage For="@(() => Model.Email)" />
@@ -94,8 +98,9 @@
                                Placeholder="Пароль"
                                ID="password"
                                @bind-Value="Model.Password"  />
-                    <SfTooltip Position="Position.TopCenter"
+                    <SfTooltip Position="Position.RightCenter"
                                Target="#shieldPassword"
+                               CssClass="fontTooltip"
                                Content="Должен содержать не менее 8 символов в длину. Мы не храним пароль в открытом виде.">
                     </SfTooltip>
                     @if ((Model.Password ?? string.Empty).Length < 8)
@@ -145,7 +150,6 @@
     private RegisterModel Model { get; set; }
     private string? LastServerErrorMessage { get; set; }
 
-    private string returnUrl;
     private IList<AuthenticationScheme> ExternalLogins { get; set; }
 
     private EditContext editContext;
@@ -164,7 +168,6 @@
 
     public async Task Submit()
     {
-        returnUrl = NavigationManager.BaseUri;
         LastServerErrorMessage = null;
 
         var client = ClientFactory.CreateClient();
@@ -179,7 +182,8 @@
             authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
             await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
 
-            NavigationManager.NavigateTo(returnUrl, true);
+            var navigateUrl = NavigationManager.ToAbsoluteUri($"account/register/confirmation?email={Model.Email}");
+            NavigationManager.NavigateTo(navigateUrl.ToString(), true);
         }
         else
         {

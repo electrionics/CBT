@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Popups;
@@ -62,6 +63,9 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 0;
+
+    options.SignIn.RequireConfirmedEmail = true;
+    options.Lockout.MaxFailedAccessAttempts = 10;
 });
 
 
@@ -88,8 +92,12 @@ builder.Services.AddScoped<NotificationsService>();
 builder.Services.AddScoped<SfDialogService>();
 builder.Services.AddScoped<UserManager<User>>();
 
+builder.Services.AddScoped<IEmailSender, EmailService>();
+
 builder.Services.AddScoped<IValidator<LoginModel>, LoginModelValidator>();
 builder.Services.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
+builder.Services.AddScoped<IValidator<ResendConfirmationModel>, ResendConfirmationModelValidator>();
+builder.Services.AddScoped<IValidator<ResetPasswordModel>, ResetPasswordModelValidator>();
 
 builder.Services.AddHostedService<UserNotificationBackgroundService>();
 

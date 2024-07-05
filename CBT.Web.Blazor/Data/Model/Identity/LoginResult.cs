@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace CBT.Web.Blazor.Data.Model.Identity
+﻿namespace CBT.Web.Blazor.Data.Model.Identity
 {
     public class LoginResult
     {

@@ -17,9 +17,11 @@
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
+@inject UserManager<User> UserManager;
 
 @inject SignInManager<User> _signInManager;
 @inject IJSRuntime JSRuntime;
+@inject SfDialogService SfDialogService;
 
 <PageTitle>Псионик - Вход в систему</PageTitle>
 
@@ -44,6 +46,10 @@
                 <div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Войти</button>
                 </div>
+                <div>
+                    <br/>
+                    <a href="/account/resetpassword">Забыли пароль?</a>
+                </div>
             </EditForm>
         </section>
     </div>
@@ -63,25 +69,23 @@
 @code{
     private LoginModel Model { get; set; }
 
+    private string? LastServerErrorMessage { get; set; }
     private string returnUrl;
     private IList<AuthenticationScheme> ExternalLogins { get; set; }
-
-    private EditContext editContext;
-    private ValidationMessageStore messageStore;
 
 
     protected override async Task OnInitializedAsync()
     {
         Model = new();
 
-        editContext = new EditContext(Model);
-        messageStore = new(editContext);
-
-        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        ExternalLogins = (await _signInManager
+            .GetExternalAuthenticationSchemesAsync())
+            .ToList();
     }
 
     public async Task Submit()
     {
+        LastServerErrorMessage = null;
         returnUrl = NavigationManager.BaseUri;
 
         var apiUrl = NavigationManager.ToAbsoluteUri("api/account/login");
@@ -104,12 +108,26 @@
         }
         else if (result.Value?.IsLockedOut ?? false)
         {
-            throw new NotImplementedException();
+            LastServerErrorMessage = "Пользователь заблокирован.";
             //NavigationManager.NavigateTo("./Lockout");
         }
         else
         {
-            messageStore.Add(() => Model, "Неудачная попытка входа.");
+            var user = await UserManager.FindByNameAsync(Model.Email);
+            if (user != null &&
+                !await UserManager.IsEmailConfirmedAsync(user))
+            {
+                NavigationManager.NavigateTo("/account/register/confirmation/resend", true);
+            }
+            else
+            {
+                LastServerErrorMessage = "Неудачная попытка входа.";
+            }
+        }
+
+        if (LastServerErrorMessage != null)
+        {
+            await SfDialogService.AlertAsync("Ошибка входа.", LastServerErrorMessage);
         }
     }
 }

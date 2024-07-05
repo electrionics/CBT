@@ -1,5 +1,6 @@
 ﻿@page "/account/logout"
 
+@using CBT.Web.Blazor.Data.Model.Identity
 @using Microsoft.AspNetCore.Identity;
 @using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
@@ -43,7 +44,7 @@
 
         var apiUrl = NavigationManager.ToAbsoluteUri("api/account/logout");
         var client = ClientFactory.CreateClient();
-        var result = await client.PostResultAsJsonAsync<bool, object>(apiUrl, new { });
+        var result = await client.PostResultAsJsonAsync<LogoutResult, LogoutModel>(apiUrl, new());
 
         _logger.LogInformation("User logged out.");
 

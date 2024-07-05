@@ -87,3 +87,7 @@ a, .btn-link {
 .hidden{
     display: none!important;
 }
+
+.fontTooltip .e-tip-content {
+    font-size: 16px!important;
+}
