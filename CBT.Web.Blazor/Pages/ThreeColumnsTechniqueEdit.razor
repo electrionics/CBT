@@ -1,16 +1,16 @@
 ﻿@using Microsoft.AspNetCore.Identity;
 
-@using Syncfusion.Blazor.Popups
-@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Popups;
+@using Syncfusion.Blazor.DropDowns;
 
 @using CBT.Web.Blazor;
-@using CBT.Web.Blazor.Data
+@using CBT.Web.Blazor.Data;
 @using CBT.Web.Blazor.Data.Identity;
 @using CBT.Web.Blazor.Data.Model;
 @using CBT.Web.Blazor.Services;
 
-@inject AutomaticThoughtsService AutomaticThoughtsService
-@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject AutomaticThoughtsService AutomaticThoughtsService;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
