@@ -1,13 +1,3 @@
 ﻿@page "/diary/automatic-thoughts/report/example"
-@inherits AutomaticThoughtDiaryReport
-@{
-    base.BuildRenderTree(__builder);
-}
-@code {
-    protected override Task<string?> GetCurrentUserId()
-    {
-        return Task.FromResult<string?>(null);
-    }
 
-    protected override bool ReadOnly => true;
-}
+<AutomaticThoughtDiaryReportExampleComponent/>

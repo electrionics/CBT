@@ -1,0 +1,207 @@
+﻿@using Microsoft.AspNetCore.Identity;
+
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Grids;
+
+@inject PsychologistReviewFacade PsychologistReviewService
+@inject DiariesFacade AutomaticThoughtsService
+@inject CognitiveErrorsFacade CognitiveErrorsService;
+@inject SfDialogService SfDialogService;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+<PageTitle>Псионик - Кабинет психолога - Техника трёх колонок</PageTitle>
+
+<h1>Кабинет психолога - Техника трёх колонок</h1>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <div class="alert alert-secondary mt-4">
+        Всего @(items.Count) записей.
+    </div>
+    @code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
+    }
+    <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+    {
+        rowDirection = RowDirection.Vertical;
+    }
+    else
+    {
+        rowDirection = RowDirection.Horizontal;
+    }
+    <SfGrid @ref="DataGrid" 
+            EnableAdaptiveUI="true" 
+            AdaptiveUIMode="AdaptiveMode.Both" 
+            RowRenderingMode="@rowDirection" 
+            Height="100%" 
+            Width="100%" 
+            DataSource="items" 
+            AllowTextWrap="true"
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+        <GridColumns>
+            <GridColumn 
+                HeaderText="Клиент"
+                AllowFiltering="false"
+                AllowSorting="false">
+                <Template>
+                    @{
+                        var model = (ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context;
+                        if (!model.SentBack)
+                        {
+                            if (model.State == ReviewRecordState.Reviewed)
+                            {
+                                <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Value.Id))">
+                                    Клиенту
+                                </button>
+                            }
+                            else
+                            {
+                                <text>
+                                    <i class="oi oi-circle-check" style="color: blue;" /> Принято
+                                </text>
+                            }
+                        }
+                        else
+                        {
+                            <text>
+                                <i class="oi oi-circle-check" style="color: green;" /> Проверено!
+                            </text>
+                        }
+                        <br/><span>@model.PatientDisplayName</span>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.Thought"
+                        HeaderText="Автоматическая мысль"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
+            <GridColumn Field="Value.Errors"
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Errors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error].Title</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Value.RationalAnswer"
+                        HeaderText="Рациональный ответ"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ReviewedErrors)"
+                        HeaderText="Когнитивные искажения"
+                        AllowFiltering="false"
+                        AllowSorting="false">
+                <Template>
+                    @{
+                        var errors = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).ReviewedErrors;
+                        foreach (var error in errors)
+                        {
+                            <span>@cognitiveErrors[(int)error].Title</span>
+                            <br />
+                        }
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.RationalAnswerComment)"
+                        HeaderText="Комментарий к рациональному ответу"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
+            <GridColumn Field="@nameof(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.Value.Id)"
+                        HeaderText=""
+                        AllowFiltering="true"
+                        AllowSorting="true">
+                <Template>
+                    @{
+                        var id = ((ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>)context).Value.Id;
+
+                        <button class="btn btn-success" @onclick="@(async () => await EditBtnClick(id))">
+                            <i class="oi oi-pencil" /> Изменить
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+    <ThreeColumnsTechniqueReviewEditComponent @ref="EditableThought" CognitiveErrors="cognitiveErrors">
+    </ThreeColumnsTechniqueReviewEditComponent>
+}
+
+@code {
+    SfGrid<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>> DataGrid;
+
+    ThreeColumnsTechniqueReviewEditComponent EditableThought;
+
+    private List<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>> items;
+    private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+        cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
+    }
+
+    public async Task EditBtnClick(int recordId)
+    {
+        var currentUserId = await GetCurrentUserId();
+        var model = await PsychologistReviewService.GetThreeColumnRecordReview(recordId, currentUserId);
+
+        if (model != null)
+        {
+            EditableThought.Model = model;
+            EditableThought.IsVisible = true;
+            EditableThought.SuccessCallback = async () =>
+            {
+                model.State = ReviewRecordState.Reviewed;
+                await Refresh();
+            };
+        }
+    }
+
+    public async Task SendBtnClick(int id)
+    {
+        await PsychologistReviewService.SendRecordToPatient(id);
+
+        items.First(x => x.Value.Id == id).SentBack = true;
+    }
+
+    private async Task Refresh()
+    {
+        var currentUserId = await GetCurrentUserId();
+
+        items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        return currentUserId;
+    }
+}

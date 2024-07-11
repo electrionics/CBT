@@ -9,3 +9,4 @@ function writeAuthCookie(value) {
 function readAuthCookie() {
     return document.cookie;
 }
+sok.onerror = function (evt) { console.log(evt); }

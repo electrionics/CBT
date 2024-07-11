@@ -2,9 +2,10 @@
 
 using Microsoft.AspNetCore.SignalR;
 
-using CBT.Web.Blazor.Data;
+using CBT.Domain;
+using CBT.Logic.Services;
+using CBT.SharedComponents.Blazor;
 using CBT.Web.Blazor.Hubs;
-using CBT.Web.Blazor.Services;
 
 namespace CBT.Web.Blazor.Background
 {
@@ -37,7 +38,7 @@ namespace CBT.Web.Blazor.Background
                     _logger.LogInformation($"Executing {nameof(UserNotificationBackgroundService)} {time}");
 #pragma warning restore CA2254 // Template should be a static expression
 
-                    using var dbContext = new CBTDataContext(databaseConfig.SingleConnectionString);
+                    using var dbContext = new CBTDataContextMARS(databaseConfig.SingleConnectionStringMARS);
                     var notificationService = new NotificationsService(dbContext);
 
                     var sw = Stopwatch.StartNew();

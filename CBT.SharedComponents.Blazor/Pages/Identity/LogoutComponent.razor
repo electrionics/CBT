@@ -1,0 +1,54 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using Microsoft.Extensions.Logging
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<User> _signInManager;
+@inject NavigationManager NavigationManager;
+
+@inject ILogger<LogoutComponent> _logger;
+@inject IHttpClientFactory ClientFactory;
+@inject IJSRuntime JSRuntime;
+
+<PageTitle>Псионик - Выход из системы</PageTitle>
+
+<header>
+    <h1>Выход из системы</h1>
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <Authorized>
+                <form class="form-inline" @onsubmit="Submit">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Нажмите для выхода</button>
+                </form>
+            </Authorized>
+            <NotAuthorized>
+                <p>Вы успешно выполнили выход из системы.</p>
+            </NotAuthorized>
+        </AuthorizeView>
+    </CascadingAuthenticationState>
+</header>
+
+@code{
+    private string returnUrl;
+
+    public async Task Submit()
+    {
+        returnUrl = NavigationManager.BaseUri;
+
+        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/logout");
+        var client = ClientFactory.CreateClient();
+        var result = await client.PostResultAsJsonAsync<LogoutResult, LogoutModel>(apiUrl, new());
+
+        _logger.LogInformation("User logged out.");
+
+        var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
+        var authCookie = cookies.FirstOrDefault().Value?.FirstOrDefault();
+        authCookie = authCookie?.Replace(" httponly", "");
+
+        if (authCookie != null)
+        {
+            await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+            NavigationManager.NavigateTo(returnUrl, true);
+        }
+    }
+}

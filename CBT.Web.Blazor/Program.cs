@@ -1,120 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-
-using Syncfusion.Blazor;
-using Syncfusion.Blazor.Popups;
 using Serilog;
-using FluentValidation;
 
-using CBT.Web.Blazor;
-using CBT.Web.Blazor.Services;
+using CBT.SharedComponents.Blazor;
+
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
-using CBT.Web.Blazor.Data;
-using CBT.Web.Blazor.Data.Identity;
-using CBT.Web.Blazor.Data.Model.Validators;
-using CBT.Web.Blazor.Data.Model.Identity;
+using CBT.Shared.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
 
-builder.Services.AddSingleton(databaseConfig!);
-
-builder.Services.AddDbContext<CBTIdentityDataContext>(options =>
-{
-    options.UseSqlServer(databaseConfig?.SingleConnectionString);
-});
-builder.Services.AddDbContext<CBTDataContext>((options) =>
-{
-    options.UseSqlServer(databaseConfig?.SingleConnectionString);
-});
-builder.Services.AddDbContext<CBTDataContextMARS>((options) =>
-{
-    options.UseSqlServer(databaseConfig?.SingleConnectionStringMARS);
-});
-
-
-builder.Services.AddIdentity<User, Role>()
-    .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("https://localhost:7040", "http://localhost:51979")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
-});
-
-builder.Services.AddAuthentication();
-
-// JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-
-builder.Services.AddAuthorization();
-
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Default Password settings.
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 8;
-    options.Password.RequiredUniqueChars = 0;
-
-    options.SignIn.RequireConfirmedEmail = true;
-    options.Lockout.MaxFailedAccessAttempts = 10;
-});
-
-
-builder.Services.AddSignalR((options) =>
-{
-    options.EnableDetailedErrors = true;
-});
-
-builder.Services.AddControllers();
-builder.Services.AddHttpClient();
-builder.Services.AddHttpContextAccessor();
-
-// Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-builder.Services.AddSyncfusionBlazor();
-
-builder.Services.AddScoped<AutomaticThoughtsService>();
-builder.Services.AddScoped<PsychologistReviewService>();
-builder.Services.AddScoped<CognitiveErrorsService>();
-builder.Services.AddScoped<EmotionsService>();
-builder.Services.AddScoped<PeopleService>(); 
-builder.Services.AddScoped<NotificationsService>(); 
-builder.Services.AddScoped<SfDialogService>();
-builder.Services.AddScoped<UserManager<User>>();
-
-builder.Services.AddScoped<IEmailSender, EmailService>();
-
-builder.Services.AddScoped<IValidator<LoginModel>, LoginModelValidator>();
-builder.Services.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
-builder.Services.AddScoped<IValidator<ResendConfirmationModel>, ResendConfirmationModelValidator>();
-builder.Services.AddScoped<IValidator<ResetPasswordModel>, ResetPasswordModelValidator>();
+builder.Services.Extend(databaseConfig!);
 
 builder.Services.AddHostedService<UserNotificationBackgroundService>();
-
-//builder.Services.AddScoped<JwtProvider>();
-//builder.Services.ConfigureOptions<JwtOptionsSetup>();
-//builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
-
-//builder.Services.AddScoped<CustomAuthenticationStateProvider>();
-//builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
-
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.HttpOnly = HttpOnlyPolicy.None;
-    options.Secure = CookieSecurePolicy.None;
-    options.CheckConsentNeeded = _ => false;
-});
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)

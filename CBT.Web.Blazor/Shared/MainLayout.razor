@@ -1,12 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
+@using CBT.Shared.Blazor.Shared;
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>ПСИОНИК</PageTitle>
 
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenuComponent />
     </div>
 
     <main>
@@ -23,7 +25,7 @@
             <CascadingAuthenticationState>
                 <AuthorizeView>
                     <Authorized>
-                        <Notifications />
+                        <NotificationsOneTimeComponent />
                         Здравствуйте, @context.User?.Identity?.Name 
                         <a href="account/logout">Выход</a>
                     </Authorized>

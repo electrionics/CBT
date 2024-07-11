@@ -1,0 +1,78 @@
+﻿@inherits NotificationsComponent
+
+@namespace CBT.Shared.Blazor.Shared
+
+@using Microsoft.AspNetCore.Http;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.Net.Http.Headers;
+
+@using CBT.Domain.Identity
+@using CBT.Logic.Services;
+
+@inject NotificationsService NotificationsService;
+@inject PeopleService PeopleService;
+@inject UserManager<User> UserManager;
+@inject IHttpContextAccessor HttpContextAccessor;
+
+@code {
+    protected List<string> _messages = new();
+
+    protected override async Task SetupNotifications()
+    {
+        await SingleTimeDirectNotificationSet();
+    }
+
+    private async Task SingleTimeDirectNotificationSet()
+    {
+        var principal = HttpContextAccessor.HttpContext?.User;
+        if (principal != null)
+        {
+            var userId = UserManager.GetUserId(principal);
+
+            if (!await SendPsychologistNotification(userId!))
+            {
+                if (!await SendPatientNotification(userId!))
+                {
+                    _messages.Add("0");
+                }
+            }
+        }
+    }
+
+    private async Task<bool> SendPsychologistNotification(string userId)
+    {
+        var psychologist = await PeopleService.GetPsychoilogist(userId!);
+
+        if (psychologist == null)
+        {
+            return false;
+        }
+
+        var notifications = await NotificationsService.GetPsychologistNotifications(new[] { psychologist.Id });
+
+        if (notifications.TryGetValue(psychologist.Id, out var count))
+        {
+            _messages.Add(count.ToString());
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task<bool> SendPatientNotification(string userId)
+    {
+        var patient = await PeopleService.GetPatient(userId!);
+        if (patient == null)
+            return false;
+
+        var notifications =
+            await NotificationsService.GetPatientNotifications(new[] { patient.Id });
+        if (notifications.TryGetValue(patient.Id, out var count))
+        {
+            _messages.Add(count.ToString());
+            return true;
+        }
+
+        return false;
+    }
+}

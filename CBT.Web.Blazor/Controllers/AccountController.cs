@@ -5,18 +5,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 using FluentValidation;
 
-using CBT.Web.Blazor.Data;
-using CBT.Web.Blazor.Data.Entities;
-using CBT.Web.Blazor.Data.Identity;
-using CBT.Web.Blazor.Data.Model.Enums;
-using CBT.Web.Blazor.Data.Model.Identity;
+using CBT.Domain.Entities;
+using CBT.Domain.Identity;
+using CBT.SharedComponents.Blazor.Model.Enums;
+using CBT.SharedComponents.Blazor.Model.Identity;
+using CBT.SharedComponents.Blazor.Common;
+using CBT.Domain;
 
-using NavigationManager = Microsoft.AspNetCore.Components.NavigationManager;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
-using CBT.Web.Blazor.Common;
 
 
 namespace CBT.Web.Blazor.Controllers

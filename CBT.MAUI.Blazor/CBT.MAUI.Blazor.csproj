@@ -56,12 +56,20 @@
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
-
-    <ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+        <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\CBT.Domain\CBT.Domain.csproj" />
+	  <ProjectReference Include="..\CBT.Logic\CBT.Logic.csproj" />
+	  <ProjectReference Include="..\CBT.SharedComponents.Blazor\CBT.SharedComponents.Blazor.csproj" />
+	</ItemGroup>
 
 </Project>

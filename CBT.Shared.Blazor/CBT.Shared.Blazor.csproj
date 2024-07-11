@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="App.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="App.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.9.2" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="26.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="26.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="26.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="26.1.41" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="26.1.41" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CBT.Logic\CBT.Logic.csproj" />
+  </ItemGroup>
+
+</Project>

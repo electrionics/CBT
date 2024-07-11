@@ -1,0 +1,46 @@
+﻿@inject CognitiveErrorsFacade CognitiveErrorsService
+
+<PageTitle>Псионик - Когнитивные ошибки</PageTitle>
+
+<h1>Когнитивные ошибки</h1>
+
+<div class="alert alert-secondary mt-4">
+    На этой странице приведен список всевозможных когнитивных ошибок, которые приводят к расстройствам настроения или тревоге.
+</div>
+
+@if (cognitiveErrors == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Название</th>
+                <th>Описание</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cognitiveError in cognitiveErrors)
+            {
+                <tr>
+                    <td>@cognitiveError.Key</td>
+                    <td>@cognitiveError.Value.Title</td>
+                    <td>@cognitiveError.Value.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<KeyValuePair<int, CognitiveErrorModel>>? cognitiveErrors;
+
+    protected override Task OnInitializedAsync()
+    {
+        cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
+        return Task.CompletedTask;
+    }
+}

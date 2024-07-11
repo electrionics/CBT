@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+using CBT.SharedComponents.Blazor;
 
 namespace CBT.MAUI.Blazor
 {
@@ -16,9 +19,18 @@ namespace CBT.MAUI.Blazor
 
             builder.Services.AddMauiBlazorWebView();
 
+
+            #region From Web
+            builder.Configuration.AddJsonFile("appsettings.desktop.json");
+            var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
+            builder.Services.Extend(databaseConfig!);
+
+            #endregion
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+
+            
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
