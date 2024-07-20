@@ -4,7 +4,7 @@
 @using Syncfusion.Blazor.DropDowns;
 
 @inject DiariesFacade AutomaticThoughtsService;
-@inject AuthenticationStateProvider GetAuthenticationStateAsync;
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">

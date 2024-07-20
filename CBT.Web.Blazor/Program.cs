@@ -5,13 +5,15 @@ using CBT.SharedComponents.Blazor;
 using CBT.Web.Blazor;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
+using CBT.SharedComponents.Blazor.Common;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
-var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
-var builderServices = builder.Services;
 
+var builderServices = builder.Services;
 builderServices
-    .WithDatabase(databaseConfig!)
+    .WithConfigurations(builder.Configuration)
+    .WithDatabase(builder.Configuration)
     .WithServices()
     .WithValidators()
     .WithIdentity()
@@ -46,6 +48,7 @@ builder.Host.UseSerilog(logger);
 
 var app = builder.Build();
 // old Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXxednRRRmVcVkJ2V0I=
+// Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1");
 
 // Configure the HTTP request pipeline.

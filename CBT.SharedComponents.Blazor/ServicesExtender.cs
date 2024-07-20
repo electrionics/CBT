@@ -1,17 +1,20 @@
 ﻿using CBT.Domain;
 using CBT.Domain.Identity;
 using CBT.Logic.Services;
+using CBT.SharedComponents.Blazor.Common;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Popups;
@@ -20,9 +23,20 @@ namespace CBT.SharedComponents.Blazor
 {
     public static class ServicesExtender
     {
-        public static IServiceCollection WithDatabase(this IServiceCollection builderServices, DatabaseConfig databaseConfig)
+        public static IServiceCollection WithConfigurations(this IServiceCollection builderServices, ConfigurationManager builderConfiguration)
         {
+            var databaseConfig = builderConfiguration.GetSection("Database").Get<DatabaseConfig>();
+            var apiConfig = builderConfiguration.GetSection("Api").Get<ApiConfig>();
+
             builderServices.AddSingleton(databaseConfig!);
+            builderServices.AddSingleton(apiConfig!);
+
+            return builderServices;
+        }
+
+        public static IServiceCollection WithDatabase(this IServiceCollection builderServices, ConfigurationManager builderConfiguration)
+        {
+            var databaseConfig = builderConfiguration.GetSection("Database").Get<DatabaseConfig>();
 
             builderServices.AddDbContext<CBTIdentityDataContext>(options =>
             {
@@ -73,6 +87,7 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddScoped<JsInterop>();
             builderServices.AddSyncfusionBlazor();
             builderServices.AddHttpClient();
+            builderServices.AddHttpContextAccessor();
 
             return builderServices;
         }
@@ -96,6 +111,9 @@ namespace CBT.SharedComponents.Blazor
                 options.Lockout.MaxFailedAccessAttempts = 10;
             });
 
+            builderServices.AddScoped<AuthenticationStateProvider, BaseAuthenticationStateProvider>();
+            builderServices.AddScoped<BaseAuthenticationStateProvider>();
+
             return builderServices;
         }
 
@@ -118,7 +136,6 @@ namespace CBT.SharedComponents.Blazor
             });
 
             builderServices.AddControllers();
-            builderServices.AddHttpContextAccessor();
 
             builderServices
                 .AddRazorComponents()

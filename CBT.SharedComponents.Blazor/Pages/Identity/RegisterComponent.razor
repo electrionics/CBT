@@ -14,6 +14,8 @@
 @inject SignInManager<User> _signInManager;
 @inject JsInterop JsInterop;
 
+@inject BaseAuthenticationStateProvider AuthenticationStateProvider;
+
 <PageTitle>Псионик - Регистрация</PageTitle>
 
 <div class="row">
@@ -167,10 +169,8 @@
 
         if (result.Value?.Succeeded ?? false)
         {
-            var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
-            var authCookie = cookies.First().Value.First();
-            authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
-            await JsInterop.WriteAuthCookie(authCookie);
+            await AuthenticationStateProvider.Login(Model.Email);
+            await JsInterop.WriteAuth(result);
 
             var navigateUrl = NavigationManager.ToAbsoluteUri($"account/register/confirmation?email={Model.Email}");
             NavigationManager.NavigateTo(navigateUrl.ToString(), true);

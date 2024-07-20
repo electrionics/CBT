@@ -2,11 +2,11 @@
 @using System.Text;
 @using System.Security.Claims;
 
-@using CBT.Domain.Identity
-
 @using Microsoft.AspNetCore.Authentication;
 @using Microsoft.AspNetCore.Components.Authorization;
 @using Microsoft.AspNetCore.Identity;
+
+@using CBT.Domain.Identity
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
@@ -15,6 +15,8 @@
 @inject SignInManager<User> _signInManager;
 @inject JsInterop JsInterop;
 @inject SfDialogService SfDialogService;
+@inject ApiConfig ApiConfig;
+@inject BaseAuthenticationStateProvider AuthenticationStateProvider;
 
 <PageTitle>Псионик - Вход в систему</PageTitle>
 
@@ -79,20 +81,17 @@
     public async Task Submit()
     {
         LastServerErrorMessage = null;
-        returnUrl = NavigationManager.BaseUri;
 
-        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/login");
         var client = ClientFactory.CreateClient();
-
+        var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/login";
         var result = await client.PostResultAsJsonAsync<LoginResult, LoginModel>(apiUrl, Model);
+
         if (result.Value?.Succeeded ?? false)
         {
-            var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
-            var authCookie = cookies.First().Value.First();
-            authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
-            await JsInterop.WriteAuthCookie(authCookie);
+            await AuthenticationStateProvider.Login(Model.Email);
+            await JsInterop.WriteAuth(result);
 
-            NavigationManager.NavigateTo(returnUrl, true);
+            NavigationManager.NavigateTo(NavigationManager.BaseUri, true);
         }
         else if (result.Value?.RequiresTwoFactor ?? false)
         {

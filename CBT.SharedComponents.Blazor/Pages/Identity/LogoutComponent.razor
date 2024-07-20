@@ -2,13 +2,15 @@
 @using Microsoft.Extensions.Logging
 
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject BaseAuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<User> _signInManager;
 @inject NavigationManager NavigationManager;
 
 @inject ILogger<LogoutComponent> _logger;
 @inject IHttpClientFactory ClientFactory;
 @inject JsInterop JsInterop;
+
+@inject ApiConfig ApiConfig;
 
 <PageTitle>Псионик - Выход из системы</PageTitle>
 
@@ -35,20 +37,15 @@
     {
         returnUrl = NavigationManager.BaseUri;
 
-        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/logout");
         var client = ClientFactory.CreateClient();
+        var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/logout";
         var result = await client.PostResultAsJsonAsync<LogoutResult, LogoutModel>(apiUrl, new());
+
+        AuthenticationStateProvider.Logout();
+        await JsInterop.WriteAuth(result);
 
         _logger.LogInformation("User logged out.");
 
-        var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
-        var authCookie = cookies.FirstOrDefault().Value?.FirstOrDefault();
-        authCookie = authCookie?.Replace(" httponly", "");
-
-        if (authCookie != null)
-        {
-            await JsInterop.WriteAuthCookie(authCookie);
-            NavigationManager.NavigateTo(returnUrl, true);
-        }
+        NavigationManager.NavigateTo(returnUrl, true);
     }
 }

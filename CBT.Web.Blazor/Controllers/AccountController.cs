@@ -326,6 +326,31 @@ namespace CBT.Web.Blazor.Controllers
         //    return Task.FromResult(result);
         //}
 
+        [HttpGet]
+        [Route("/api/account/resetpassword/code")]
+        public async Task<GenerateCodeResult> GenerateCode([FromQuery]string email)
+        {
+            var result = new GenerateCodeResult();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user != null)
+                {
+                    result.Code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                }
+                else
+                {
+                    result.Message = "Пользователь не найден. Введите корректный адрес электронной почты.";
+                }
+            }
+            catch (Exception e)
+            {
+                result.Message = "Произошла ошибка.";
+            }
+
+            return result;
+        }
+
         [HttpPost]
         [Route("api/account/resetpassword")]
         public async Task<ResetPasswordResult> SendResetPassword([FromBody]ResetPasswordModel model)

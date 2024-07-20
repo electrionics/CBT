@@ -15,4 +15,3 @@ export function writeAuthCookie(value) {
 export function readAuthCookie() {
     return document.cookie;
 }
-sok.onerror = function (evt) { console.log(evt); }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 
 using CBT.SharedComponents.Blazor;
+using CBT.SharedComponents.Blazor.Common;
 using CBT.MAUI.Blazor.Infrastructure;
 
 namespace CBT.MAUI.Blazor
@@ -30,11 +31,15 @@ namespace CBT.MAUI.Blazor
 
             #endregion
 
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1");
+
             builder.Configuration.AddJsonFile("appsettings.desktop.json");
-            var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
+
             var builderServices = builder.Services;
+
             builderServices
-                .WithDatabase(databaseConfig!)
+                .WithConfigurations(builder.Configuration)
+                .WithDatabase(builder.Configuration)
                 .WithServices()
                 .WithValidators()
                 .WithIdentity()
@@ -47,7 +52,6 @@ namespace CBT.MAUI.Blazor
             #endregion
 
             builderServices.AddAuthorizationCore();
-            builderServices.AddScoped<AuthenticationStateProvider, CurrentThreadUserAuthenticationStateProvider>();
 
             return builder.Build();
         }

@@ -3,6 +3,8 @@
 @inject IHttpClientFactory ClientFactory;
 @inject SfDialogService SfDialogService;
 
+@inject ApiConfig ApiConfig;
+
 <h1>Подтверждение регистрации</h1>
 
 @if (Model?.DisplayConfirmAccountLink ?? false)
@@ -28,7 +30,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         var client = ClientFactory.CreateClient();
-        var apiUrl = NavigationManager.ToAbsoluteUri($"api/account/register/confirmation?email={Email}");
+        var apiUrl = ApiConfig.ApiEndpointBaseUrl + $"/account/register/confirmation?email={Email}";
 
         Model = await client.GetFromJsonAsync<RegisterConfirmationModel>(apiUrl);
 

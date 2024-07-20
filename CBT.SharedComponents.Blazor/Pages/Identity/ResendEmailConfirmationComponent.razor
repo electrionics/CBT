@@ -3,6 +3,8 @@
 @inject IHttpClientFactory ClientFactory;
 @inject NavigationManager NavigationManager;
 
+@inject ApiConfig ApiConfig;
+
 <PageTitle>Псионик - Повторное подтверждение почты</PageTitle>
 
 <h1>Повторное подтверждение почты</h1>
@@ -59,7 +61,7 @@
         LastServerErrorMessage = null;
 
         var client = ClientFactory.CreateClient();
-        var apiUrl = NavigationManager.ToAbsoluteUri($"api/account/register/confirmation/resend");
+        var apiUrl = ApiConfig.ApiEndpointBaseUrl + $"/account/register/confirmation/resend";
 
         var result = await client.PostResultAsJsonAsync<ResendConfirmationResult, ResendConfirmationModel>(apiUrl, Model);
 
