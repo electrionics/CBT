@@ -13,7 +13,7 @@
 @inject UserManager<User> UserManager;
 
 @inject SignInManager<User> _signInManager;
-@inject IJSRuntime JSRuntime;
+@inject JsInterop JsInterop;
 @inject SfDialogService SfDialogService;
 
 <PageTitle>Псионик - Вход в систему</PageTitle>
@@ -90,7 +90,7 @@
             var cookies = result.Headers.Where(x => x.Key == "Set-Cookie");
             var authCookie = cookies.First().Value.First();
             authCookie = authCookie.Replace(" httponly", ""); //authCookie = authCookie.Replace(" secure; samesite=lax; httponly", "");
-            await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+            await JsInterop.WriteAuthCookie(authCookie);
 
             NavigationManager.NavigateTo(returnUrl, true);
         }

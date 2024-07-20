@@ -107,10 +107,6 @@
 	  <Content Update="Pages\ThreeColumnsTechniqueReviewList.razor">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Content>
-	  <Content Update="Pages\_Host.cshtml">
-	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	  </Content>
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="Pages\TaskList.razor" />

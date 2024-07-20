@@ -2,16 +2,37 @@ using Serilog;
 
 using CBT.SharedComponents.Blazor;
 
+using CBT.Web.Blazor;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
-using CBT.Shared.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfig>();
+var builderServices = builder.Services;
 
-builder.Services.Extend(databaseConfig!);
+builderServices
+    .WithDatabase(databaseConfig!)
+    .WithServices()
+    .WithValidators()
+    .WithIdentity()
+    .WithCommon()
+    .WithWeb();
 
-builder.Services.AddHostedService<UserNotificationBackgroundService>();
+#region Web
+
+builderServices.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("https://localhost:7040", "http://localhost:51979")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials());
+});
+
+builderServices.AddAntiforgery();
+builderServices.AddHostedService<UserNotificationBackgroundService>();
+
+#endregion
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -45,10 +66,11 @@ app.UseStaticFiles();
 app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapHub<NotificationHub>("notifications");
 app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();

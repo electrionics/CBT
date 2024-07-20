@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CBT.Logic", "CBT.Logic\CBT.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CBT.Domain", "CBT.Domain\CBT.Domain.csproj", "{157954B7-7B44-4E75-8AFB-ADDC4814D30C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CBT.SharedComponents.Blazor", "CBT.SharedComponents.Blazor\CBT.SharedComponents.Blazor.csproj", "{9B4865A6-128F-4E58-8242-8B74901C6B64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CBT.SharedComponents.Blazor", "CBT.SharedComponents.Blazor\CBT.SharedComponents.Blazor.csproj", "{9B4865A6-128F-4E58-8242-8B74901C6B64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

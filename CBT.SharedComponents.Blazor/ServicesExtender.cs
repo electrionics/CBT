@@ -6,6 +6,7 @@ using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -19,10 +20,8 @@ namespace CBT.SharedComponents.Blazor
 {
     public static class ServicesExtender
     {
-        public static IServiceCollection Extend(this IServiceCollection builderServices, DatabaseConfig databaseConfig)
+        public static IServiceCollection WithDatabase(this IServiceCollection builderServices, DatabaseConfig databaseConfig)
         {
-            #region Database
-
             builderServices.AddSingleton(databaseConfig!);
 
             builderServices.AddDbContext<CBTIdentityDataContext>(options =>
@@ -38,14 +37,11 @@ namespace CBT.SharedComponents.Blazor
                 options.UseSqlServer(databaseConfig?.SingleConnectionStringMARS);
             }, ServiceLifetime.Transient);
 
+            return builderServices;
+        }
 
-            builderServices.AddIdentity<User, Role>()
-                .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
-
-            #endregion
-
-            #region Dependencies
-
+        public static IServiceCollection WithServices(this IServiceCollection builderServices)
+        {
             builderServices.AddScoped<AutomaticThoughtsService>();
             builderServices.AddScoped<PeopleService>();
             builderServices.AddScoped<NotificationsService>();
@@ -59,27 +55,33 @@ namespace CBT.SharedComponents.Blazor
 
             builderServices.AddScoped<IEmailSender, EmailService>();
 
+            return builderServices;
+        }
+
+        public static IServiceCollection WithValidators(this IServiceCollection builderServices)
+        {
             builderServices.AddScoped<IValidator<LoginModel>, LoginModelValidator>();
             builderServices.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
             builderServices.AddScoped<IValidator<ResendConfirmationModel>, ResendConfirmationModelValidator>();
             builderServices.AddScoped<IValidator<ResetPasswordModel>, ResetPasswordModelValidator>();
 
-            #endregion
+            return builderServices;
+        }
 
-            #region Web (possibly to remove from here)
+        public static IServiceCollection WithCommon(this IServiceCollection builderServices)
+        {
+            builderServices.AddScoped<JsInterop>();
+            builderServices.AddSyncfusionBlazor();
+            builderServices.AddHttpClient();
 
-            builderServices.AddCors(options =>
-            {
-                options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins("https://localhost:7040", "http://localhost:51979")
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials());
-            });
+            return builderServices;
+        }
 
-            builderServices.AddAuthentication();
-            builderServices.AddAuthorization();
-
+        public static IServiceCollection WithIdentity(this IServiceCollection builderServices)
+        {
+            builderServices.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<CBTIdentityDataContext>().AddDefaultTokenProviders();
+            
             builderServices.Configure<IdentityOptions>(options =>
             {
                 // Default Password settings.
@@ -94,19 +96,13 @@ namespace CBT.SharedComponents.Blazor
                 options.Lockout.MaxFailedAccessAttempts = 10;
             });
 
-            builderServices.AddSignalR((options) =>
-            {
-                options.EnableDetailedErrors = true;
-            });
+            return builderServices;
+        }
 
-            builderServices.AddControllers();
-            builderServices.AddHttpClient();
-            builderServices.AddHttpContextAccessor();
-
-            // Add services to the container.
-            builderServices.AddRazorPages();
-            builderServices.AddServerSideBlazor();
-            builderServices.AddSyncfusionBlazor();
+        public static IServiceCollection WithWeb(this IServiceCollection builderServices)
+        {
+            builderServices.AddAuthentication();
+            builderServices.AddAuthorization();
 
             builderServices.Configure<CookiePolicyOptions>(options =>
             {
@@ -116,7 +112,17 @@ namespace CBT.SharedComponents.Blazor
                 options.CheckConsentNeeded = _ => false;
             });
 
-            #endregion
+            builderServices.AddSignalR((options) =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
+            builderServices.AddControllers();
+            builderServices.AddHttpContextAccessor();
+
+            builderServices
+                .AddRazorComponents()
+                .AddInteractiveServerComponents();
 
             return builderServices;
         }

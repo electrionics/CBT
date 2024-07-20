@@ -1,12 +1,40 @@
-﻿<Router AppAssembly="@typeof(CBT.Web.Blazor.App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(CBT.Web.Blazor.Shared.MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Не найдено</PageTitle>
-        <LayoutView Layout="@typeof(CBT.Web.Blazor.Shared.MainLayout)">
-            <p role="alert">Извините, по данному адресу ничего не найдено.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+﻿@inject IHostEnvironment Env
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="CBT.Web.Blazor.styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
+    <script src="~/script.js"></script>
+    <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+<body>
+    <Routes @rendermode="InteractiveServer" />
+
+    <div id="blazor-error-ui">
+        @if (Env.IsDevelopment())
+        {
+            <text>
+                An unhandled exception has occurred. See browser dev tools for details.
+            </text>
+        }
+        else
+        {
+            <text>
+                An error has occurred. This app may no longer respond until reloaded.
+            </text>
+        }
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
 
 @inject ILogger<LogoutComponent> _logger;
 @inject IHttpClientFactory ClientFactory;
-@inject IJSRuntime JSRuntime;
+@inject JsInterop JsInterop;
 
 <PageTitle>Псионик - Выход из системы</PageTitle>
 
@@ -47,7 +47,7 @@
 
         if (authCookie != null)
         {
-            await JSRuntime.InvokeVoidAsync("writeAuthCookie", authCookie);
+            await JsInterop.WriteAuthCookie(authCookie);
             NavigationManager.NavigateTo(returnUrl, true);
         }
     }

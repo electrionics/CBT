@@ -1,17 +1,45 @@
 ﻿@inherits LayoutComponentBase
 
+@using CBT.SharedComponents.Blazor.Shared;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>ПСИОНИК</PageTitle>
+
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenuComponent />
     </div>
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <NavLink class="nav-link" href="common/cognitive-errors">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Когнитивные ошибки
+            </NavLink>
+            <NavLink class="nav-link" href="diary/three-columns/example" title="Техника трех колонок">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Примеры проработок 1
+            </NavLink>
+            <NavLink class="nav-link" href="diary/automatic-thoughts/example" title="Дневник автоматических мыслей">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Примеры проработок 2
+            </NavLink>
+            <CascadingAuthenticationState>
+                <AuthorizeView>
+                    <Authorized>
+                        <NotificationsOneTimeComponent />
+                        Здравствуйте, @context.User?.Identity?.Name 
+                        <a href="account/logout">Выход</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="account/login">Вход</a>
+                        <a href="account/register">Регистрация</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </CascadingAuthenticationState>
         </div>
 
         <article class="content px-4">
             @Body
+            <Syncfusion.Blazor.Popups.SfDialogProvider />
         </article>
     </main>
 </div>

@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-@using CBT.Shared.Blazor.Shared;
+@using CBT.SharedComponents.Blazor.Shared;
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -8,7 +8,7 @@
 
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenuComponent />
     </div>
 
     <main>
@@ -25,7 +25,7 @@
             <CascadingAuthenticationState>
                 <AuthorizeView>
                     <Authorized>
-                        <NotificationsOneTime />
+                        <NotificationsOneTimeComponent />
                         Здравствуйте, @context.User?.Identity?.Name 
                         <a href="account/logout">Выход</a>
                     </Authorized>
@@ -38,7 +38,9 @@
         </div>
 
         <article class="content px-4">
-            @Body
+            <ErrorBoundary>
+                @Body
+            </ErrorBoundary>
             <Syncfusion.Blazor.Popups.SfDialogProvider />
         </article>
     </main>

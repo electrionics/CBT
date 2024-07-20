@@ -1,0 +1,12 @@
+﻿<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(CBT.Web.Blazor.Shared.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Не найдено</PageTitle>
+        <LayoutView Layout="@typeof(CBT.Web.Blazor.Shared.MainLayout)">
+            <p role="alert">Извините, по данному адресу ничего не найдено.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
