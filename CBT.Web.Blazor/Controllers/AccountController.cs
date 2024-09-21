@@ -5,17 +5,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 
 using FluentValidation;
 
+using CBT.Domain;
 using CBT.Domain.Entities;
 using CBT.Domain.Identity;
 using CBT.SharedComponents.Blazor.Model.Enums;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Common;
-using CBT.Domain;
 
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 

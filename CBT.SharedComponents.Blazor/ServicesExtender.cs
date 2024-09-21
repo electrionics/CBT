@@ -1,23 +1,25 @@
-﻿using CBT.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using FluentValidation;
+
+using Syncfusion.Blazor;
+using Syncfusion.Blazor.Popups;
+
+using CBT.Domain;
 using CBT.Domain.Identity;
 using CBT.Logic.Services;
 using CBT.SharedComponents.Blazor.Common;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
-using FluentValidation;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Syncfusion.Blazor;
-using Syncfusion.Blazor.Popups;
 
 namespace CBT.SharedComponents.Blazor
 {

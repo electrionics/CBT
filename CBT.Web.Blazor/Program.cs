@@ -5,8 +5,6 @@ using CBT.SharedComponents.Blazor;
 using CBT.Web.Blazor;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;
-using CBT.SharedComponents.Blazor.Common;
-using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,8 +46,8 @@ builder.Host.UseSerilog(logger);
 
 var app = builder.Build();
 // old Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXxednRRRmVcVkJ2V0I=
-// Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF5cXmZCeUx/WmFZfVpgdVdMZVtbR3FPIiBoS35RckVkWX1fcnFSRWdVUEB1");
+// 
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NBaF5cXmZCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXtfcHRRR2deV0JyW0c=");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

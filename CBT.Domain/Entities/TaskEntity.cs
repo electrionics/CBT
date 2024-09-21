@@ -32,7 +32,7 @@ namespace CBT.Domain.Entities
 
         public string Text { get; set; }
 
-        public string Comment { get; set; }
+        public string? Comment { get; set; }
 
         public int CompletionPercent { get; set; }
     }

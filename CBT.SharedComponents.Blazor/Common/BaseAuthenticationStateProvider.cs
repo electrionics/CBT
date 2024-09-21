@@ -1,9 +1,10 @@
 ﻿using System.Security.Claims;
-using CBT.Domain.Identity;
+
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json.Linq;
+
+using CBT.Domain.Identity;
 
 namespace CBT.SharedComponents.Blazor.Common
 {
@@ -43,7 +44,11 @@ namespace CBT.SharedComponents.Blazor.Common
                 }
                 else
                 {
-                    Thread.CurrentPrincipal = value;
+                    try
+                    {
+                        AppDomain.CurrentDomain.SetThreadPrincipal(value);
+                    }
+                    catch { }
                 }
             }
         }
