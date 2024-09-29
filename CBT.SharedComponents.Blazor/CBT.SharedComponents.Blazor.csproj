@@ -21,12 +21,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.Popups" Version="26.1.41" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="26.1.41" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="25.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="25.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="25.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="25.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="25.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="25.2.7" />
   </ItemGroup>
 
   <ItemGroup>

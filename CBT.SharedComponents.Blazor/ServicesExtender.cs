@@ -20,6 +20,8 @@ using CBT.SharedComponents.Blazor.Common;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
+using Microsoft.Extensions.Logging;
+using Serilog.Core;
 
 namespace CBT.SharedComponents.Blazor
 {
