@@ -81,10 +81,10 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpPost]
         [Route("/api/account/logout")]
-        public async Task<bool> Logout()
+        public async Task<LogoutResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return true;
+            return new LogoutResult { Success = true };
         }
 
         [HttpPost]

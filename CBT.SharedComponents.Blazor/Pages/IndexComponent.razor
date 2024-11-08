@@ -8,6 +8,23 @@
     Заполняй их, отслеживай и <b>улучшай своё состояние!</b>
 </div>
 
+<div class="mt-4">
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <NotAuthorized>
+                <NavLink class="btn btn-primary" href="account/login" title="Вход">
+                    Нажми, чтобы войти
+                </NavLink>
+                <NavLink class="btn btn-success" href="account/register" title="Регистрация">
+                    Нажми, чтобы зарегистрироваться
+                </NavLink>
+                <br/>
+                <br />
+            </NotAuthorized>
+        </AuthorizeView>
+    </CascadingAuthenticationState>
+</div>
+
 <h2>История проекта</h2>
 
 <div class="alert alert-secondary mt-4">
@@ -60,8 +77,14 @@
     <CascadingAuthenticationState>
         <AuthorizeView>
             <NotAuthorized>
-                <a href="account/login">Нажми, чтобы зайти на сайт</a><br/>
-                <a href="account/register">Нажми, чтобы зарегистрироваться</a>
+                <NavLink class="btn btn-primary" href="account/login" title="Вход">
+                    Нажми, чтобы войти
+                </NavLink>
+                <NavLink class="btn btn-success" href="account/register" title="Регистрация">
+                    Нажми, чтобы зарегистрироваться
+                </NavLink>
+                <br />
+                <br />
             </NotAuthorized>
         </AuthorizeView>
     </CascadingAuthenticationState>

@@ -27,11 +27,17 @@
                     <Authorized>
                         <NotificationsOneTimeComponent />
                         Здравствуйте, @context.User?.Identity?.Name 
-                        <a href="account/logout">Выход</a>
+                        <NavLink class="nav-link" href="account/logout" title="Выход">
+                            <span class="oi oi-box-arrow-left" aria-hidden="true"></span> Выход
+                        </NavLink>
                     </Authorized>
                     <NotAuthorized>
-                        <a href="account/login">Вход</a>
-                        <a href="account/register">Регистрация</a>
+                        <NavLink class="nav-link" href="account/login" title="Вход">
+                            Вход
+                        </NavLink>
+                        <NavLink class="nav-link" href="account/register" title="Регистрация">
+                            Регистрация
+                        </NavLink>
                     </NotAuthorized>
                 </AuthorizeView>
             </CascadingAuthenticationState>
