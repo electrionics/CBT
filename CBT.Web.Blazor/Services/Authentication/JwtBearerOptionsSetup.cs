@@ -6,14 +6,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CBT.Web.Blazor.Services.Authentication
 {
-    public class JwtBearerOptionsSetup : IConfigureOptions<JwtBearerOptions>
+    public class JwtBearerOptionsSetup(
+        IOptions<JwtOptions> options) : IConfigureOptions<JwtBearerOptions>
     {
-        private readonly JwtOptions _jwtOptions;
-
-        public JwtBearerOptionsSetup(IOptions<JwtOptions> options) 
-        { 
-            _jwtOptions = options.Value;
-        }
+        private readonly JwtOptions _jwtOptions = options.Value;
 
         public void Configure(JwtBearerOptions options)
         {

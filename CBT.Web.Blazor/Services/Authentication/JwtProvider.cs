@@ -9,14 +9,10 @@ using CBT.Domain.Identity;
 
 namespace CBT.Web.Blazor.Services.Authentication
 {
-    public class JwtProvider
+    public class JwtProvider(
+        IOptions<JwtOptions> options)
     {
-        private readonly JwtOptions _jwtOptions;
-
-        public JwtProvider(IOptions<JwtOptions> options)
-        {
-            _jwtOptions = options.Value;
-        }
+        private readonly JwtOptions _jwtOptions = options.Value;
 
         public string Generate(User user)
         {

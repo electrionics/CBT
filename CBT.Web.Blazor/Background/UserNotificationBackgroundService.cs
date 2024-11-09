@@ -9,19 +9,16 @@ using CBT.Web.Blazor.Hubs;
 
 namespace CBT.Web.Blazor.Background
 {
-    public class UserNotificationBackgroundService : BackgroundService
+    public class UserNotificationBackgroundService(
+        ILogger<UserNotificationBackgroundService> logger, 
+        IHubContext<NotificationHub, 
+        INotificationClient> hubContext, 
+        DatabaseConfig databaseConfig) : BackgroundService
     {
         private static readonly TimeSpan Period = TimeSpan.FromSeconds(30);
-        private readonly ILogger<UserNotificationBackgroundService> _logger;
-        private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
-        private readonly DatabaseConfig databaseConfig;
-
-        public UserNotificationBackgroundService(ILogger<UserNotificationBackgroundService> logger, IHubContext<NotificationHub, INotificationClient> hubContext, DatabaseConfig databaseConfig)
-        {
-            _logger = logger;
-            _hubContext = hubContext;
-            this.databaseConfig = databaseConfig;
-        }
+        private readonly ILogger<UserNotificationBackgroundService> _logger = logger;
+        private readonly IHubContext<NotificationHub, INotificationClient> _hubContext = hubContext;
+        private readonly DatabaseConfig databaseConfig = databaseConfig;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

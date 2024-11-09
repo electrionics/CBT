@@ -5,16 +5,12 @@ using Microsoft.JSInterop;
 
 namespace CBT.Web.Blazor.Services.Authentication
 {
-    public class TokenServerAuthenticationStateProvider: AuthenticationStateProvider
+    public class TokenServerAuthenticationStateProvider(
+        IJSRuntime jsRuntime, 
+        JwtProvider jwtProvider) : AuthenticationStateProvider
     {
-        private readonly IJSRuntime _jsRuntime;
-        private readonly JwtProvider _jwtProvider;
-
-        public TokenServerAuthenticationStateProvider(IJSRuntime jsRuntime, JwtProvider jwtProvider)
-        {
-            _jsRuntime = jsRuntime;
-            _jwtProvider = jwtProvider;
-        }
+        private readonly IJSRuntime _jsRuntime = jsRuntime;
+        private readonly JwtProvider _jwtProvider = jwtProvider;
 
         public async Task<string> GetTokenAsync()
              => await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
