@@ -35,10 +35,12 @@
                                    AllowFiltering="true"
                                    EnableCloseOnSelect="false"
                                    MaximumSelectionLength="5"
+                                   Enabled="@(!IsEdit)" 
                                    @bind-Value="@Model.BindEmotionIds">
                         <MultiSelectFieldSettings Text="Value" Value="Key">
                         </MultiSelectFieldSettings>
                     </SfMultiSelect>
+                    @* Enabled не всегда true, при добавлении эмоций из списка во время редактировании формы падает ошибка, пока нет времени разбираться, да и эмоции добавлять к записи особого смысла нет, как сейчас видится.*@
                     <ValidationMessage For="@(() => Model.BindEmotionIds)" />
                 </div>
                 <div class="mb-4 percent-input-container">
@@ -104,7 +106,7 @@
                 </div>
                 <div class="e-footer-content">
                     <button class="btn btn-success" type="submit">@(IsEdit ? "Сохранить" : "Добавить")</button>
-                    <button class="btn btn-danger" @onclick="CloseBtnClick">Отмена</button>
+                    <button class="btn" @onclick="CloseBtnClick">Отмена</button>
                 </div>
             </EditForm>
         </Content>

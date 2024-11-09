@@ -10,7 +10,24 @@ namespace CBT.SharedComponents.Blazor.Model
         public Dictionary<int, int> BeginningEmotionValues { get; set; }
         public Dictionary<int, int> ResultingEmotionValues { get; set; }
 
-        public List<int> BindEmotionIds { get; set; }
+        private List<int> bindEmotionIds = [];
+        public List<int> BindEmotionIds 
+        { 
+            get
+            {
+                return bindEmotionIds;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    bindEmotionIds = value;
+                    return;
+                }
+
+                bindEmotionIds = [];
+            }
+        }
 
         public AutomaticThoughtDiaryRecordModel(Dictionary<int, string> emotions) : this()
         {
