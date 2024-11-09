@@ -165,7 +165,7 @@
         var client = ClientFactory.CreateClient();
         var apiUrl = NavigationManager.ToAbsoluteUri("api/account/register");
 
-        var result = await client.PostResultAsJsonAsync<RegisterResult, RegisterModel>(apiUrl, Model);
+        var result = await client.PostResultAsJsonAsync<CommonResult, RegisterModel>(apiUrl, Model);
 
         if (result.Value?.Succeeded ?? false)
         {

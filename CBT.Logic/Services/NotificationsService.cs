@@ -1,6 +1,7 @@
-﻿using CBT.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+
+using CBT.Domain;
 using CBT.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace CBT.Logic.Services
 {

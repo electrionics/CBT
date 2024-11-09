@@ -1,36 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
-using CBT.Domain.Entities;
 using CBT.Domain;
+using CBT.Domain.Entities;
 using CBT.Domain.Entities.Enums;
 using CBT.SharedComponents.Blazor.Model;
 using CBT.SharedComponents.Blazor.Model.Enums;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
-    public class PsychologistReviewFacade
+    public class PsychologistReviewFacade(
+        CBTDataContext dataContext)
     {
-        private readonly ILogger<PsychologistReviewFacade> _logger;
-        private readonly CBTDataContext dataContext;
+        private readonly CBTDataContext _dataContext = dataContext;
 
         private const string DemoUserId = "DemoPsychologist";
-
-        public PsychologistReviewFacade(ILogger<PsychologistReviewFacade> logger, CBTDataContext dataContext)
-        {
-            _logger = logger;
-            this.dataContext = dataContext;
-        }
 
 
         #region GetAllRecordReviews
 
         public async Task<List<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>>> GetAllThreeeColumnsRecordReviews(string? userId, ReviewRecordState? filterState)
         {
-            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+            var psychologist = await _dataContext.Set<Psychologist>().AsNoTracking()
                 .FirstAsync(x => x.UserId == userId);
 
-            var records = await BuildQuery(dataContext, userId, filterState)
+            var records = await BuildQuery(_dataContext, userId, filterState)
                     .Where(x => x.Type == DiaryType.ThreeColumnsTechnique)
                     .ToListAsync();
 
@@ -43,10 +36,10 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<List<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>>> GetAllAutomaticDiaryRecordReviews(string? userId, ReviewRecordState? filterState)
         {
-            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+            var psychologist = await _dataContext.Set<Psychologist>().AsNoTracking()
                 .FirstAsync(x => x.UserId == userId);
 
-            var records = await BuildQuery(dataContext, userId, filterState)
+            var records = await BuildQuery(_dataContext, userId, filterState)
                     .Include(x => x.Emotions)
                     .Where(x => x.Type == DiaryType.AutomaticThoughtDiary)
                     .ToListAsync();
@@ -58,9 +51,9 @@ namespace CBT.SharedComponents.Blazor.Services
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
-        private IQueryable<AutomaticThought> BuildQuery(CBTDataContext dataContext, string? userId, ReviewRecordState? filterState)
+        private static IQueryable<AutomaticThought> BuildQuery(CBTDataContext dataContextParameter, string? userId, ReviewRecordState? filterState)
         {
-            var query = dataContext.Set<AutomaticThought>()
+            var query = dataContextParameter.Set<AutomaticThought>()
                                     .Include(x => x.CognitiveErrors)
                                     .Include(x => x.PsychologistReviews)
                                     .Include(x => x.Patient)
@@ -70,11 +63,11 @@ namespace CBT.SharedComponents.Blazor.Services
 
             if (filterState == ReviewRecordState.Pending)
             {
-                query = query.Where(x => !x.PsychologistReviews.Any());
+                query = query.Where(x => x.PsychologistReviews.Count == 0);
             }
             else if (filterState == ReviewRecordState.Reviewed)
             {
-                query = query.Where(x => x.PsychologistReviews.Any());
+                query = query.Where(x => x.PsychologistReviews.Count != 0);
             }
 
             return query;
@@ -87,10 +80,10 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>?> GetThreeColumnRecordReview(int recordId, string? userId)
         {
-            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+            var psychologist = await _dataContext.Set<Psychologist>().AsNoTracking()
                 .FirstAsync(x => x.UserId == userId);
 
-            var record = await dataContext.Set<AutomaticThought>()
+            var record = await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.PsychologistReviews)
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Patient)
@@ -101,10 +94,10 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>?> GetAutomaticDiaryRecordReview(int recordId, string? userId)
         {
-            var psychologist = await dataContext.Set<Psychologist>().AsNoTracking()
+            var psychologist = await _dataContext.Set<Psychologist>().AsNoTracking()
                 .FirstAsync(x => x.UserId == userId);
 
-            var record = await dataContext.Set<AutomaticThought>()
+            var record = await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.PsychologistReviews)
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Patient)
@@ -121,34 +114,34 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task SaveThreeColumnRecordReview(ThoughtRecordReview<ThreeColumnsTechniqueRecordModel> model, string? userId)
         {
-            var data = await FetchData(dataContext, model.Value.Id, userId); 
+            var (record, psychologistId) = await FetchData(_dataContext, model.Value.Id, userId); 
             
             model.State = ReviewRecordState.Reviewed;
 
-            ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ConvertBack(model, data.psychologistId, data.record);
+            ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>.ConvertBack(model, psychologistId, record);
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         public async Task SaveAutomaticDiaryRecordReview(ThoughtRecordReview<AutomaticThoughtDiaryRecordModel> model, string? userId)
         {
-            var data = await FetchData(dataContext, model.Value.Id, userId);
+            var (record, psychologistId) = await FetchData(_dataContext, model.Value.Id, userId);
 
             model.State = ReviewRecordState.Reviewed;
 
-            ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.ConvertBack(model, data.psychologistId, data.record);
+            ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.ConvertBack(model, psychologistId, record);
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
-        private async Task<(AutomaticThought record, int psychologistId)> FetchData(CBTDataContext dataContext, int recordId, string? userId)
+        private static async Task<(AutomaticThought record, int psychologistId)> FetchData(CBTDataContext dataContextParameter, int recordId, string? userId)
         {
-            var record = await dataContext.Set<AutomaticThought>()
+            var record = await dataContextParameter.Set<AutomaticThought>()
                     .Include(x => x.PsychologistReviews)
                     .Include(x => x.CognitiveErrors)
                     .FirstAsync(x => x.Id == recordId);
 
-            var psychologistId = (await dataContext
+            var psychologistId = (await dataContextParameter
                 .Set<Psychologist>()
                 .AsNoTracking()
                 .FirstAsync(x => x.UserId == (userId ?? DemoUserId))).Id;
@@ -163,12 +156,12 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task SendRecordToPatient(int thoughtId)
         {
-            var data = await dataContext.Set<ThoughtPsychologistReview>()
+            var data = await _dataContext.Set<ThoughtPsychologistReview>()
                     .FirstAsync(x => x.ThoughtId == thoughtId);
 
             data.SentBack = true;
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         #endregion

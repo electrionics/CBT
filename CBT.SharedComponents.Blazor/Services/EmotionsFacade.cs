@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 using CBT.Domain;
 using CBT.Domain.Entities;
@@ -8,23 +7,18 @@ using CBT.Domain.Entities.Enums;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
-    public class EmotionsFacade
+    public class EmotionsFacade(
+        CBTDataContextMARS dataContext)
     {
-        private readonly ILogger<EmotionsFacade> _logger; //TODO: use logger in this class
-        private readonly CBTDataContextMARS dataContext;
-        private const string DemoUserId = "DemoClient";
+        private readonly CBTDataContextMARS _dataContext = dataContext;
 
-        public EmotionsFacade(ILogger<EmotionsFacade> logger, CBTDataContextMARS dataContext)
-        {
-            _logger = logger;
-            this.dataContext = dataContext;
-        }
+        private const string DemoUserId = "DemoClient";
 
         #region GetAllEmotions
 
         public async Task<Dictionary<int, string>> GetAllEmotions()
         {
-            var emotions = await dataContext.Set<Emotion>()
+            var emotions = await _dataContext.Set<Emotion>()
                 .AsNoTracking().ToListAsync();
 
             return emotions.ToDictionary(x => x.Id, x => x.Name);
@@ -41,7 +35,7 @@ namespace CBT.SharedComponents.Blazor.Services
         {
             var allEmotions = await GetAllEmotions();
 
-            var userEmotions = await dataContext.Set<ThoughtEmotion>()
+            var userEmotions = await _dataContext.Set<ThoughtEmotion>()
                 .AsNoTracking()
                 .Where(x => x.Thought.Patient.UserId == (userId ?? DemoUserId))
                 .GroupBy(x => x.EmotionId)

@@ -15,13 +15,12 @@ using Syncfusion.Blazor.Popups;
 
 using CBT.Domain;
 using CBT.Domain.Identity;
-using CBT.Logic.Services;
 using CBT.SharedComponents.Blazor.Common;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
-using Microsoft.Extensions.Logging;
-using Serilog.Core;
+using CBT.SharedComponents.Blazor.Model;
+using CBT.Logic.Services;
 
 namespace CBT.SharedComponents.Blazor
 {
@@ -62,6 +61,7 @@ namespace CBT.SharedComponents.Blazor
         {
             builderServices.AddScoped<AutomaticThoughtsService>();
             builderServices.AddScoped<PeopleService>();
+            builderServices.AddScoped<LinkingService>();
             builderServices.AddScoped<NotificationsService>();
             builderServices.AddScoped<SfDialogService>();
             builderServices.AddScoped<UserManager<User>>();
@@ -70,6 +70,7 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddScoped<PsychologistReviewFacade>();
             builderServices.AddScoped<CognitiveErrorsFacade>();
             builderServices.AddScoped<EmotionsFacade>();
+            builderServices.AddScoped<LinkingFacade>();
 
             builderServices.AddScoped<IEmailSender, EmailService>();
 
@@ -82,6 +83,7 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
             builderServices.AddScoped<IValidator<ResendConfirmationModel>, ResendConfirmationModelValidator>();
             builderServices.AddScoped<IValidator<ResetPasswordModel>, ResetPasswordModelValidator>();
+            builderServices.AddScoped<IValidator<ProfileModel>, ProfileModelValidator>();
 
             return builderServices;
         }
@@ -89,6 +91,7 @@ namespace CBT.SharedComponents.Blazor
         public static IServiceCollection WithCommon(this IServiceCollection builderServices)
         {
             builderServices.AddScoped<JsInterop>();
+            builderServices.AddScoped<ClipboardService>();
             builderServices.AddSyncfusionBlazor();
             builderServices.AddHttpClient();
             builderServices.AddHttpContextAccessor();

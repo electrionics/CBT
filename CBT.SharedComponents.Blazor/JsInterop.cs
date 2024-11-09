@@ -9,16 +9,9 @@ namespace CBT.SharedComponents.Blazor
     // This class can be registered as scoped DI service and then injected into Blazor
     // components for use.
 
-    public class JsInterop : IAsyncDisposable
+    public class JsInterop(
+        IJSRuntime jsRuntime) : JsInteropBase(jsRuntime), IAsyncDisposable
     {
-        private readonly Lazy<Task<IJSObjectReference>> moduleTask;
-
-        public JsInterop(IJSRuntime jsRuntime)
-        {
-            moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/CBT.SharedComponents.Blazor/jsInterop.js").AsTask());
-        }
-
         public async ValueTask<string> Prompt(string message)
         {
             var module = await moduleTask.Value;
@@ -35,15 +28,6 @@ namespace CBT.SharedComponents.Blazor
         {
             var module = await moduleTask.Value;
             return await module.InvokeAsync<string>("readAuthCookie");
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (moduleTask.IsValueCreated)
-            {
-                var module = await moduleTask.Value;
-                await module.DisposeAsync();
-            }
         }
     }
 }

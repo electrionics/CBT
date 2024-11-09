@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.Diagnostics;
+
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace CBT.Web.Blazor.Pages
 {
@@ -14,13 +14,6 @@ namespace CBT.Web.Blazor.Pages
         public Exception? LastException { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-        private readonly ILogger<ErrorModel> _logger;
-
-        public ErrorModel(ILogger<ErrorModel> logger)
-        {
-            _logger = logger;
-        }
 
         public void OnGet()
         {

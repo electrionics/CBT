@@ -8,66 +8,49 @@ using Microsoft.AspNetCore.Mvc;
 
 using FluentValidation;
 
-using CBT.Domain;
-using CBT.Domain.Entities;
 using CBT.Domain.Identity;
+using CBT.Logic.Services;
 using CBT.SharedComponents.Blazor.Model.Enums;
 using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Common;
+using CBT.SharedComponents.Blazor.Model;
 
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 
 namespace CBT.Web.Blazor.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(SignInManager<User> signInManager,
+        UserManager<User> userManager,
+        IUserStore<User> userStore,
+        ILogger<AccountController> logger,
+        IEmailSender emailSender,
+        IHttpContextAccessor httpContextAccessor,
+        IValidator<RegisterModel> registerValidator,
+        IValidator<ResendConfirmationModel> resendConfirmationValidator,
+        IValidator<ResetPasswordModel> resetPasswordValidator,
+        LinkingService linkingService,
+        PeopleService peopleService) : Controller
     {
         #region Dependencies
 
-        private readonly CBTDataContext _dataContext;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<AccountController> _logger = logger;
 
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
-        private readonly IUserStore<User> _userStore;
-        private readonly IUserEmailStore<User> _emailStore;
+        private readonly SignInManager<User> _signInManager = signInManager;
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly IUserStore<User> _userStore = userStore;
+        private readonly IUserEmailStore<User> _emailStore = (IUserEmailStore<User>)userStore;
 
-        private readonly IEmailSender _emailSender;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailSender _emailSender = emailSender;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-        private readonly IValidator<RegisterModel> _registerValidator;
-        private readonly IValidator<ResendConfirmationModel> _resendConfirmationValidator;
-        private readonly IValidator<ResetPasswordModel> _resetPasswordValidator;
+        private readonly IValidator<RegisterModel> _registerValidator = registerValidator;
+        private readonly IValidator<ResendConfirmationModel> _resendConfirmationValidator = resendConfirmationValidator;
+        private readonly IValidator<ResetPasswordModel> _resetPasswordValidator = resetPasswordValidator;
 
-        #endregion
+        private readonly LinkingService _linkingService = linkingService;
+        private readonly PeopleService _peopleService = peopleService;
 
-        #region ctor
-        public AccountController(SignInManager<User> signInManager,
-            UserManager<User> userManager,
-            IUserStore<User> userStore,
-            CBTDataContext dataContext,
-            ILogger<AccountController> logger,
-            IEmailSender emailSender,
-            IHttpContextAccessor httpContextAccessor,
-            IValidator<RegisterModel> registerValidator,
-            IValidator<ResendConfirmationModel> resendConfirmationValidator,
-            IValidator<ResetPasswordModel> resetPasswordValidator)
-        {
-            _dataContext = dataContext;
-            _logger = logger;
-
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = (IUserEmailStore<User>)userStore;
-
-            _emailSender = emailSender;
-            _httpContextAccessor = httpContextAccessor;
-
-            _registerValidator = registerValidator;
-            _resendConfirmationValidator = resendConfirmationValidator;
-            _resetPasswordValidator = resetPasswordValidator;
-        }
         #endregion
 
         [HttpPost]
@@ -89,12 +72,12 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpPost]
         [Route("/api/account/register")]
-        public async Task<RegisterResult> Register([FromBody] RegisterModel model)
+        public async Task<CommonResult> Register([FromBody] RegisterModel model)
         {
             var validationResult = await _registerValidator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
-                return new RegisterResult
+                return new CommonResult
                 {
                     Succeeded = false,
                     ErrorMessage = validationResult.Errors.First().ErrorMessage
@@ -115,28 +98,21 @@ namespace CBT.Web.Blazor.Controllers
                     if (model.RoleTypes.Contains(RoleType.Client))
                     {
                         await _userManager.AddToRoleAsync(user, "Client");
-                        _dataContext.Set<Patient>().Add(new Patient
-                        {
-                            DisplayName = model.Name,
-                            UserId = user.Id
-                        });
+                        await _peopleService.CreatePatient(model.Name, user.Id);
                     }
                     if (model.RoleTypes.Contains(RoleType.Psychologist))
                     {
                         await _userManager.AddToRoleAsync(user, "Psychologist");
-                        _dataContext.Set<Psychologist>().Add(new Psychologist
-                        {
-                            DisplayName = model.Name,
-                            UserId = user.Id,
-                        });
+                        await _peopleService.CreatePsychologist(model.Name, user.Id);
                     }
-                    await _dataContext.SaveChangesAsync();
+
+                    await _linkingService.CreateNewLink(user.Id);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Ошибка при регистрации.");
 
-                    return new RegisterResult
+                    return new CommonResult
                     {
                         Succeeded = false,
                         ErrorMessage = "Ошибка на сервере.",
@@ -146,14 +122,14 @@ namespace CBT.Web.Blazor.Controllers
                 // roles
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 
-                return new RegisterResult
+                return new CommonResult
                 {
                     Succeeded = true
                 };
             }
             else
             {
-                return new RegisterResult
+                return new CommonResult
                 {
                     Succeeded = false,
                     ErrorMessage = result.Errors.First().Description,
@@ -175,7 +151,7 @@ namespace CBT.Web.Blazor.Controllers
                 };
             }
 
-            returnUrl = returnUrl ?? indexRelativeUrl;
+            returnUrl ??= indexRelativeUrl;
 
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -341,7 +317,7 @@ namespace CBT.Web.Blazor.Controllers
                     result.Message = "Пользователь не найден. Введите корректный адрес электронной почты.";
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 result.Message = "Произошла ошибка.";
             }
@@ -391,7 +367,7 @@ namespace CBT.Web.Blazor.Controllers
 
         [HttpGet]
         [Route("api/account/confirmEmail")]
-        public async Task<bool> ConfirmEmail(string userId, string code, string? returnUrl = null)
+        public async Task<bool> ConfirmEmail(string userId, string code)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)

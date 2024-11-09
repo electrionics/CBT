@@ -23,5 +23,7 @@
     protected virtual async Task SetupNotifications()
     {
         _messages.Add("0");
+
+        await Task.CompletedTask;
     }
 }

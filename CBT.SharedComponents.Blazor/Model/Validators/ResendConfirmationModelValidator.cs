@@ -1,5 +1,6 @@
-﻿using CBT.SharedComponents.Blazor.Model.Identity;
-using FluentValidation;
+﻿using FluentValidation;
+
+using CBT.SharedComponents.Blazor.Model.Identity;
 
 namespace CBT.SharedComponents.Blazor.Model.Validators
 {

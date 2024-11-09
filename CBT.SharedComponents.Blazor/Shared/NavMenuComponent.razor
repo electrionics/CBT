@@ -21,6 +21,15 @@
             <NavLink class="nav-link nav-link-2-l" href="/references">
                 <span class="oi oi-info" aria-hidden="true"></span> Справочная информация
             </NavLink>
+            <CascadingAuthenticationState>
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink class="nav-link nav-link-2-l" href="/profile">
+                           <span class="oi oi-person" aria-hidden="true"></span> Мой профиль
+                        </NavLink>
+                    </Authorized>
+                </AuthorizeView>
+            </CascadingAuthenticationState>
         </div>
         <CascadingAuthenticationState>
             <AuthorizeView Roles="Psychologist">

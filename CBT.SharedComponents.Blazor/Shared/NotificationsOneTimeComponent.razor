@@ -13,8 +13,6 @@
 @inject IHttpContextAccessor HttpContextAccessor;
 
 @code {
-    protected List<string> _messages = new();
-
     protected override async Task SetupNotifications()
     {
         await SingleTimeDirectNotificationSet();

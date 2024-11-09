@@ -8,18 +8,12 @@ using CBT.Domain.Identity;
 
 namespace CBT.SharedComponents.Blazor.Common
 {
-    public class BaseAuthenticationStateProvider : AuthenticationStateProvider
+    public class BaseAuthenticationStateProvider(
+        IHttpContextAccessor? httpContextAccessor,
+        UserManager<User> userManager) : AuthenticationStateProvider
     {
-        private readonly IHttpContextAccessor? httpContextAccessor;
-        private readonly UserManager<User> userManager;
-
-        public BaseAuthenticationStateProvider(
-            IHttpContextAccessor? httpContextAccessor, 
-            UserManager<User> userManager) 
-        {
-            this.httpContextAccessor = httpContextAccessor;
-            this.userManager = userManager;
-        }
+        private readonly IHttpContextAccessor? _httpContextAccessor = httpContextAccessor;
+        private readonly UserManager<User> _userManager = userManager;
 
         #region Current User
 
@@ -27,9 +21,9 @@ namespace CBT.SharedComponents.Blazor.Common
         {
             get
             {
-                if (httpContextAccessor?.HttpContext != null)
+                if (_httpContextAccessor?.HttpContext != null)
                 {
-                    return httpContextAccessor.HttpContext.User ?? anonymousUser;
+                    return _httpContextAccessor.HttpContext.User ?? anonymousUser;
                 }
                 else
                 {
@@ -38,9 +32,9 @@ namespace CBT.SharedComponents.Blazor.Common
             }
             set
             {
-                if (httpContextAccessor?.HttpContext != null)
+                if (_httpContextAccessor?.HttpContext != null)
                 {
-                    httpContextAccessor.HttpContext.User = value;
+                    _httpContextAccessor.HttpContext.User = value;
                 }
                 else
                 {
@@ -65,10 +59,10 @@ namespace CBT.SharedComponents.Blazor.Common
 
         public async Task Login(string email)
         {
-            var user = await userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                var roles = await userManager.GetRolesAsync(user);
+                var roles = await _userManager.GetRolesAsync(user);
 
                 var claims = new List<Claim>
                 {

@@ -3,43 +3,33 @@
 using CBT.Domain;
 using CBT.Domain.Entities;
 using CBT.Domain.Entities.Enums;
-using Microsoft.Extensions.Logging;
 
 namespace CBT.Logic.Services
 {
-    public class AutomaticThoughtsService
+    public class AutomaticThoughtsService(
+        CBTDataContext dataContext)
     {
-        private readonly ILogger<AutomaticThoughtsService> _logger; //TODO: use logger in this class
-        private readonly CBTDataContext dataContext;
-        private const string DemoUserId = "DemoClient";
+        private readonly CBTDataContext _dataContext = dataContext;
 
-        public AutomaticThoughtsService(ILogger<AutomaticThoughtsService> logger, CBTDataContext dataContext)
-        {
-            _logger = logger;
-            this.dataContext = dataContext;
-        }
+        private const string DemoUserId = "DemoClient";
 
         #region GetAllThoughts
 
         public async Task<List<AutomaticThought>> GetAllThoughts(string? userId = null)
         {
-            var threeColumnsTechniques = await dataContext.Set<AutomaticThought>()
+            var threeColumnsTechniques = await _dataContext.Set<AutomaticThought>()
                                 .Include(x => x.CognitiveErrors)
                                 .AsNoTracking()
                                 .Where(x => x.Type == DiaryType.ThreeColumnsTechnique)
                                 .Where(x => x.Patient.UserId == (userId ?? DemoUserId))
                                 .ToListAsync();
-#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-            return threeColumnsTechniques
-                .OrderBy(CalculateOrderOfThoughts)
-                .ToList();
-#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+            return [.. threeColumnsTechniques.OrderBy(CalculateOrderOfThoughts)];
         }
 
         private static int CalculateOrderOfThoughts(AutomaticThought item)
         {
             var orderAddition = 0;
-            if (!item.CognitiveErrors.Any())
+            if (item.CognitiveErrors.Count == 0)
             {
                 orderAddition += -2_000_000;
             }
@@ -64,13 +54,13 @@ namespace CBT.Logic.Services
                 Thought = thought,
                 RationalAnswer = null,
                 Type = DiaryType.ThreeColumnsTechnique,
-                CognitiveErrors = new List<ThoughtCognitiveError>()
+                CognitiveErrors = []
             };
 
-            await dataContext
+            await _dataContext
                 .Set<AutomaticThought>()
                 .AddAsync(data);
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
 
             return data.Id;
         }
@@ -80,12 +70,12 @@ namespace CBT.Logic.Services
 
         #region AddThoughtFull
 
-        public async Task<int> AddThoughtFull(AutomaticThought data, string? userId)
+        public async Task<int> AddThoughtFull(AutomaticThought data)
         {
-            dataContext
+            _dataContext
                 .Set<AutomaticThought>()
                 .Add(data);
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
 
             return data.Id;
         }
@@ -97,7 +87,7 @@ namespace CBT.Logic.Services
 
         public async Task<AutomaticThought?> GetThought(int id)
         {
-            return (await dataContext.Set<AutomaticThought>()
+            return (await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .AsNoTracking()
                 .FirstAsync(x => x.Id == id));
@@ -110,15 +100,15 @@ namespace CBT.Logic.Services
 
         public async Task EditThoughtFull(Action<AutomaticThought, int> convertBack, int thoughtId, string? userId)
         {
-            var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
+            var patient = await _dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
-            var data = await dataContext.Set<AutomaticThought>()
+            var data = await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .FirstAsync(x => x.Id == thoughtId);
 
             convertBack(data, patient.Id);
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         #endregion
@@ -128,15 +118,15 @@ namespace CBT.Logic.Services
 
         public async Task DeleteThought(int id)
         {
-            var data = await dataContext.Set<AutomaticThought>()
+            var data = await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Emotions)
                 .FirstAsync(x => x.Id == id);
 
-            dataContext.Set<AutomaticThought>()
+            _dataContext.Set<AutomaticThought>()
                 .Remove(data);
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         #endregion
@@ -146,12 +136,12 @@ namespace CBT.Logic.Services
 
         public async Task SendThoughtToPsychologist(int id)
         {
-            var data = await dataContext.Set<AutomaticThought>()
+            var data = await _dataContext.Set<AutomaticThought>()
                 .FirstAsync(x => x.Id == id);
 
             data.Sent = true;
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         #endregion
@@ -163,7 +153,7 @@ namespace CBT.Logic.Services
 
         public async Task<List<ThoughtPsychologistReview>> GetPsychologistReviews(int thoughtId)
         {
-            var data = await dataContext.Set<ThoughtPsychologistReview>().AsNoTracking()
+            var data = await _dataContext.Set<ThoughtPsychologistReview>().AsNoTracking()
                 .Include(x => x.Thought).ThenInclude(x => x.CognitiveErrors)
                 .Include(x => x.Psychologist)
                 .Where(x => x.SentBack && x.ThoughtId == thoughtId && x.Thought.Sent)
@@ -180,18 +170,14 @@ namespace CBT.Logic.Services
 
         public async Task<List<AutomaticThought>> GetAllAutomaticThoughts(string? userId = null)
         {
-            var threeColumnsTechniques = await dataContext.Set<AutomaticThought>()
+            var threeColumnsTechniques = await _dataContext.Set<AutomaticThought>()
                                 .Include(x => x.CognitiveErrors)
                                 .Include(x => x.Emotions)
                                 .AsNoTracking()
                                 .Where(x => x.Type == DiaryType.AutomaticThoughtDiary)
                                 .Where(x => x.Patient.UserId == (userId ?? DemoUserId))
                                 .ToListAsync();
-#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-            return threeColumnsTechniques
-                .OrderBy(CalculateOrderOfThoughts)
-                .ToList();
-#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+            return [.. threeColumnsTechniques.OrderBy(CalculateOrderOfThoughts)];
         }
 
         #endregion
@@ -201,12 +187,12 @@ namespace CBT.Logic.Services
 
         public async Task<int> AddAutomaticThoughtFull(AutomaticThought data, string? userId)
         {
-            var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
+            var patient = await _dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
-            dataContext
+            _dataContext
                 .Set<AutomaticThought>()
                 .Add(data);
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
 
             return data.Id;
         }
@@ -218,7 +204,7 @@ namespace CBT.Logic.Services
 
         public async Task<AutomaticThought> GetAutomaticThought(int id)
         {
-            return await dataContext.Set<AutomaticThought>()
+            return await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Emotions)
                 .AsNoTracking()
@@ -232,15 +218,15 @@ namespace CBT.Logic.Services
 
         public async Task EditAutomaticThoughtFull(Action<AutomaticThought, int> convertBack, int thoughtId, string? userId)
         {
-            var patient = await dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
+            var patient = await _dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
 
-            var data = await dataContext.Set<AutomaticThought>()
+            var data = await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors).Include(x => x.Emotions)
                 .FirstAsync(x => x.Id == thoughtId);
 
             convertBack(data, patient.Id);
 
-            await dataContext.SaveChangesAsync();
+            await _dataContext.SaveChangesAsync();
         }
 
         #endregion

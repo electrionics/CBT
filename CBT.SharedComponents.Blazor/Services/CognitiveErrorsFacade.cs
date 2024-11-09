@@ -1,30 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 using CBT.Domain;
 using CBT.Domain.Entities;
-using CBT.SharedComponents.Blazor.Model;
 using CBT.Domain.Entities.Enums;
+using CBT.SharedComponents.Blazor.Model;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
-    public class CognitiveErrorsFacade
+    public class CognitiveErrorsFacade(CBTDataContext dataContext)
     {
-        private readonly ILogger<CognitiveErrorsFacade> _logger; //TODO: use logger in this class
-        private readonly CBTDataContext dataContext;
-        private const string DemoUserId = "DemoClient";
+        private readonly CBTDataContext _dataContext = dataContext;
 
-        public CognitiveErrorsFacade(ILogger<CognitiveErrorsFacade> logger, CBTDataContext dataContext)
-        {
-            _logger = logger;
-            this.dataContext = dataContext;
-        }
+        private const string DemoUserId = "DemoClient";
 
         #region GetAllCognitiveErrors
 
-        public Dictionary<int, CognitiveErrorModel> GetAllCognitiveErrors()
-        {
-            return new Dictionary<int, CognitiveErrorModel>()
+#pragma warning disable CA1822 // Mark members as static
+        public Dictionary<int, CognitiveErrorModel> GetAllCognitiveErrors() => new()
             {
                 { (int)CognitiveErrors.AllOrNothing, new CognitiveErrorModel { Key = (int)CognitiveErrors.AllOrNothing,
                     Title = "Всё или ничего",
@@ -60,17 +52,17 @@ namespace CBT.SharedComponents.Blazor.Services
                     Title = "Преуменьшение",
                     Description = "Когда вы думаете о своих сильных сторонах, то можете делать противоположное преувеличению — смотреть так, что вещи выглядят маленькими и несущественными." } },
             };
-        }
+#pragma warning restore CA1822 // Mark members as static
 
         #endregion
 
         #region GetErrorsReport
-        
+
         public async Task<List<CognitiveErrorReportItem>> GetErrorsReport(string? userId = null)
         {
             var allErrors = GetAllCognitiveErrors();
 
-            var userErrors = await dataContext.Set<ThoughtCognitiveError>()
+            var userErrors = await _dataContext.Set<ThoughtCognitiveError>()
                 .AsNoTracking()
                 .Where(x => 
                     x.Thought.Patient.UserId == (userId ?? DemoUserId) &&
@@ -78,7 +70,7 @@ namespace CBT.SharedComponents.Blazor.Services
                 .GroupBy(x => x.CognitiveErrorId)
                 .ToDictionaryAsync(x => x.Key, x => x.Count());
 
-            var reviewUserErrors = (await dataContext.Set<ThoughtCognitiveError>()
+            var reviewUserErrors = (await _dataContext.Set<ThoughtCognitiveError>()
                 .AsNoTracking()
                 .Where(x => 
                     x.Thought.Patient.UserId == (userId ?? DemoUserId) && 

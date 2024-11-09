@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CBT.SharedComponents.Blazor.Common
+﻿namespace CBT.SharedComponents.Blazor.Common
 {
     public static class JsInteropExtensions
     {

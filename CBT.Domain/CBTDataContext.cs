@@ -141,6 +141,11 @@ namespace CBT.Domain
                     .HasForeignKey(x => x.ParentThoughtId);
             });
 
+            modelBuilder.Entity<Link>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+            });
+
             #endregion
         }
 
@@ -189,7 +194,7 @@ namespace CBT.Domain
         private void CreateEntity(ITrackingCreate trackable, DateTime? now = null)
         {
             trackable.DateCreated = now ?? DateTime.Now;
-            trackable.UserCreated = CurrentUserName;
+            trackable.UserCreated = CurrentUserName!;
         }
 
         private void UpdateEntity(ITrackingUpdate trackable, DateTime? now = null)

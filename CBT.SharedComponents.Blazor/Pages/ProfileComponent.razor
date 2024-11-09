@@ -1,0 +1,109 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@using Syncfusion.Blazor.Inputs
+
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
+@inject NavigationManager NavigationManager;
+@inject UserManager<User> UserManager;
+
+@inject ClipboardService ClipboardService;
+
+@inject LinkingFacade LinkingFacade;
+
+<h1>Мой профиль</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            <hr />
+            <div class="form-floating mb-3">
+                <div for="name" class="form-label">Моё имя <span class="oi oi-info" id="infoName"></span></div>
+                <div class="form-field">
+                    @Model?.DisplayName
+                    <SfTooltip Position="Position.RightCenter"
+                               Target="#infoName"
+                               CssClass="fontTooltip"
+                               Content="Используется для отображения на сайте.">
+                    </SfTooltip>
+                </div>
+                
+            </div>
+            <div class="form-floating mb-3">
+                <div for="email" class="form-label">Моя электронная почта <span class="oi oi-shield" id="infoEmail"></span></div>
+                <div class="form-field">
+                    @Model?.Email
+                    <SfTooltip Position="Position.RightCenter"
+                               Target="#infoEmail"
+                               CssClass="fontTooltip"
+                               Content="Не показываем никому, кроме Вас.">
+                    </SfTooltip>
+                </div>
+                
+            </div>
+            <div class="form-floating mb-3">
+                <div for="email" class="form-label">Моя ссылка <span class="oi oi-info" id="infoUrl"></span></div>
+                <div class="form-field">
+                    <button @onclick="CopyLink" class="btn btn-success"><span class="oi oi-copy"></span> Скопировать ссылку</button>
+                    <button @onclick="Recreate" class="btn btn-primary"><span class="oi oi-plus"></span> Пересоздать ссылку</button>
+                    <SfTooltip Position="Position.RightCenter"
+                               Target="#infoUrl"
+                               CssClass="fontTooltip"
+                               Content="Если Вы получаете помощь - отправьте ссылку тому, кто может Вам помочь. Если Вы оказываете помощь - отправьте ссылку тому, кому Вы хотите помочь.">
+                    </SfTooltip>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@code {
+    private string CurrentUserId { get; set; }
+
+    private ProfileModel Model { get; set; }
+    private string? LastServerErrorMessage { get; set; }
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+
+        CurrentUserId = UserManager.GetUserId(user)!;
+
+        Model = await LinkingFacade.GetModelByUserId(CurrentUserId);
+        Model!.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
+    }
+
+    public async Task Recreate()
+    {
+        LastServerErrorMessage = null;
+
+        try
+        {
+            Model.PublicId = await LinkingFacade.RecreateLink(CurrentUserId);
+            Model.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+        }
+        catch(Exception)
+        {
+            LastServerErrorMessage = "Ошибка. Ссылка не обновлена";
+        }
+    }
+
+    public async Task CopyLink()
+    {
+        try
+        {
+            await ClipboardService.WriteTextAsync(Model.UrlForShare);
+        }
+        catch (Exception)
+        {
+            LastServerErrorMessage = "Ошибка. Ссылка не скопирована";
+        }
+    }
+}
