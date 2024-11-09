@@ -5,6 +5,8 @@
 @inject UserManager<User> UserManager;
 @inject EmotionsFacade EmotionsService;
 
+<Loading @ref="Loader" />
+
 @code {
     private string? activeBreakpoint;
     private ChartSeriesType chartType;
@@ -61,6 +63,8 @@ else
 </SfChart>
 
 @code {
+    Loading Loader;
+
     SfChart DataChart1;
     SfChart DataChart2;
 

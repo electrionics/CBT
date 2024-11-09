@@ -8,6 +8,8 @@
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
+<Loading @ref="Loader" />
+
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
     <DialogEvents Opened="Opened"></DialogEvents>
     <DialogTemplates>
@@ -103,6 +105,8 @@
 </SfDialog>
 
 @code {
+    Loading Loader;
+
     [Parameter]
     public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
 
@@ -157,6 +161,9 @@
 
     private async Task SaveButtonClick()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);
@@ -178,5 +185,7 @@
         }
 
         IsVisible = false;
+
+        await Loader.StopAsync();
     }
 }

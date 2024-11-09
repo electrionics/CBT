@@ -14,6 +14,8 @@
 
 <PageTitle>Псионик - Выход из системы</PageTitle>
 
+<Loading @ref="Loader" />
+
 <header>
     <h1>Выход из системы</h1>
     <CascadingAuthenticationState>
@@ -30,11 +32,16 @@
     </CascadingAuthenticationState>
 </header>
 
-@code{
+@code {
+    Loading Loader;
+
     private string returnUrl;
 
     public async Task Submit()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         returnUrl = NavigationManager.BaseUri;
 
         var client = ClientFactory.CreateClient();

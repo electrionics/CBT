@@ -12,6 +12,8 @@
 
 <PageTitle>Псионик - Техника трёх колонок</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Техника трёх колонок</h1>
 
 <div class="alert alert-secondary mt-4">
@@ -37,13 +39,13 @@
 
 @if (cognitiveErrors == null)
 {
-    <p><em>Загрузка...</em></p>
+    <Loading Visible="true" />
 }
 else
 {
     <div class="alert alert-secondary mt-4">
         Всего @(items.Count) записей.
-        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(!ReadOnly? "" : "hidden")" />
+        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="async () => await AddBtnClick()" CssClass="@(!ReadOnly? "" : "hidden")" />
     </div>
     @code {
     private string? activeBreakpoint;
@@ -164,6 +166,8 @@ else
 }
 
 @code {
+    Loading Loader;
+
     SfGrid<ThreeColumnsTechniqueRecordModel> DataGrid;
 
     ThreeColumnsTechniqueEditComponent EditableThought;
@@ -188,7 +192,7 @@ else
         reviewExists = new Dictionary<int, bool>();
     }
 
-    public void AddBtnClick()
+    public async Task AddBtnClick()
     {
         if (EditableThought.IsEdit == true)
         {

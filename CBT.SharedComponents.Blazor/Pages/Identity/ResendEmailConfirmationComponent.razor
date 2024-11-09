@@ -7,6 +7,8 @@
 
 <PageTitle>Псионик - Повторное подтверждение почты</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Повторное подтверждение почты</h1>
 <h2>Введите вашу почту.</h2>
 <hr />
@@ -37,6 +39,8 @@
 </div>
 
 @code {
+    Loading Loader;
+
     [Parameter]
     [SupplyParameterFromQuery(Name = "email")]
     public string Email { get; set; }
@@ -58,6 +62,9 @@
 
     public async Task Submit()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         LastServerErrorMessage = null;
 
         var client = ClientFactory.CreateClient();

@@ -13,11 +13,13 @@
 
 <PageTitle>Псионик - Кабинет психолога - Техника трёх колонок</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Кабинет психолога - Техника трёх колонок</h1>
 
 @if (cognitiveErrors == null)
 {
-    <p><em>Загрузка...</em></p>
+    <Loading Visible="true" />
 }
 else
 {
@@ -147,6 +149,8 @@ else
 }
 
 @code {
+    Loading Loader;
+
     SfGrid<ThoughtRecordReview<ThreeColumnsTechniqueRecordModel>> DataGrid;
 
     ThreeColumnsTechniqueReviewEditComponent EditableThought;
@@ -162,8 +166,13 @@ else
         cognitiveErrors = CognitiveErrorsService.GetAllCognitiveErrors();
     }
 
+    #region Event Handlers
+
     public async Task EditBtnClick(int recordId)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var currentUserId = await GetCurrentUserId();
         var model = await PsychologistReviewService.GetThreeColumnRecordReview(recordId, currentUserId);
 
@@ -181,6 +190,9 @@ else
 
     public async Task SendBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         await PsychologistReviewService.SendRecordToPatient(id);
 
         items.First(x => x.Value.Id == id).SentBack = true;
@@ -188,6 +200,9 @@ else
 
     private async Task Refresh()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllThreeeColumnsRecordReviews(currentUserId, null);
@@ -195,6 +210,8 @@ else
         await InvokeAsync(StateHasChanged);
         await DataGrid.Refresh();
     }
+
+    #endregion
 
     protected virtual async Task<string?> GetCurrentUserId()
     {

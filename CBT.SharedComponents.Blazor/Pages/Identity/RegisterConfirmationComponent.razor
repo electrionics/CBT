@@ -5,6 +5,11 @@
 
 @inject ApiConfig ApiConfig;
 
+@if (Model == null)
+{
+    <Loading Visible="true"/>
+}
+
 <h1>Подтверждение регистрации</h1>
 
 @if (Model?.DisplayConfirmAccountLink ?? false)
@@ -20,7 +25,7 @@ else
     </p>
 }
 
-@code{
+@code {
     private RegisterConfirmationModel? Model { get; set; }
 
     [Parameter]

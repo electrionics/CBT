@@ -1,0 +1,24 @@
+﻿<SfSpinner @ref="Loader" @bind-Visible="Visible">
+    <SpinnerTemplates>
+        <Template>
+            <img src="_content/CBT.SharedComponents.Blazor/double_ring_loader.gif" />
+        </Template>
+    </SpinnerTemplates>
+</SfSpinner>
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    private SfSpinner Loader { get; set; }
+
+    public async Task StartAsync()
+    {
+        await Loader.ShowAsync();
+    }
+
+    public async Task StopAsync()
+    {
+        await Loader.HideAsync();
+    }
+}

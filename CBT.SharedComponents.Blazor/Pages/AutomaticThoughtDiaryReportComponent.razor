@@ -6,13 +6,17 @@
 
 <PageTitle>Псионик - Дневник автоматических мыслей - Персональный отчет</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Дневник автоматических мыслей - Персональный отчет</h1>
 
 <CognitiveErrorsReportComponent UserId="@UserIdDisplayFor"></CognitiveErrorsReportComponent>
 <EmotionsReportComponent UserId="@UserIdDisplayFor"></EmotionsReportComponent>
 
 
-@code{
+@code {
+    Loading Loader;
+
     protected string? UserIdDisplayFor { get; set; }
 
     protected virtual async Task<string?> GetCurrentUserId()

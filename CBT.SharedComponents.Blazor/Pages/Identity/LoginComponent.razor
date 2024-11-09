@@ -20,6 +20,8 @@
 
 <PageTitle>Псионик - Вход в систему</PageTitle>
 
+<Loading @ref="Loader" />
+
 <div class="row">
     <div class="col-md-4">
         <section>
@@ -61,7 +63,9 @@
     </div>
 </div>
 
-@code{
+@code {
+    Loading Loader;
+
     private LoginModel Model { get; set; }
 
     private string? LastServerErrorMessage { get; set; }
@@ -79,6 +83,9 @@
 
     public async Task Submit()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         LastServerErrorMessage = null;
 
         var client = ClientFactory.CreateClient();

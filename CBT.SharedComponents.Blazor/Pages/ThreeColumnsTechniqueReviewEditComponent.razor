@@ -9,6 +9,8 @@
 @inject PsychologistReviewFacade PsychologistReviewService;
 @inject DiariesFacade AutomaticThoughtsService;
 
+<Loading @ref="Loader" />
+
 <SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
     <DialogTemplates>
         <Header>
@@ -65,6 +67,8 @@
 </SfDialog>
 
 @code {
+    Loading Loader;
+
     [Parameter]
     public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
 
@@ -91,6 +95,9 @@
 
     private async Task SaveButtonClick()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         await PsychologistReviewService.SaveThreeColumnRecordReview(Model, currentUserId);
 
         if (SuccessCallback != null)

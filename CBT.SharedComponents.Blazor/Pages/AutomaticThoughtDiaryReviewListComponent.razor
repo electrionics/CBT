@@ -15,11 +15,13 @@
 
 <PageTitle>Псионик - Кабинет психолога - Дневник автоматических мыслей</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Кабинет психолога - Дневник автоматических мыслей</h1>
 
 @if (cognitiveErrors == null)
 {
-    <p><em>Загрузка...</em></p>
+    <Loading Visible="true" />
 }
 else
 {
@@ -183,6 +185,8 @@ else
 }
 
 @code {
+    Loading Loader;
+
     SfGrid<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>> DataGrid;
 
     AutomaticThoughtDiaryReviewEditComponent EditableThought;
@@ -202,6 +206,9 @@ else
 
     public async Task EditBtnClick(int recordId)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var currentUserId = await GetCurrentUserId();
         var model = await PsychologistReviewService.GetAutomaticDiaryRecordReview(recordId, currentUserId);
 
@@ -219,6 +226,9 @@ else
 
     public async Task SendBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         await PsychologistReviewService.SendRecordToPatient(id);
 
         var model = items.First(x => x.Value.Id == id);
@@ -227,6 +237,9 @@ else
 
     private async Task Refresh()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var currentUserId = await GetCurrentUserId();
 
         items = await PsychologistReviewService.GetAllAutomaticDiaryRecordReviews(currentUserId, null);

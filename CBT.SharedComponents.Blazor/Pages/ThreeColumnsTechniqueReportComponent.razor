@@ -6,12 +6,16 @@
 
 <PageTitle>Псионик - Техника трёх колонок - Персональный отчет</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Техника трёх колонок - Персональный отчет</h1>
 
 <CognitiveErrorsReportComponent UserId="@UserIdDisplayFor"></CognitiveErrorsReportComponent>
 
 
 @code {
+    Loading Loader;
+
     protected string? UserIdDisplayFor { get; set; }
     
     protected virtual async Task<string?> GetCurrentUserId()

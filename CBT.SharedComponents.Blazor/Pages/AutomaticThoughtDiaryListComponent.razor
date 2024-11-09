@@ -14,6 +14,8 @@
 
 <PageTitle>Псионик - Дневник автоматических мыслей</PageTitle>
 
+<Loading @ref="Loader" />
+
 <h1>Дневник автоматических мыслей</h1>
 
 <div class="alert alert-secondary mt-4">
@@ -44,13 +46,13 @@
 
 @if (cognitiveErrors == null)
 {
-    <p><em>Загрузка...</em></p>
+    <Loading Visible="true"/>
 }
 else
 {
     <div class="alert alert-secondary mt-4">
         Всего @(items.Count) записей.
-        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(!ReadOnly? "" : "hidden")" />
+        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="async () => await AddBtnClick()" CssClass="@(!ReadOnly? "" : "hidden")" />
     </div>
     @code{
         private string? activeBreakpoint;
@@ -204,6 +206,8 @@ else
 }
 
 @code {
+    Loading Loader;
+
     SfGrid<AutomaticThoughtDiaryRecordModel> DataGrid;
 
     AutomaticThoughtDiaryEditComponent EditableThought;
@@ -228,8 +232,13 @@ else
         reviewExists = new Dictionary<int, bool>();
     }
 
-    public void AddBtnClick()
+    #region Event Handlers
+
+    public async Task AddBtnClick()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         EditableThought.Model = new AutomaticThoughtDiaryRecordModel(emotions);
 
         EditableThought.IsEdit = false;
@@ -240,6 +249,9 @@ else
 
     public async Task DeleteBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new ()
         {
             ShowCloseIcon = true,
@@ -262,6 +274,9 @@ else
 
     public async Task EditBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var model = await AutomaticThoughtsService.GetAutomaticThought(id);
         if (model != null)
         {
@@ -275,6 +290,9 @@ else
 
     public async Task SendBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         await AutomaticThoughtsService.SendThoughtToPsychologist(id);
 
         items.First(x => x.Id == id).Sent = true;
@@ -282,6 +300,9 @@ else
 
     public async Task CheckReviewBtnClick(int id)
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var reviews = await AutomaticThoughtsService.GetPsychologistReviews(id);
         if (reviews?.Any() ?? false)
         {
@@ -297,6 +318,9 @@ else
 
     private async Task Refresh()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var currentUserId = await GetCurrentUserId();
 
         items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
@@ -304,6 +328,8 @@ else
         await InvokeAsync(StateHasChanged);
         await DataGrid.Refresh();
     }
+
+    #endregion
 
     protected virtual async Task<string?> GetCurrentUserId()
     {

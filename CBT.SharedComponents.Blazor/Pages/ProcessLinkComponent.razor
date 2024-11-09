@@ -6,11 +6,17 @@
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
 
+<PageTitle>Псионик - Привязка пользователя</PageTitle>
+
+<Loading @ref="Loader" />
+
 <SfToast ID="toast_default" @ref="ToastObj" Title="Привязка пользователя" Content="@Message" Timeout="@MillisecondsToRedirect" Icon="e-meeting">
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
 @code {
+    Loading Loader;
+
     private const int MillisecondsToRedirect = 3000;
 
     [SupplyParameterFromQuery(Name = "publicId")]

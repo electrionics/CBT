@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using System.Timers;
+@using Microsoft.AspNetCore.Identity
 
 @using Syncfusion.Blazor.Inputs
 
@@ -9,6 +10,10 @@
 @inject ClipboardService ClipboardService;
 
 @inject LinkingFacade LinkingFacade;
+
+<PageTitle>Псионик - Мой профиль</PageTitle>
+
+<Loading @ref="Loader" />
 
 <h1>Мой профиль</h1>
 
@@ -59,35 +64,65 @@
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
+
+
 @code {
+    Loading Loader;
+
     private const int MillisecondsToDisplay = 3000;
-    private SfToast ToastObj{ get; set; }
+    private SfToast ToastObj { get; set; }
+    private bool LoaderVisible { get; set; }
 
     private string CurrentUserId { get; set; }
 
     private ProfileModel Model { get; set; }
     private string Message { get; set; }
 
-    private EditContext editContext;
-    private ValidationMessageStore messageStore;
-
+    #region Initialization Overrides
 
     protected override async Task OnInitializedAsync()
     {
+        LoaderVisible = true;
+
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
 
-        CurrentUserId = UserManager.GetUserId(user)!;
+        Message = string.Empty;
 
-        Model = await LinkingFacade.GetModelByUserId(CurrentUserId);
-        Model!.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+        try
+        {
+            CurrentUserId = UserManager.GetUserId(user)!;
 
-        editContext = new EditContext(Model);
-        messageStore = new(editContext);
+            Model = await LinkingFacade.GetModelByUserId(CurrentUserId);
+            Model.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+        }
+        catch(Exception)
+        {
+            Message = "Ошибка при загрузке страницы";
+        }
+
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrEmpty(Message))
+        {
+            await ToastObj.ShowAsync();
+            Message = string.Empty;
+        }
+
+        LoaderVisible = false;
+    }
+
+    #endregion
+
+    #region Event Handlers
 
     public async Task Recreate()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         Message = "Ссылка обновлена";
 
         try
@@ -118,4 +153,6 @@
 
         await ToastObj.ShowAsync();
     }
+
+    #endregion
 }

@@ -6,6 +6,8 @@
 @inject UserManager<User> UserManager;
 @inject CognitiveErrorsFacade CognitiveErrorsService;
 
+<Loading @ref="Loader" />
+
 @code {
     private string? activeBreakpoint;
     private ChartSeriesType chartType;
@@ -46,6 +48,8 @@ else
 </SfChart>
 
 @code {
+    Loading Loader;
+
     SfChart DataChart;
 
     private IEnumerable<CognitiveErrorReportItem> items;
