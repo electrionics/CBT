@@ -4,108 +4,118 @@
 @using Syncfusion.Blazor.DropDowns;
 @using Syncfusion.Blazor.Inputs;
 
+@using CBT.SharedComponents.Blazor.Model.Validators.Diaries;-
+
 @inject DiariesFacade AutomaticThoughtsService;
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
 <Loading @ref="Loader" />
 
-<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought" Header="@(IsEdit ? "Дополнить запись" : "Добавить запись")">
     <DialogEvents Opened="Opened"></DialogEvents>
     <DialogTemplates>
-        <Header>
-            @(IsEdit ? "Дополнить" : "Добавить") запись
-        </Header>
         <Content>
-            <div class="mb-4">
-                <label for="situation" class="form-label">Ситуация</label>
-                <textarea @bind="Model.Situation" class="form-control" id="situation" aria-describedby="situationHelp"></textarea>
-                <div id="thoughtHelp" class="form-text">Кратко опишите события, которые привели к неприятной эмоции.</div>
-            </div>
-            <div class="mb-4">
-                <label for="BindEmotionIds" class="form-label">Эмоции</label>
-                <SfMultiSelect ID="BindEmotionIds"
-                               TValue="List<int>"
-                               TItem="KeyValuePair<int, string>"
-                               DataSource="Emotions"
-                               AllowFiltering="true"
-                               EnableCloseOnSelect="false"
-                               MaximumSelectionLength="5"
-                               @bind-Value="@Model.BindEmotionIds">
-                    <MultiSelectFieldSettings Text="Value" Value="Key">
-                    </MultiSelectFieldSettings>
-                </SfMultiSelect>
-            </div>
-            <div class="mb-4 percent-input-container">
-                @{
-                    foreach (var emotionId in Model.BindEmotionIds)
-                    {
-                        <text>
-                            Эмоция: <span>@(Emotions[emotionId])</span> -
-                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.BeginningEmotionValues[emotionId]" /><br />
-                            <SfSlider @ref="slidersBegin[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.BeginningEmotionValues[emotionId]" Min="0" Max="100" Step="1">
-                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
-                            </SfSlider>
-                        </text>
+            <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+                <FluentValidationValidator TValidator="AutomaticThoughtDiaryRecordModelValidator" />
+                <ValidationSummary />
+
+                <div class="mb-4">
+                    <label for="situation" class="form-label">Ситуация</label>
+                    <textarea @bind="Model.Situation" class="form-control" id="situation" aria-describedby="situationHelp"></textarea>
+                    <div id="thoughtHelp" class="form-text">Кратко опишите события, которые привели к неприятной эмоции.</div>
+                    <ValidationMessage For="@(() => Model.Situation)" />
+                </div>
+                <div class="mb-4">
+                    <label for="BindEmotionIds" class="form-label">Эмоции</label>
+                    <SfMultiSelect ID="BindEmotionIds"
+                                   TValue="List<int>"
+                                   TItem="KeyValuePair<int, string>"
+                                   DataSource="Emotions"
+                                   AllowFiltering="true"
+                                   EnableCloseOnSelect="false"
+                                   MaximumSelectionLength="5"
+                                   @bind-Value="@Model.BindEmotionIds">
+                        <MultiSelectFieldSettings Text="Value" Value="Key">
+                        </MultiSelectFieldSettings>
+                    </SfMultiSelect>
+                    <ValidationMessage For="@(() => Model.BindEmotionIds)" />
+                </div>
+                <div class="mb-4 percent-input-container">
+                    @{
+                        foreach (var emotionId in Model.BindEmotionIds)
+                        {
+                            <text>
+                                Эмоция: <span>@(Emotions[emotionId])</span> -
+                                Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.BeginningEmotionValues[emotionId]" /><br />
+                                <SfSlider @ref="slidersBegin[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.BeginningEmotionValues[emotionId]" Min="0" Max="100" Step="1">
+                                    <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
+                                </SfSlider>
+                            </text>
+                        }
                     }
-                }
-            </div>
-            <div class="mb-4">
-                <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
-                <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
-                </SfTooltip>
-                <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
-                <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div><!--TODO: другой текст (из книги) и тултип-->
-            </div>
-            <div class="mb-4">
-                <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
-                <SfMultiSelect
-                        ID="CognitiveErrors"
-                        TValue="List<int>"
-                        TItem="KeyValuePair<int, CognitiveErrorModel>"
-                        DataSource="CognitiveErrors"
-                        AllowFiltering="true"
-                        ShowClearButton="true"
-                        EnableCloseOnSelect="false"
-                        MaximumSelectionLength="6"
-                        @bind-Value="@Model.Errors">
-                    <MultiSelectFieldSettings Text="Value.Title" Value="Key">
-                    </MultiSelectFieldSettings>
-                </SfMultiSelect>
-                <div class="form-text">Определите искажения для каждой из автоматических мыслей.</div>
-            </div>
-            <div class="mb-4">
-                <label for="rational" class="form-label">Рациональный ответ</label>
-                <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
-                <div id="rationalHelp" class="form-text">Запишите рациональный ответ на автоматические мысли.</div>
-            </div>
-            <div class="mb-4 percent-input-container">
-                <label class="form-label">Результат</label><br/>
-                @{
-                    foreach (var emotionId in Model.BindEmotionIds)
-                    {
-                        <text>
-                            Эмоция: <span>@(Emotions[emotionId])</span> -
-                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.ResultingEmotionValues[emotionId]" /><br />
-                            <SfSlider @ref="slidersResult[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.ResultingEmotionValues[emotionId]" Min="0" Max="100" Step="1">
-                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
-                            </SfSlider>
-                        </text>
+                </div>
+                <div class="mb-4">
+                    <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
+                    <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
+                    </SfTooltip>
+                    <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
+                    <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div><!--TODO: другой текст (из книги) и тултип-->
+                    <ValidationMessage For="@(() => Model.Thought)" />
+                </div>
+                <div class="mb-4">
+                    <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
+                    <SfMultiSelect
+                            ID="CognitiveErrors"
+                            TValue="List<int>"
+                            TItem="KeyValuePair<int, CognitiveErrorModel>"
+                            DataSource="CognitiveErrors"
+                            AllowFiltering="true"
+                            ShowClearButton="true"
+                            EnableCloseOnSelect="false"
+                            MaximumSelectionLength="6"
+                            @bind-Value="@Model.Errors">
+                        <MultiSelectFieldSettings Text="Value.Title" Value="Key">
+                        </MultiSelectFieldSettings>
+                    </SfMultiSelect>
+                    <div class="form-text">Определите искажения для каждой из автоматических мыслей.</div>
+                    <ValidationMessage For="@(() => Model.Errors)" />
+                </div>
+                <div class="mb-4">
+                    <label for="rational" class="form-label">Рациональный ответ</label>
+                    <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
+                    <div id="rationalHelp" class="form-text">Запишите рациональный ответ на автоматические мысли.</div>
+                    <ValidationMessage For="@(() => Model.RationalAnswer)" />
+                </div>
+                <div class="mb-4 percent-input-container">
+                    <label class="form-label">Результат</label><br/>
+                    @{
+                        foreach (var emotionId in Model.BindEmotionIds)
+                        {
+                            <text>
+                                Эмоция: <span>@(Emotions[emotionId])</span> -
+                                Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.ResultingEmotionValues[emotionId]" /><br />
+                                <SfSlider @ref="slidersResult[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.ResultingEmotionValues[emotionId]" Min="0" Max="100" Step="1">
+                                    <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
+                                </SfSlider>
+                            </text>
+                        }
                     }
-                }
-            </div>
+                </div>
+                <div class="e-footer-content">
+                    <button class="btn btn-success" type="submit">@(IsEdit ? "Сохранить" : "Добавить")</button>
+                    <button class="btn btn-danger" @onclick="CloseBtnClick">Отмена</button>
+                </div>
+            </EditForm>
         </Content>
     </DialogTemplates>
-    <DialogButtons>
-        <DialogButton Content="@(IsEdit ? "Сохранить" : "Добавить")" IsPrimary="true" CssClass="btn btn-success"
-            OnClick="SaveButtonClick"/>
-        <DialogButton Content="Отмена"
-            OnClick="CloseBtnClick"/>
-    </DialogButtons>
 </SfDialog>
 
 @code {
     Loading Loader;
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
 
     [Parameter]
     public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
@@ -123,6 +133,10 @@
 
     private void Initialize()
     {
+        Model = new();
+
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
     }
 
     #region Fix Sliders Initialization In Popup
@@ -159,7 +173,7 @@
         IsVisible = false;
     }
 
-    private async Task SaveButtonClick()
+    private async Task OnValidSubmit()
     {
         await using var usage = new LoadingUsage(Loader);
         await usage.StartAsync();

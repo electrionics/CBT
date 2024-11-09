@@ -45,7 +45,7 @@ else
 {
     <div class="alert alert-secondary mt-4">
         Всего @(items.Count) записей.
-        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="async () => await AddBtnClick()" CssClass="@(!ReadOnly? "" : "hidden")" />
+        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="AddBtnClick" CssClass="@(!ReadOnly? "" : "hidden")" />
     </div>
     @code {
     private string? activeBreakpoint;
@@ -192,7 +192,7 @@ else
         reviewExists = new Dictionary<int, bool>();
     }
 
-    public async Task AddBtnClick()
+    public void AddBtnClick()
     {
         if (EditableThought.IsEdit == true)
         {

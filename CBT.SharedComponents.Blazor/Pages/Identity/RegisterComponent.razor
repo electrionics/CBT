@@ -10,9 +10,11 @@
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
+@inject ILogger<RegisterComponent> _logger;
 
 @inject SignInManager<User> _signInManager;
 @inject JsInterop JsInterop;
+@inject ApiConfig ApiConfig;
 
 @inject BaseAuthenticationStateProvider AuthenticationStateProvider;
 
@@ -29,6 +31,7 @@
                 <hr />
                 <FluentValidationValidator TValidator="RegisterModelValidator" />
                 <ValidationSummary />
+
                 @if (LastServerErrorMessage != null)
                 {
                     <div class="form-floating mb-3 validation-message">
@@ -171,11 +174,10 @@
         LastServerErrorMessage = null;
 
         var client = ClientFactory.CreateClient();
-        var apiUrl = NavigationManager.ToAbsoluteUri("api/account/register");
-
+        var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/register";
         var result = await client.PostResultAsJsonAsync<CommonResult, RegisterModel>(apiUrl, Model);
 
-        if (result.Value?.Succeeded ?? false)
+        if (result.Succeeded && (result.Value?.Succeeded ?? false))
         {
             await AuthenticationStateProvider.Login(Model.Email);
             await JsInterop.WriteAuth(result);
@@ -188,6 +190,7 @@
             // messageStore.Add(() => Model, result?.ErrorMessage ?? "Ошибка на сервере.");
             // editContext.NotifyValidationStateChanged();
             LastServerErrorMessage = result.Value?.ErrorMessage ?? "Ошибка на сервере.";
+            _logger.LogError("Неудачная попытка регистрации", LastServerErrorMessage);
         }
     }
 

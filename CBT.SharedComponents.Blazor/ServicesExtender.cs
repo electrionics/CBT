@@ -20,6 +20,7 @@ using CBT.SharedComponents.Blazor.Model.Identity;
 using CBT.SharedComponents.Blazor.Model.Validators;
 using CBT.SharedComponents.Blazor.Services;
 using CBT.SharedComponents.Blazor.Model;
+using CBT.SharedComponents.Blazor.Model.Validators.Diaries;
 using CBT.Logic.Services;
 
 namespace CBT.SharedComponents.Blazor
@@ -72,7 +73,7 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddScoped<EmotionsFacade>();
             builderServices.AddScoped<LinkingFacade>();
 
-            builderServices.AddScoped<IEmailSender, EmailService>();
+            builderServices.AddScoped<IEmailSender, EmailSender>();
 
             return builderServices;
         }
@@ -84,6 +85,9 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddScoped<IValidator<ResendConfirmationModel>, ResendConfirmationModelValidator>();
             builderServices.AddScoped<IValidator<ResetPasswordModel>, ResetPasswordModelValidator>();
             builderServices.AddScoped<IValidator<ProfileModel>, ProfileModelValidator>();
+
+            builderServices.AddScoped<IValidator<ThreeColumnsTechniqueRecordModel>, ThreeColumnsTechniqueRecordModelValidator>();
+            builderServices.AddScoped<IValidator<AutomaticThoughtDiaryRecordModel>, AutomaticThoughtDiaryRecordModelValidator>();
 
             return builderServices;
         }

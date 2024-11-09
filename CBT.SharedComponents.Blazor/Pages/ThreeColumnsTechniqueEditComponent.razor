@@ -2,6 +2,9 @@
 
 @using Syncfusion.Blazor.Popups;
 @using Syncfusion.Blazor.DropDowns;
+@using Syncfusion.Blazor.Buttons;
+
+@using CBT.SharedComponents.Blazor.Model.Validators.Diaries;
 
 @inject DiariesFacade AutomaticThoughtsService;
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
@@ -9,18 +12,19 @@
 
 <Loading @ref="Loader" />
 
-<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
-    <DialogTemplates>
-        <Header>
-            @(IsEdit ? "Дополнить" : "Добавить") запись
-        </Header>
-        <Content>
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought" Header="@(IsEdit ? "Дополнить запись" : "Добавить запись")">
+    <ChildContent>
+        <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+            <FluentValidationValidator TValidator="ThreeColumnsTechniqueRecordModelValidator" />
+            <ValidationSummary />
+
             <div class="mb-4">
                 <label for="thought" class="form-label fw-bold">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
                 <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
                 </SfTooltip>
                 <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
                 <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div>
+                <ValidationMessage For="@(() => Model.Thought)" />
             </div>
             <div class="mb-4">
                 <label for="CognitiveErrors" class="form-label fw-bold">Когнитивные искажения</label>
@@ -36,24 +40,27 @@
                     <MultiSelectFieldSettings Text="Value.Title" Value="Key">
                     </MultiSelectFieldSettings>
                 </SfMultiSelect>
+                <ValidationMessage For="@(() => Model.Errors)" />
             </div>
             <div class="mb-4">
                 <label for="rational" class="form-label fw-bold">Рациональный ответ</label>
                 <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
                 <div id="rationalHelp" class="form-text">Опровергните негативную мысль.</div>
+                <ValidationMessage For="@(() => Model.RationalAnswer)" />
             </div>
-        </Content>
-    </DialogTemplates>
-    <DialogButtons>
-        <DialogButton Content="@(IsEdit ? "Сохранить" : "Добавить")" IsPrimary="true" CssClass="btn btn-success"
-                      OnClick="SaveButtonClick" />
-        <DialogButton Content="Отмена"
-                      OnClick="CloseBtnClick" />
-    </DialogButtons>
+            <div class="e-footer-content">
+                <button class="btn btn-success" type="submit">@(IsEdit ? "Сохранить" : "Добавить")</button>
+                <button class="btn btn-danger" @onclick="CloseBtnClick">Отмена</button>
+            </div>
+        </EditForm>
+    </ChildContent>
 </SfDialog>
 
 @code {
     Loading Loader;
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
 
     [Parameter]
     public IEnumerable<KeyValuePair<int, CognitiveErrorModel>> CognitiveErrors { get; set; }
@@ -71,6 +78,9 @@
     {
         Model = new ThreeColumnsTechniqueRecordModel();
 
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
+
         base.OnInitialized();
     }
 
@@ -79,7 +89,7 @@
         IsVisible = false;
     }
 
-    private async Task SaveButtonClick()
+    private async Task OnValidSubmit()
     {
         await using var usage = new LoadingUsage(Loader);
         await usage.StartAsync();

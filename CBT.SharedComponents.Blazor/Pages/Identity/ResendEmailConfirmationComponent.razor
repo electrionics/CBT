@@ -2,6 +2,7 @@
 
 @inject IHttpClientFactory ClientFactory;
 @inject NavigationManager NavigationManager;
+@inject ILogger<ResendEmailConfirmationComponent> _logger;
 
 @inject ApiConfig ApiConfig;
 
@@ -72,7 +73,7 @@
 
         var result = await client.PostResultAsJsonAsync<ResendConfirmationResult, ResendConfirmationModel>(apiUrl, Model);
 
-        if (result.Value?.Success ?? false)
+        if (result.Succeeded && (result.Value?.Success ?? false))
         {
             var navigateUrl = NavigationManager.ToAbsoluteUri("account/login");
             NavigationManager.NavigateTo(navigateUrl.ToString(), true);
@@ -80,6 +81,7 @@
         else
         {
             LastServerErrorMessage = result.Value?.ErrorMessage ?? "Ошибка на сервере.";
+            _logger.LogError(LastServerErrorMessage);
         }
     }
 }

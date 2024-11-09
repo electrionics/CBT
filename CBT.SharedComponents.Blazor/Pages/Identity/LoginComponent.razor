@@ -13,6 +13,7 @@
 @inject UserManager<User> UserManager;
 
 @inject SignInManager<User> _signInManager;
+@inject ILogger<LoginComponent> _logger;
 @inject JsInterop JsInterop;
 @inject SfDialogService SfDialogService;
 @inject ApiConfig ApiConfig;
@@ -92,39 +93,48 @@
         var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/login";
         var result = await client.PostResultAsJsonAsync<LoginResult, LoginModel>(apiUrl, Model);
 
-        if (result.Value?.Succeeded ?? false)
+        if (result.Succeeded)
         {
-            await AuthenticationStateProvider.Login(Model.Email);
-            await JsInterop.WriteAuth(result);
-
-            NavigationManager.NavigateTo(NavigationManager.BaseUri, true);
-        }
-        else if (result.Value?.RequiresTwoFactor ?? false)
-        {
-            throw new NotImplementedException();
-            //NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
-        }
-        else if (result.Value?.IsLockedOut ?? false)
-        {
-            LastServerErrorMessage = "Пользователь заблокирован.";
-            //NavigationManager.NavigateTo("./Lockout");
-        }
-        else
-        {
-            var user = await UserManager.FindByNameAsync(Model.Email);
-            if (user != null &&
-                !await UserManager.IsEmailConfirmedAsync(user))
+            if (result.Value?.Succeeded ?? false)
             {
-                NavigationManager.NavigateTo("/account/register/confirmation/resend", true);
+                await AuthenticationStateProvider.Login(Model.Email);
+                await JsInterop.WriteAuth(result);
+
+                NavigationManager.NavigateTo(NavigationManager.BaseUri, true);
+            }
+            else if (result.Value?.RequiresTwoFactor ?? false)
+            {
+                throw new NotImplementedException();
+                //NavigationManager.NavigateTo($"./LoginWith2fa?ReturnUrl={returnUrl}&RememberMe={Model.RememberMe}");
+            }
+            else if (result.Value?.IsLockedOut ?? false)
+            {
+                LastServerErrorMessage = "Пользователь заблокирован.";
+                //NavigationManager.NavigateTo("./Lockout");
             }
             else
             {
-                LastServerErrorMessage = "Неудачная попытка входа.";
+                var user = await UserManager.FindByNameAsync(Model.Email);
+                if (user != null &&
+                    !await UserManager.IsEmailConfirmedAsync(user))
+                {
+                    NavigationManager.NavigateTo("/account/register/confirmation/resend", true);
+                }
+                else
+                {
+                    LastServerErrorMessage = "Неудачная попытка входа.";
+                }
             }
         }
+        else
+        {
+            LastServerErrorMessage = "Ошибка при выполнении запроса";
+        }
+        
 
         if (LastServerErrorMessage != null)
         {
+            _logger.LogError("Неудачная попытка входа: " + LastServerErrorMessage);
             await SfDialogService.AlertAsync("Ошибка входа.", LastServerErrorMessage);
         }
     }

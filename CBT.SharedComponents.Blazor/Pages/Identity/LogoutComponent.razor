@@ -9,6 +9,7 @@
 @inject ILogger<LogoutComponent> _logger;
 @inject IHttpClientFactory ClientFactory;
 @inject JsInterop JsInterop;
+@inject SfDialogService SfDialogService;
 
 @inject ApiConfig ApiConfig;
 
@@ -46,13 +47,19 @@
 
         var client = ClientFactory.CreateClient();
         var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/logout";
-        var result = await client.PostResultAsJsonAsync<LogoutResult, LogoutModel>(apiUrl, new());
+        var result = await client.PostResultAsJsonAsync<CommonResult, LogoutModel>(apiUrl, new());
 
-        AuthenticationStateProvider.Logout();
-        await JsInterop.WriteAuth(result);
+        if (result.Succeeded && (result.Value?.Succeeded ?? false))
+        {
+            AuthenticationStateProvider.Logout();
+            await JsInterop.WriteAuth(result);
 
-        _logger.LogInformation("User logged out.");
-
-        NavigationManager.NavigateTo(returnUrl, true);
+            NavigationManager.NavigateTo(returnUrl, true);
+        }
+        else
+        {
+            _logger.LogError("Неудачная попытка выхода");
+            await SfDialogService.AlertAsync("Ошибка.", "Не удалось выйти.");
+        }
     }
 }

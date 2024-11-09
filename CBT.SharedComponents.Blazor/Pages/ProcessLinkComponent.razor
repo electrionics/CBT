@@ -5,18 +5,17 @@
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
+@inject ApiConfig ApiConfig;
 
 <PageTitle>Псионик - Привязка пользователя</PageTitle>
 
-<Loading @ref="Loader" />
+<Loading Visible="true" />
 
 <SfToast ID="toast_default" @ref="ToastObj" Title="Привязка пользователя" Content="@Message" Timeout="@MillisecondsToRedirect" Icon="e-meeting">
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
 @code {
-    Loading Loader;
-
     private const int MillisecondsToRedirect = 3000;
 
     [SupplyParameterFromQuery(Name = "publicId")]
@@ -36,7 +35,7 @@
             try
             {
                 var client = ClientFactory.CreateClient();
-                var apiUrl = NavigationManager.ToAbsoluteUri($"/api/linking/process?publicId={PublicId}");
+                var apiUrl = ApiConfig.ApiEndpointBaseUrl + $"/linking/process?publicId={PublicId}";
                 var result = await client.GetFromJsonAsync<CommonResult>(apiUrl);
 
                 if (result!.Succeeded)
@@ -48,7 +47,7 @@
                     Message = result.ErrorMessage!;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Message = "Ошибка при попытке привязать пользователя";
             }

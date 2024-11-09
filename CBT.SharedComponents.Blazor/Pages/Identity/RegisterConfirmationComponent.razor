@@ -1,7 +1,9 @@
 ﻿@using System.Net.Http.Json
+
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
 @inject SfDialogService SfDialogService;
+@inject ILogger<RegisterConfirmationComponent> _logger;
 
 @inject ApiConfig ApiConfig;
 
@@ -45,6 +47,7 @@ else
         }
         else
         {
+            _logger.LogError("Неудачная попытка подтвердить почту.");
             await SfDialogService.AlertAsync("Ошибка.", "Письмо не отправлено, повторите попытку позже.");
         }
 

@@ -46,7 +46,7 @@ namespace CBT.Web.Blazor.Background
                     var psychologistIds = psychologistNotifications.Keys.ToHashSet();
                     var psychologists = await notificationService.GetPsychologistsToNotify(psychologistIds, stoppingToken);
 
-                    var patientIds = psychologistNotifications.Keys.ToHashSet();
+                    var patientIds = patientNotifications.Keys.ToHashSet();
                     var patients = await notificationService.GetPatientsToNotify(patientIds, stoppingToken);
 
                     sw.Stop();
