@@ -14,40 +14,36 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        <div class="nav-item px-3 nav-link" style="color:#d7d7d7;">
+            Главное меню
+        </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Главная
             </NavLink>
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link nav-link-2-l" href="/references">
                 <span class="oi oi-info" aria-hidden="true"></span> Справочная информация
             </NavLink>
-            <CascadingAuthenticationState>
-                <AuthorizeView>
-                    <Authorized>
-                        <NavLink class="nav-link nav-link-2-l" href="/profile">
-                           <span class="oi oi-person" aria-hidden="true"></span> Мой профиль
-                        </NavLink>
-                    </Authorized>
-                </AuthorizeView>
-            </CascadingAuthenticationState>
         </div>
         <CascadingAuthenticationState>
-            <AuthorizeView Roles="Psychologist">
+            <AuthorizeView>
                 <Authorized>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link nav-link-2-l" href="review/three-columns" style="padding-right: 0!important;">
-                            <span class="oi oi-pencil" aria-hidden="true"></span> Техника трёх<br />колонок
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link nav-link-2-l" href="review/automatic-thoughts" style="padding-right: 0!important;">
-                            <span class="oi oi-pencil" aria-hidden="true"></span> Дневник<br />автоматических мыслей
+                        <NavLink class="nav-link nav-link-2-l" href="/profile">
+                            <span class="oi oi-person" aria-hidden="true"></span> Мой профиль
                         </NavLink>
                     </div>
                 </Authorized>
             </AuthorizeView>
+        </CascadingAuthenticationState>
+        <CascadingAuthenticationState>
             <AuthorizeView Roles="Client">
                 <Authorized>
+                    <div class="nav-item px-3 nav-link" style="color:#d7d7d7;">
+                        Клиенту
+                    </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link nav-link-2-l" href="diary/three-columns" style="padding-right: 0!important;">
                             <span class="oi oi-plus" aria-hidden="true"></span> Техника трёх<br />колонок
@@ -56,6 +52,23 @@
                     <div class="nav-item px-3">
                         <NavLink class="nav-link nav-link-2-l" href="diary/automatic-thoughts" style="padding-right: 0!important;">
                             <span class="oi oi-plus" aria-hidden="true"></span> Дневник<br />автоматических мыслей
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Roles="Psychologist">
+                <Authorized>
+                    <div class="nav-item px-3 nav-link" style="color:#d7d7d7;">
+                        Психологу
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link nav-link-2-l" href="review/three-columns" style="padding-right: 0!important;">
+                            <span class="oi oi-pencil" aria-hidden="true"></span> Техника трёх<br />колонок
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link nav-link-2-l" href="review/automatic-thoughts" style="padding-right: 0!important;">
+                            <span class="oi oi-pencil" aria-hidden="true"></span> Дневник<br />автоматических мыслей
                         </NavLink>
                     </div>
                 </Authorized>

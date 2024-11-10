@@ -1,6 +1,8 @@
 ﻿@using System.Timers;
 @using Microsoft.AspNetCore.Identity
 
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
@@ -16,6 +18,22 @@
 <Loading @ref="Loader" />
 
 <h1>Мой профиль</h1>
+
+@code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
+}
+<SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+{
+    rowDirection = RowDirection.Vertical;
+}
+else
+{
+    rowDirection = RowDirection.Horizontal;
+}
+
+<h2>Мои данные</h2>
 
 <div class="row">
     <div class="col-md-4">
@@ -56,18 +74,94 @@
                     </SfTooltip>
                 </div>
             </div>
+            <div class="form-floating mb-3">
+                <NavLink class="nav-link" href="account/logout" title="Выход">
+                    <span class="oi oi-box-arrow-left" aria-hidden="true"></span> Выход
+                </NavLink>
+            </div>
+        </section>
+    </div>
+
+    <h2>Соединенные пользователи</h2>
+
+    <div class="col-md-8">
+        <section>
+            <hr />
+            @if (Model == null)
+            {
+                <Loading Visible="true" />
+            }
+            else
+            {
+                <SfGrid @ref="DataGrid" 
+                        EnableAdaptiveUI="true" 
+                        AdaptiveUIMode="AdaptiveMode.Both" 
+                        RowRenderingMode="@rowDirection" 
+                        Height="100%" 
+                        Width="100%"
+                        DataSource="Model.LinkedUsers"
+                        AllowTextWrap="true" 
+                        AllowPaging="true"
+                        AllowSorting="true"
+                        AllowFiltering="true">
+                    <GridPageSettings PageSize="25"></GridPageSettings>
+                    <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(UserLinkingModel.DisplayName)"
+                                    HeaderText="Имя пользователя"
+                                    AllowFiltering="true"
+                                    AllowSorting="true">
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UserLinkingModel.IsPatientForCurrent)"
+                                    HeaderText=""
+                                    AllowFiltering="false"
+                                    AllowSorting="false"
+                                    Visible="Model.IsPsychologist">
+                            <HeaderTemplate>
+                                Мой клиент <span class="oi oi-info" id="clientInfo"></span>
+                                <SfTooltip Position="Position.TopCenter" Target="#clientInfo" Content="Если переключатель включен - клиент может отправлять вам свои записи для комментирования, а вы можете просматривать и комментировать его записи.">
+                                </SfTooltip>
+                            </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var model = (UserLinkingModel)context;
+
+                                    <SfSwitch @bind-Checked="model.IsPatientForCurrent" OnLabel="Да" OffLabel="Нет" TChecked="bool" ValueChange="async (args) => await ToggleConnection(model.PatientId, null, args.Checked)"></SfSwitch>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UserLinkingModel.IsPsychologistForCurrent)"
+                                    AllowFiltering="false"
+                                    AllowSorting="false"
+                                    Visible="Model.IsPatient">
+                            <HeaderTemplate>
+                                Мой психолог <span class="oi oi-info" id="psyInfo"></span>
+                                <SfTooltip Position="Position.TopCenter" Target="#psyInfo" Content="Если переключатель включен - психолог может просматривать и комментировать отправленные вами записи.">
+                                </SfTooltip>
+                            </HeaderTemplate>
+                            <Template>
+                                @{
+                                    var model = (UserLinkingModel)context;
+
+                                    <SfSwitch @bind-Checked="model.IsPsychologistForCurrent" OnLabel="Да" OffLabel="Нет" TChecked="bool" ValueChange="async (args) => await ToggleConnection(null, model.PsychologistId, args.Checked)"></SfSwitch>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            }
         </section>
     </div>
 </div>
 
-<SfToast ID="toast_default" @ref="ToastObj" Title="Действие со ссылкой" Content="@Message" Timeout="@MillisecondsToDisplay" Icon="e-meeting">
+<SfToast ID="toast_default" @ref="ToastObj" Title="Действие на странице" Content="@Message" Timeout="@MillisecondsToDisplay" Icon="e-meeting">
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
-
-
 @code {
     Loading Loader;
+
+    SfGrid<UserLinkingModel> DataGrid;
 
     private const int MillisecondsToDisplay = 3000;
     private SfToast ToastObj { get; set; }
@@ -93,8 +187,7 @@
         {
             CurrentUserId = UserManager.GetUserId(user)!;
 
-            Model = await LinkingFacade.GetModelByUserId(CurrentUserId);
-            Model.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+            await Refresh();
         }
         catch(Exception)
         {
@@ -154,5 +247,28 @@
         await ToastObj.ShowAsync();
     }
 
+    public async Task ToggleConnection(int? patientId, int? psychologistId, bool value)
+    {
+        if (patientId != null)
+        {
+            await LinkingFacade.SetConnectionWithPatient(CurrentUserId, patientId.Value, value);
+        }
+        else if (psychologistId != null)
+        {
+            await LinkingFacade.SetConnectionWithPsychologist(CurrentUserId, psychologistId.Value, value);
+        }
+
+        await Refresh();
+
+        Message = "Сохранено";
+        await ToastObj.ShowAsync();
+    }
+
     #endregion
+
+    private async Task Refresh()
+    {
+        Model = await LinkingFacade.GetModelByUserId(CurrentUserId);
+        Model.UrlForShare = NavigationManager.ToAbsoluteUri($"process-link?publicId={Model.PublicId}").AbsoluteUri;
+    }
 }

@@ -10,6 +10,10 @@
 
         public string UrlForShare {  get; set; }
 
+        public bool IsPatient { get; set; }
+
+        public bool IsPsychologist { get; set; }
+
         public List<UserLinkingModel> LinkedUsers { get; set; }
     }
 }

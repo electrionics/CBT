@@ -1,7 +1,6 @@
 using Serilog;
 
 using CBT.SharedComponents.Blazor;
-
 using CBT.Web.Blazor;
 using CBT.Web.Blazor.Hubs;
 using CBT.Web.Blazor.Background;

@@ -41,9 +41,9 @@ namespace CBT.Web.Blazor.Controllers
             }
 
             var currentPatient = await _peopleService.GetPatient(currentUser.Id);
-            var currentPsychologist = await _peopleService.GetPsychoilogist(currentUser.Id);
+            var currentPsychologist = await _peopleService.GetPsychologist(currentUser.Id);
             var linkPatient = await _peopleService.GetPatient(link.UserId);
-            var linkPsychologist = await _peopleService.GetPsychoilogist(link.UserId);
+            var linkPsychologist = await _peopleService.GetPsychologist(link.UserId);
 
             if (currentPatient != null && linkPsychologist != null)
             {

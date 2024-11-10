@@ -31,10 +31,16 @@ namespace CBT.Logic.Services
             await _dataContext.SaveChangesAsync();
         }
 
-        public async Task<Psychologist?> GetPsychoilogist(string userId)
+        public async Task<Psychologist?> GetPsychologist(string userId)
         {
             return await _dataContext.Set<Psychologist>().AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userId);
+        }
+
+        public async Task<Psychologist?> GetPsychologist(int psychologistId)
+        {
+            return await _dataContext.Set<Psychologist>().AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == psychologistId);
         }
 
         public async Task<Patient?> GetPatient(string userId)
@@ -43,24 +49,40 @@ namespace CBT.Logic.Services
                 .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
+        public async Task<Patient?> GetPatient(int patientId)
+        {
+            return await _dataContext.Set<Patient>().AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == patientId);
+        }
+
         public async Task<PatientPsychologist?> GetExistingConnection(int patientId, int psychologistId)
         {
-            var connection = await _dataContext.Set<PatientPsychologist>().FirstOrDefaultAsync(x => x.PatientId == patientId && x.PsychologistId == psychologistId);
+            var connection = await _dataContext.Set<PatientPsychologist>()
+                .FirstOrDefaultAsync(x => x.PatientId == patientId && x.PsychologistId == psychologistId);
 
             return connection;
         }
 
-        public async Task<bool> Connect(Patient patient, Psychologist psychologist)
+        public async Task<bool> Connect(Patient patient, Psychologist psychologist, bool enable = true)
         {
             if (patient == null || psychologist == null)
                 return false;
 
             var peopleConnection = await GetExistingConnection(patient.Id, psychologist.Id);
-            if (peopleConnection != null)
-                return true; // already created
-
-            peopleConnection = new PatientPsychologist { PatientId = patient.Id, PsychologistId = psychologist.Id };
-            _dataContext.Set<PatientPsychologist>().Add(peopleConnection);
+            if (peopleConnection != null)// already created
+            {
+                peopleConnection.Enabled = enable;
+            }
+            else
+            {
+                peopleConnection = new PatientPsychologist
+                {
+                    PatientId = patient.Id,
+                    PsychologistId = psychologist.Id,
+                    Enabled = enable
+                };
+                _dataContext.Set<PatientPsychologist>().Add(peopleConnection);
+            }
 
             await _dataContext.SaveChangesAsync();
             return true;
@@ -68,39 +90,22 @@ namespace CBT.Logic.Services
 
         public async Task<List<PatientPsychologist>> GetConnectionsFor(int? patientId, int? psychologistId)
         {
-            var result = new List<PatientPsychologist>();
+            List<PatientPsychologist> result;
 
-            //if (patientId != null && psychologistId != null)
+            try
             {
-                try
-                {
-                    result = await _dataContext.Set<PatientPsychologist>()
-                        .Include(x => x.Patient)
-                        .Include(x => x.Psychologist)
-                        .Where(x =>
-                            x.PatientId == patientId ||
-                            x.PsychologistId == psychologistId)
-                        .ToListAsync();
-                }
-                catch(Exception e)
-                {
-                    return result;
-                }
+                result = await _dataContext.Set<PatientPsychologist>()
+                    .Include(x => x.Patient)
+                    .Include(x => x.Psychologist)
+                    .Where(x =>
+                        x.PatientId == patientId ||
+                        x.PsychologistId == psychologistId)
+                    .ToListAsync();
             }
-            //else if (patientId != null)
-            //{
-            //    result = await _dataContext.Set<PatientPsychologist>()
-            //        .Where(x =>
-            //            x.PatientId == patientId)
-            //        .ToListAsync();
-            //}
-            //else if (patientId != null)
-            //{
-            //    result = await _dataContext.Set<PatientPsychologist>()
-            //        .Where(x =>
-            //            x.PsychologistId == psychologistId)
-            //        .ToListAsync();
-            //}
+            catch (Exception)
+            {
+                return [];
+            }
 
             return result;
         }

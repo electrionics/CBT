@@ -12,6 +12,10 @@
 @inject UserManager<User> UserManager;
 @inject IHttpContextAccessor HttpContextAccessor;
 
+@{
+    base.BuildRenderTree(__builder);
+}
+
 @code {
     protected override async Task SetupNotifications()
     {
@@ -37,7 +41,7 @@
 
     private async Task<bool> SendPsychologistNotification(string userId)
     {
-        var psychologist = await PeopleService.GetPsychoilogist(userId!);
+        var psychologist = await PeopleService.GetPsychologist(userId!);
 
         if (psychologist == null)
         {

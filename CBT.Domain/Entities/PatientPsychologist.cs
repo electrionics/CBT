@@ -8,6 +8,8 @@ namespace CBT.Domain.Entities
 
         public int PsychologistId { get; set; }
 
+        public bool Enabled { get; set; }
+
 
         public Patient Patient { get; set; }
 
