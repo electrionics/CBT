@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Pages\TaskListComponent.razor" />
+    <Content Remove="Pages\AntiProcrastinationDiaryListComponent.razor" />
   </ItemGroup>
 
 
@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Pages\TaskListComponent.razor" />
+    <None Include="Pages\AntiProcrastinationDiaryListComponent.razor" />
   </ItemGroup>
 
   <ItemGroup>

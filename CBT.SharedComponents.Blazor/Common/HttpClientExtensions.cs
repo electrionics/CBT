@@ -36,5 +36,35 @@ namespace CBT.SharedComponents.Blazor.Common
         {
             return PostResultAsJsonAsync<TResult, TBody>(client, url.AbsoluteUri, body);
         }
+
+        public static async Task<HttpResult<TResult>> GetResultAsJsonAsync<TResult>(this HttpClient client, string url)
+        {
+            var message = new HttpRequestMessage(HttpMethod.Get, url);
+            message = message.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+            var result = new HttpResult<TResult>();
+
+            try
+            {
+                var response = await client.SendAsync(message);
+                response.EnsureSuccessStatusCode();
+                var jsonStr = await response.Content.ReadAsStringAsync();
+
+                result.Headers = response.Headers;
+                result.Value = JsonConvert.DeserializeObject<TResult>(jsonStr);
+                result.Succeeded = true;
+            }
+            catch (HttpRequestException)
+            {
+                result.Succeeded = false;
+            }
+
+            return result;
+        }
+
+        public static Task<HttpResult<TResult>> GetResultAsJsonAsync<TResult>(this HttpClient client, Uri url)
+        {
+            return GetResultAsJsonAsync<TResult>(client, url.AbsoluteUri);
+        }
     }
 }
