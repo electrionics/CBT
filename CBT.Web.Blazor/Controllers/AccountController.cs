@@ -120,7 +120,7 @@ namespace CBT.Web.Blazor.Controllers
                     };
                 }
                 
-                // roles
+                // then confirmation
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 
                 return new CommonResult
@@ -174,6 +174,8 @@ namespace CBT.Web.Blazor.Controllers
 
             if (model.DisplayConfirmAccountLink)
             {
+                model.RedirectRelativeUrl = "/";
+
                 return model;
             }
             else

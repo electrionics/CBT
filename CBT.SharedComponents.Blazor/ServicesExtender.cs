@@ -42,15 +42,15 @@ namespace CBT.SharedComponents.Blazor
         {
             var databaseConfig = builderConfiguration.GetSection("Database").Get<DatabaseConfig>();
 
-            builderServices.AddDbContext<CBTIdentityDataContext>(options =>
+            builderServices.AddDbContextFactory<CBTIdentityDataContext>(options =>
             {
                 options.UseSqlServer(databaseConfig?.SingleConnectionString);
             }, ServiceLifetime.Transient);
-            builderServices.AddDbContext<CBTDataContext>((options) =>
+            builderServices.AddDbContextFactory<CBTDataContext>((options) =>
             {
                 options.UseSqlServer(databaseConfig?.SingleConnectionString);
             }, ServiceLifetime.Transient);
-            builderServices.AddDbContext<CBTDataContextMARS>((options) =>
+            builderServices.AddDbContextFactory<CBTDataContextMARS>((options) =>
             {
                 options.UseSqlServer(databaseConfig?.SingleConnectionStringMARS);
             }, ServiceLifetime.Transient);
@@ -60,20 +60,20 @@ namespace CBT.SharedComponents.Blazor
 
         public static IServiceCollection WithServices(this IServiceCollection builderServices)
         {
-            builderServices.AddScoped<AutomaticThoughtsService>();
-            builderServices.AddScoped<PeopleService>();
-            builderServices.AddScoped<LinkingService>();
-            builderServices.AddScoped<NotificationsService>();
-            builderServices.AddScoped<SfDialogService>();
-            builderServices.AddScoped<UserManager<User>>();
+            builderServices.AddTransient<AutomaticThoughtsService>();
+            builderServices.AddTransient<PeopleService>();
+            builderServices.AddTransient<LinkingService>();
+            builderServices.AddTransient<NotificationsService>();
+            builderServices.AddTransient<SfDialogService>();
+            builderServices.AddTransient<UserManager<User>>();
 
-            builderServices.AddScoped<DiariesFacade>();
-            builderServices.AddScoped<PsychologistReviewFacade>();
-            builderServices.AddScoped<CognitiveErrorsFacade>();
-            builderServices.AddScoped<EmotionsFacade>();
-            builderServices.AddScoped<LinkingFacade>();
+            builderServices.AddTransient<DiariesFacade>();
+            builderServices.AddTransient<PsychologistReviewFacade>();
+            builderServices.AddTransient<CognitiveErrorsFacade>();
+            builderServices.AddTransient<EmotionsFacade>();
+            builderServices.AddTransient<LinkingFacade>();
 
-            builderServices.AddScoped<IEmailSender, EmailSender>();
+            builderServices.AddTransient<IEmailSender, EmailSender>();
 
             return builderServices;
         }

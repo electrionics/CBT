@@ -61,31 +61,6 @@ namespace CBT.SharedComponents.Blazor.Services
             return link.PublicId;
         }
 
-        public async Task SaveLinkedUsers(string userId, List<UserLinkingModel> linkedUsers)
-        {
-            var currentPatient = await _peopleService.GetPatient(userId);
-            var currentPsychologist = await _peopleService.GetPsychologist(userId);
-
-            foreach (var linkedUser in linkedUsers)
-            {
-                if (linkedUser.PatientId != null &&
-                    currentPsychologist != null)
-                {
-                    var linkedPatient = await _peopleService.GetPatient(linkedUser.PatientId.Value);
-
-                    await _peopleService.Connect(linkedPatient!, currentPsychologist, linkedUser.IsPatientForCurrent);
-                }
-
-                if (linkedUser.PsychologistId != null &&
-                    currentPatient != null)
-                {
-                    var linkedPsychologist = await _peopleService.GetPsychologist(linkedUser.PsychologistId.Value);
-
-                    await _peopleService.Connect(currentPatient, linkedPsychologist!, linkedUser.IsPsychologistForCurrent);
-                }
-            }
-        }
-
         public async Task SetConnectionWithPatient(string currentUserId, int patientId, bool enable)
         {
             var currentPsychologist = await _peopleService.GetPsychologist(currentUserId);
