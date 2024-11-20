@@ -40,7 +40,7 @@ namespace CBT.SharedComponents.Blazor.Services
                 .FirstAsync(x => x.UserId == userId);
 
             var records = await BuildQuery(_dataContext, userId, filterState)
-                    .Include(x => x.Emotions)
+                    .Include(x => x.Emotions).ThenInclude(x => x.Emotion)
                     .Where(x => x.Type == DiaryType.AutomaticThoughtDiary)
                     .ToListAsync();
 
@@ -101,7 +101,7 @@ namespace CBT.SharedComponents.Blazor.Services
                 .Include(x => x.PsychologistReviews)
                 .Include(x => x.CognitiveErrors)
                 .Include(x => x.Patient)
-                .Include(x => x.Emotions)
+                .Include(x => x.Emotions).ThenInclude(x => x.Emotion)
                 .FirstAsync(x => x.Id == recordId);
 
             return ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>.Convert(record, psychologist.Id);

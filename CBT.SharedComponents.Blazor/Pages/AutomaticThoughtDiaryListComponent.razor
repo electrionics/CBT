@@ -44,7 +44,7 @@
     }
 </div>
 
-@if (cognitiveErrors == null)
+@if (items == null || cognitiveErrors == null || emotions == null)
 {
     <Loading Visible="true"/>
 }
@@ -132,7 +132,7 @@ else
                         var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).BeginningEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
-                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
                             <br />
                         }
                     }
@@ -170,7 +170,7 @@ else
                         var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).ResultingEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
-                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
                             <br />
                         }
                     }
@@ -215,7 +215,7 @@ else
 
     private List<AutomaticThoughtDiaryRecordModel> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
-    private Dictionary<int, string> emotions;
+    private Dictionary<int, EmotionModel> emotions;
 
     private Dictionary<int, bool> reviewExists;
 

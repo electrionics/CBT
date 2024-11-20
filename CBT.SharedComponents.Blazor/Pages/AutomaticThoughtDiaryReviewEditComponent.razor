@@ -28,7 +28,7 @@
 
                     foreach (var emotion in emotions)
                     {
-                        <span>@Emotions[emotion.Key] - @emotion.Value %</span>
+                        <span class="emotion @(Emotions[emotion.Key].Positive ? "positive" : "negative")">@Emotions[emotion.Key].Name - @emotion.Value %</span>
                         <br />
                     }
                 }
@@ -60,7 +60,7 @@
 
                     foreach (var emotion in emotionsR)
                     {
-                        <span>@Emotions[emotion.Key] - @emotion.Value %</span>
+                        <span class="emotion @(Emotions[emotion.Key].Positive ? "positive" : "negative")">@Emotions[emotion.Key].Name - @emotion.Value %</span>
                         <br />
                     }
                 }
@@ -100,7 +100,7 @@
     [Parameter]
     public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
     [Parameter]
-    public Dictionary<int, string> Emotions { get; set; }
+    public Dictionary<int, EmotionModel> Emotions { get; set; }
 
     public ThoughtRecordReview<AutomaticThoughtDiaryRecordModel> Model { get; set; }
     public bool IsVisible { get; set; } = false;

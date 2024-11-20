@@ -84,6 +84,9 @@ namespace CBT.Domain
                 entity.HasOne(x => x.Thought)
                     .WithMany(x => x.Emotions)
                     .HasForeignKey(x => x.ThoughtId);
+                entity.HasOne(x => x.Emotion)
+                    .WithMany(x => x.ThoughtEmotions)
+                    .HasForeignKey(x => x.EmotionId);
             });
 
             modelBuilder.Entity<ThoughtPsychologistReview>(entity =>

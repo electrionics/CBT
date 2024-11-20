@@ -30,14 +30,14 @@
                     <label for="BindEmotionIds" class="form-label">Эмоции</label>
                     <SfMultiSelect ID="BindEmotionIds"
                                    TValue="List<int>"
-                                   TItem="KeyValuePair<int, string>"
+                                   TItem="KeyValuePair<int, EmotionModel>"
                                    DataSource="Emotions"
                                    AllowFiltering="true"
                                    EnableCloseOnSelect="false"
                                    MaximumSelectionLength="5"
                                    Enabled="@(!IsEdit)" 
                                    @bind-Value="@Model.BindEmotionIds">
-                        <MultiSelectFieldSettings Text="Value" Value="Key">
+                        <MultiSelectFieldSettings Text="Value.Name" Value="Key" IconCss="Value.CssClass">
                         </MultiSelectFieldSettings>
                     </SfMultiSelect>
                     @* Enabled не всегда true, при добавлении эмоций из списка во время редактировании формы падает ошибка, пока нет времени разбираться, да и эмоции добавлять к записи особого смысла нет, как сейчас видится.*@
@@ -48,7 +48,7 @@
                         foreach (var emotionId in Model.BindEmotionIds)
                         {
                             <text>
-                                Эмоция: <span>@(Emotions[emotionId])</span> -
+                                Эмоция: <span class="emotion @(Emotions[emotionId].Positive ? "positive" : "negative")">@(Emotions[emotionId].Name)</span> -
                                 Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.BeginningEmotionValues[emotionId]" /><br />
                                 <SfSlider @ref="slidersBegin[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.BeginningEmotionValues[emotionId]" Min="0" Max="100" Step="1">
                                     <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
@@ -95,7 +95,7 @@
                         foreach (var emotionId in Model.BindEmotionIds)
                         {
                             <text>
-                                Эмоция: <span>@(Emotions[emotionId])</span> -
+                                Эмоция: <span class="emotion @(Emotions[emotionId].Positive ? "positive" : "negative")">@(Emotions[emotionId].Name)</span> -
                                 Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.ResultingEmotionValues[emotionId]" /><br />
                                 <SfSlider @ref="slidersResult[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.ResultingEmotionValues[emotionId]" Min="0" Max="100" Step="1">
                                     <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
@@ -123,7 +123,7 @@
     public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
 
     [Parameter]
-    public Dictionary<int, string> Emotions { get; set; }
+    public Dictionary<int, EmotionModel> Emotions { get; set; }
 
     public bool IsEdit { get; set; }
 

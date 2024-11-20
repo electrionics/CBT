@@ -172,7 +172,7 @@ namespace CBT.Logic.Services
         {
             var threeColumnsTechniques = await _dataContext.Set<AutomaticThought>()
                                 .Include(x => x.CognitiveErrors)
-                                .Include(x => x.Emotions)
+                                .Include(x => x.Emotions).ThenInclude(x => x.Emotion)
                                 .AsNoTracking()
                                 .Where(x => x.Type == DiaryType.AutomaticThoughtDiary)
                                 .Where(x => x.Patient.UserId == (userId ?? DemoUserId))
@@ -206,7 +206,7 @@ namespace CBT.Logic.Services
         {
             return await _dataContext.Set<AutomaticThought>()
                 .Include(x => x.CognitiveErrors)
-                .Include(x => x.Emotions)
+                .Include(x => x.Emotions).ThenInclude(x => x.Emotion)
                 .AsNoTracking()
                 .FirstAsync(x => x.Id == id);
         }

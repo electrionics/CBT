@@ -39,10 +39,10 @@
                     </div>
                 }
                 <div class="form-floating mb-3">
-                    <div class="form-label">Я хочу</div>
+                    <div class="form-label">Тип пользователя:</div>
                     <div>
                         <InputCheckbox id="client" @bind-Value="Model.IsClient" />
-                        Получать помощь <span class="oi oi-info" id="infoClient"></span>
+                        Я <b>Клиент</b> и хочу получать психологическую помощь <span class="oi oi-info" id="infoClient"></span>
                     </div>
                     <SfTooltip Position="Position.RightCenter" 
                                Target="#infoClient" 
@@ -51,7 +51,7 @@
                     </SfTooltip>
                     <div>
                         <InputCheckbox id="psy" @bind-Value="Model.IsPsychologist" />
-                        Оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
+                        Я <b>Психолог</b> и хочу оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
                     </div>
                     <SfTooltip Position="Position.RightCenter"
                                Target="#infoPsychologist" 

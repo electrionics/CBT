@@ -100,7 +100,7 @@ else
                         var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.BeginningEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
-                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
                             <br />
                         }
                     }
@@ -138,7 +138,7 @@ else
                         var recordEmotions = ((ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>)context).Value.ResultingEmotionValues;
                         foreach (var emotion in recordEmotions)
                         {
-                            <span>@emotions[emotion.Key] - @(emotion.Value)%</span>
+                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
                             <br />
                         }
                     }
@@ -193,7 +193,7 @@ else
 
     private List<ThoughtRecordReview<AutomaticThoughtDiaryRecordModel>> items;
     private Dictionary<int, CognitiveErrorModel> cognitiveErrors;
-    private Dictionary<int, string> emotions;
+    private Dictionary<int, EmotionModel> emotions;
 
     protected override async Task OnInitializedAsync()
     {

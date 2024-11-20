@@ -22,7 +22,8 @@ namespace CBT.SharedComponents.Blazor.Model.Validators.Diaries
                     .WithMessage("Сократите описание ситуации, вызвавшей автоматическую мысль, до 300 символов. Текущая длина: {TotalLength} символов.");
             RuleFor(x => x.BindEmotionIds)
                 .Must(x => x.Count > 0) // user
-                    .WithMessage("Выберите как минимум 1 эмоцию.");
+                    .WithMessage("Выберите как минимум 1 эмоцию.")
+                    .When(x => x.Id == 0); // edit
 
             RuleFor(x => x.BeginningEmotionValues)
                 .Must(x => x.All(y => y.Value >= 0 && y.Value <= 100)) // business

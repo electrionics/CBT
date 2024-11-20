@@ -10,5 +10,7 @@ namespace CBT.Domain.Entities
         public ThoughtEmotionState State { get; set; }
 
         public AutomaticThought Thought { get; set; }
+
+        public Emotion Emotion { get; set; }
     }
 }

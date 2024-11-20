@@ -29,7 +29,7 @@ namespace CBT.SharedComponents.Blazor.Model
             }
         }
 
-        public AutomaticThoughtDiaryRecordModel(Dictionary<int, string> emotions) : this()
+        public AutomaticThoughtDiaryRecordModel(Dictionary<int, EmotionModel> emotions) : this()
         {
             foreach (var kvp in emotions.Select(x => new KeyValuePair<int, int>(x.Key, 0)))
             {
@@ -70,7 +70,7 @@ namespace CBT.SharedComponents.Blazor.Model
                 ResultingEmotionValues = data.Emotions
                     .Where(y => y.State == ThoughtEmotionState.Result)
                     .ToDictionary(x => x.EmotionId, x => x.Value),
-                BindEmotionIds = data.Emotions.Select(x => x.EmotionId).Distinct().ToList()
+                BindEmotionIds = data.Emotions.OrderBy(x => x.Emotion.Positive).Select(x => x.EmotionId).Distinct().ToList()
             };
         }
 

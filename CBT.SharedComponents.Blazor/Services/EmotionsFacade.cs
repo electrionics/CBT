@@ -16,12 +16,17 @@ namespace CBT.SharedComponents.Blazor.Services
 
         #region GetAllEmotions
 
-        public async Task<Dictionary<int, string>> GetAllEmotions()
+        public async Task<Dictionary<int, EmotionModel>> GetAllEmotions()
         {
             var emotions = await _dataContext.Set<Emotion>()
-                .AsNoTracking().ToListAsync();
+                .AsNoTracking().OrderBy(x => x.Positive).ToListAsync();
 
-            return emotions.ToDictionary(x => x.Id, x => x.Name);
+            return emotions.ToDictionary(x => x.Id, x => new EmotionModel
+            {
+                Key = x.Id,
+                Name = x.Name,
+                Positive = x.Positive,
+            });
 
             // TODO: sort by frequency
         }
@@ -45,7 +50,7 @@ namespace CBT.SharedComponents.Blazor.Services
                 .Where(x => userEmotions.ContainsKey(x.Key))
                 .Select(x => new EmotionReportItem
                 {
-                    Name = x.Value,
+                    Name = x.Value.Name,
                     BeforePercent = userEmotions[x.Key]
                         .Where(x => x.State == ThoughtEmotionState.Beginning)
                         .Average(x => (decimal)x.Value),
