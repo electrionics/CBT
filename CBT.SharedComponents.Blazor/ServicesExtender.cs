@@ -61,6 +61,7 @@ namespace CBT.SharedComponents.Blazor
         public static IServiceCollection WithServices(this IServiceCollection builderServices)
         {
             builderServices.AddTransient<AutomaticThoughtsService>();
+            builderServices.AddTransient<AntiProcrastinationRecordService>();
             builderServices.AddTransient<PeopleService>();
             builderServices.AddTransient<LinkingService>();
             builderServices.AddTransient<NotificationsService>();

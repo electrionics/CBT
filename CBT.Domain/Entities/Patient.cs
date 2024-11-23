@@ -8,6 +8,6 @@
 
         public List<PatientPsychologist> Psychologists { get; set; }
 
-        public List<TaskEntity> Tasks { get; set; }
+        public List<AntiProcrastinationRecord> AntiProcrastinationRecords { get; set; }
     }
 }

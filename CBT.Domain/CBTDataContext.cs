@@ -69,6 +69,15 @@ namespace CBT.Domain
                 entity.HasKey(x => x.Id);
             });
 
+            modelBuilder.Entity<AntiProcrastinationRecord>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+
+                entity.HasOne(x => x.Patient)
+                    .WithMany(x => x.AntiProcrastinationRecords)
+                    .HasForeignKey(x => x.PatientId);
+            });
+
             modelBuilder.Entity<ThoughtCognitiveError>(entity =>
             {
                 entity.HasKey(x => new { x.ThoughtId, x.CognitiveErrorId, x.ReviewerId });
@@ -125,24 +134,24 @@ namespace CBT.Domain
                     .HasForeignKey(x => x.PsychologistId);
             });
 
-            modelBuilder.Entity<TaskEntity>(entity =>
-            {
-                entity.ToTable("Task");
+            //modelBuilder.Entity<TaskEntity>(entity =>
+            //{
+            //    entity.ToTable("Task");
 
-                entity.HasKey(x => x.Id);
+            //    entity.HasKey(x => x.Id);
 
-                entity.HasOne(x => x.ParentTask)
-                    .WithMany(x => x.ChildTasks)
-                    .HasForeignKey(x => x.ParentTaskId);
+            //    entity.HasOne(x => x.ParentTask)
+            //        .WithMany(x => x.ChildTasks)
+            //        .HasForeignKey(x => x.ParentTaskId);
 
-                entity.HasOne(x => x.PatientOwner)
-                    .WithMany(x => x.Tasks)
-                    .HasForeignKey(x => x.PatientOwnerId);
+            //    entity.HasOne(x => x.PatientOwner)
+            //        .WithMany(x => x.Tasks)
+            //        .HasForeignKey(x => x.PatientOwnerId);
 
-                entity.HasOne(x => x.ParentThought)
-                    .WithMany(x => x.Tasks)
-                    .HasForeignKey(x => x.ParentThoughtId);
-            });
+            //    entity.HasOne(x => x.ParentThought)
+            //        .WithMany(x => x.Tasks)
+            //        .HasForeignKey(x => x.ParentThoughtId);
+            //});
 
             modelBuilder.Entity<Link>(entity =>
             {

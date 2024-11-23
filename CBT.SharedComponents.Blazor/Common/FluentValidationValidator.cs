@@ -7,7 +7,7 @@ namespace CBT.SharedComponents.Blazor.Common
 {
     public class FluentValidationValidator<TValidator> : ComponentBase where TValidator : IValidator, new()
     {
-        private readonly static char[] separators = new[] { '.', '[' };
+        private readonly static char[] separators = ['.', '['];
         private TValidator validator;
 
         [CascadingParameter]
@@ -57,13 +57,13 @@ namespace CBT.SharedComponents.Blazor.Common
                     return new FieldIdentifier(obj, propertyPath);
                 }
 
-                var nextToken = propertyPath.Substring(0, nextTokenEnd);
-                propertyPath = propertyPath.Substring(nextTokenEnd + 1);
+                var nextToken = propertyPath[..nextTokenEnd];
+                propertyPath = propertyPath[(nextTokenEnd + 1)..];
 
                 object? newObj;
-                if (nextToken.EndsWith("]"))
+                if (nextToken.EndsWith(']'))
                 {
-                    nextToken = nextToken.Substring(0, nextToken.Length - 1);
+                    nextToken = nextToken[..^1];
                     var prop = obj.GetType().GetProperty("Item");
                     var indexerType = prop!.GetIndexParameters()[0].ParameterType;
                     var indexerValue = Convert.ChangeType(nextToken, indexerType);
@@ -71,11 +71,7 @@ namespace CBT.SharedComponents.Blazor.Common
                 }
                 else
                 {
-                    var prop = obj.GetType().GetProperty(nextToken);
-                    if (prop == null)
-                    {
-                        throw new InvalidOperationException($"Could not find property named {nextToken} in object of type {obj.GetType().FullName}.");
-                    }
+                    var prop = obj.GetType().GetProperty(nextToken) ?? throw new InvalidOperationException($"Could not find property named {nextToken} in object of type {obj.GetType().FullName}.");
                     newObj = prop.GetValue(obj);
                 }
 

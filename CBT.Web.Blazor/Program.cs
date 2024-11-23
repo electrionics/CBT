@@ -80,5 +80,6 @@ try
 }
 catch(Exception ex)
 {
+    Console.WriteLine(ex.ToString());
     logger.Fatal("Can't start application" + ex.ToString(), ex);
 }

@@ -3,8 +3,9 @@
 @using Syncfusion.Blazor.Popups;
 @using Syncfusion.Blazor.DropDowns;
 @using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor.Calendars;
 
-@inject DiariesFacade AutomaticThoughtsService;
+@inject DiariesFacade DiariesFacade;
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
@@ -16,80 +17,39 @@
         </Header>
         <Content>
             <div class="mb-4">
-                <label for="situation" class="form-label">Ситуация</label>
-                <textarea @bind="Model.Situation" class="form-control" id="situation" aria-describedby="situationHelp"></textarea>
-                <div id="thoughtHelp" class="form-text">Кратко опишите события, которые привели к неприятной эмоции.</div>
+                <label for="situation" class="form-label">Дата</label>
+                <SfDatePicker @bind-Value="Model.PlanDate" Placeholder="Запланировано на дату" aria-describedby="plandateHelp" />
+                <textarea @bind="Model.PlanDate" class="form-control" id="plandate" aria-describedby="plandateHelp"></textarea>
+                <div id="plandateHelp" class="form-text">Выберите дату, на которую запланировано задание.</div>
             </div>
             <div class="mb-4">
-                <label for="BindEmotionIds" class="form-label">Эмоции</label>
-                <SfMultiSelect ID="BindEmotionIds"
-                               TValue="List<int>"
-                               TItem="KeyValuePair<int, string>"
-                               DataSource="Emotions"
-                               AllowFiltering="true"
-                               EnableCloseOnSelect="false"
-                               MaximumSelectionLength="5"
-                               @bind-Value="@Model.BindEmotionIds">
-                    <MultiSelectFieldSettings Text="Value" Value="Key">
-                    </MultiSelectFieldSettings>
-                </SfMultiSelect>
-            </div>
-            <div class="mb-4 percent-input-container">
-                @{
-                    foreach (var emotionId in Model.BindEmotionIds)
-                    {
-                        <text>
-                            Эмоция: <span>@(Emotions[emotionId])</span> -
-                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.BeginningEmotionValues[emotionId]" /><br />
-                            <SfSlider @ref="slidersBegin[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.BeginningEmotionValues[emotionId]" Min="0" Max="100" Step="1">
-                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
-                            </SfSlider>
-                        </text>
-                    }
-                }
+                <label for="situation" class="form-label">Задание</label>
+                <input type="text" @bind="Model.Task" class="form-control" id="task" aria-describedby="taskHelp"></input>
+                <div id="taskHelp" class="form-text">Опишите задание, которые Вам необходимо выполнить.</div>
             </div>
             <div class="mb-4">
-                <label for="thought" class="form-label">Автоматическая мысль</label> <span class="oi oi-shield" id="shield"></span>
-                <SfTooltip Position="Position.TopCenter" Target="#shield" Content="Вся личная информация, вносимая Вами на нашем сайте, защищена шифрованием и недоступна другим пользователям без вашего явного на то согласия.">
-                </SfTooltip>
-                <textarea @bind="Model.Thought" class="form-control" id="thought" aria-describedby="thoughtHelp"></textarea>
-                <div id="thoughtHelp" class="form-text">Мы не предоставляем доступ к вашим записям другим пользователям.</div><!--TODO: другой текст (из книги) и тултип-->
+                <label for="supposedEffort" class="form-label">Предполагаемая трудность</label>
+                <SfSlider @ref="sliderSupposedEffort" Type="SliderType.MinRange" @bind-Value="@Model.SupposedEffort" Min="0" Max="100" Step="1">
+                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                </SfSlider>
             </div>
             <div class="mb-4">
-                <label for="CognitiveErrors" class="form-label">Когнитивные искажения</label>
-                <SfMultiSelect ID="CognitiveErrors"
-                               TValue="List<int>"
-                               TItem="KeyValuePair<int, CognitiveErrorModel>"
-                               DataSource="CognitiveErrors"
-                               AllowFiltering="true"
-                               ShowClearButton="true"
-                               EnableCloseOnSelect="false"
-                               MaximumSelectionLength="6"
-                               @bind-Value="@Model.Errors">
-                    <MultiSelectFieldSettings Text="Value.Title" Value="Key">
-                    </MultiSelectFieldSettings>
-                </SfMultiSelect>
-                <div class="form-text">Определите искажения для каждой из автоматических мыслей.</div>
+                <label for="supposedPleasure" class="form-label">Предполагаемое удовольствие</label>
+                <SfSlider @ref="sliderSupposedPleasure" Type="SliderType.MinRange" @bind-Value="@Model.SupposedPleasure" Min="0" Max="100" Step="1">
+                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                </SfSlider>
             </div>
             <div class="mb-4">
-                <label for="rational" class="form-label">Рациональный ответ</label>
-                <textarea @bind="Model.RationalAnswer" class="form-control" id="rational" aria-describedby="rationalHelp"></textarea>
-                <div id="rationalHelp" class="form-text">Запишите рациональный ответ на автоматические мысли.</div>
+                <label for="actualEffort" class="form-label">Действительная трудность</label>
+                <SfSlider @ref="sliderActualEffort" Type="SliderType.MinRange" @bind-Value="@Model.ActualEffort" Min="0" Max="100" Step="1">
+                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                </SfSlider>
             </div>
-            <div class="mb-4 percent-input-container">
-                <label class="form-label">Результат</label><br />
-                @{
-                    foreach (var emotionId in Model.BindEmotionIds)
-                    {
-                        <text>
-                            Эмоция: <span>@(Emotions[emotionId])</span> -
-                            Интенсивность: <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int" @bind-Value="@Model.ResultingEmotionValues[emotionId]" /><br />
-                            <SfSlider @ref="slidersResult[emotionId]" Type="SliderType.MinRange" @bind-Value="@Model.ResultingEmotionValues[emotionId]" Min="0" Max="100" Step="1">
-                                <SliderTicks Placement="Placement.After" LargeStep="10"></SliderTicks>
-                            </SfSlider>
-                        </text>
-                    }
-                }
+            <div class="mb-4">
+                <label for="actualPleasure" class="form-label">Действительное удовольствие</label>
+                <SfSlider @ref="sliderActualPleasure" Type="SliderType.MinRange" @bind-Value="@Model.ActualPleasure" Min="0" Max="100" Step="1">
+                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                </SfSlider>
             </div>
         </Content>
     </DialogTemplates>
@@ -102,17 +62,16 @@
 </SfDialog>
 
 @code {
-    [Parameter]
-    public Dictionary<int, CognitiveErrorModel> CognitiveErrors { get; set; }
-
-    [Parameter]
-    public Dictionary<int, string> Emotions { get; set; }
+    private SfSlider<int?> sliderSupposedEffort { get; set; }
+    private SfSlider<int?> sliderSupposedPleasure { get; set; }
+    private SfSlider<int?> sliderActualEffort { get; set; }
+    private SfSlider<int?> sliderActualPleasure { get; set; }
 
     public bool IsEdit { get; set; }
 
     public bool IsVisible { get; set; } = false;
 
-    public AutomaticThoughtDiaryRecordModel Model { get; set; }
+    public AntiProcrastinationDiaryRecordModel Model { get; set; }
 
     public Action? SuccessCallback { get; set; }
 
@@ -124,27 +83,17 @@
 
     protected override void OnInitialized()
     {
-        slidersBegin = new Dictionary<int, SfSlider<int>>();
-        slidersResult = new Dictionary<int, SfSlider<int>>();
-
         Initialize();
 
         base.OnInitialized();
     }
 
-    Dictionary<int, SfSlider<int>> slidersBegin;
-    Dictionary<int, SfSlider<int>> slidersResult;
-
     public void Opened()
     {
-        foreach (var sliderObj in slidersBegin)
-        {
-            sliderObj.Value.RepositionAsync();
-        }
-        foreach (var sliderObj in slidersResult)
-        {
-            sliderObj.Value.RepositionAsync();
-        }
+        sliderSupposedEffort.RepositionAsync();
+        sliderSupposedPleasure.RepositionAsync();
+        sliderActualEffort.RepositionAsync();
+        sliderActualPleasure.RepositionAsync();
     }
 
     #endregion
@@ -162,14 +111,14 @@
 
         if (IsEdit)
         {
-            await AutomaticThoughtsService.EditAutomaticThoughtFull(Model, currentUserId);
+            await DiariesFacade.EditAntiprocrastinationRecordFull(Model, currentUserId);
         }
         else
         {
-            await AutomaticThoughtsService.AddAutomaticThoughtFull(Model, currentUserId);
+            await DiariesFacade.AddAntiprocrastinationRecordFull(Model, currentUserId);
         }
 
-        Model = new AutomaticThoughtDiaryRecordModel();
+        Model = new AntiProcrastinationDiaryRecordModel();
 
         if (SuccessCallback != null)
         {

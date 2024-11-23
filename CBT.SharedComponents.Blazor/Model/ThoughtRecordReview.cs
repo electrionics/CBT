@@ -28,7 +28,7 @@ namespace CBT.SharedComponents.Blazor.Model
             return new ThoughtRecordReview<T>
             {
                 Value = new T().Convert(data),
-                State = data.PsychologistReviews.Any()
+                State = data.PsychologistReviews.Count != 0
                     ? ReviewRecordState.Reviewed
                     : ReviewRecordState.Pending,
                 SentBack = data.PsychologistReviews
@@ -63,7 +63,7 @@ namespace CBT.SharedComponents.Blazor.Model
                 PsychologistId = psychologistId,
                 ReviewerId = psychologistId,
                 ThoughtId = model.Value.Id
-            }) ?? Enumerable.Empty<ThoughtCognitiveError>());
+            }) ?? []);
 
             return data;
         }

@@ -10,9 +10,10 @@ using CBT.SharedComponents.Blazor.Model;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
-    public class DiariesFacade(AutomaticThoughtsService service, CBTDataContext dataContext)
+    public class DiariesFacade(AutomaticThoughtsService automaticThoughtService, AntiProcrastinationRecordService antiProcrastinationRecordService, CBTDataContext dataContext)
     {
-        private readonly AutomaticThoughtsService _service = service;
+        private readonly AutomaticThoughtsService _automaticThoughtService = automaticThoughtService;
+        private readonly AntiProcrastinationRecordService _antiProcrastinationRecordService = antiProcrastinationRecordService;
         private readonly CBTDataContext _dataContext = dataContext;
 
         private const string DemoUserId = "DemoClient";
@@ -22,7 +23,7 @@ namespace CBT.SharedComponents.Blazor.Services
         public async Task<List<ThreeColumnsTechniqueRecordModel>> GetAllThoughts(string? userId = null)
         {
             var method = new ThreeColumnsTechniqueRecordModel().Convert;
-            var data = await _service.GetAllThoughts(userId);
+            var data = await _automaticThoughtService.GetAllThoughts(userId);
 
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
             return data
@@ -38,7 +39,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<int> AddThought(string thought)
         {
-            return await _service.AddThought(thought);
+            return await _automaticThoughtService.AddThought(thought);
         }
 
         #endregion
@@ -52,7 +53,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
             var data = model.ConvertBack(patient.Id, DiaryType.ThreeColumnsTechnique);
 
-            return await _service.AddThoughtFull(data);
+            return await _automaticThoughtService.AddThoughtFull(data);
         }
 
         #endregion
@@ -62,7 +63,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<ThreeColumnsTechniqueRecordModel?> GetThought(int id)
         {
-            var data = await _service.GetThought(id);
+            var data = await _automaticThoughtService.GetThought(id);
             return new ThreeColumnsTechniqueRecordModel().Convert(data!);
         }
 
@@ -73,7 +74,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task EditThoughtFull(ThreeColumnsTechniqueRecordModel model, string? userId)
         {
-            await _service.EditThoughtFull((data, patientId) =>
+            await _automaticThoughtService.EditThoughtFull((data, patientId) =>
             {
                 model.ConvertBack(patientId, DiaryType.ThreeColumnsTechnique, data);
             }, model.Id, userId);
@@ -86,29 +87,29 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task DeleteThought(int id)
         {
-            await _service.DeleteThought(id);
+            await _automaticThoughtService.DeleteThought(id);
         }
 
         #endregion
+
+
 
 
         #region SendThoughtToPsychologist
 
         public async Task SendThoughtToPsychologist(int id)
         {
-            await _service.SendThoughtToPsychologist(id);
+            await _automaticThoughtService.SendThoughtToPsychologist(id);
         }
 
         #endregion
-
-
 
 
         #region GetPsychologistReviews
 
         public async Task<RecordReviewModel[]> GetPsychologistReviews(int thoughtId)
         {
-            var data = await _service.GetPsychologistReviews(thoughtId);
+            var data = await _automaticThoughtService.GetPsychologistReviews(thoughtId);
 
             return data.Select(d =>
                 new RecordReviewModel
@@ -126,11 +127,13 @@ namespace CBT.SharedComponents.Blazor.Services
         #endregion
 
 
+
+
         #region GetAllAutomaticThoughts
 
         public async Task<List<AutomaticThoughtDiaryRecordModel>> GetAllAutomaticThoughts(string? userId = null)
         {
-            var data = await _service.GetAllAutomaticThoughts(userId);
+            var data = await _automaticThoughtService.GetAllAutomaticThoughts(userId);
 
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
             return data
@@ -150,7 +153,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
             var data = model.ConvertBack(patient.Id, DiaryType.AutomaticThoughtDiary);
 
-            return await _service.AddAutomaticThoughtFull(data, userId);
+            return await _automaticThoughtService.AddAutomaticThoughtFull(data, userId);
         }
 
         #endregion
@@ -160,7 +163,7 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task<AutomaticThoughtDiaryRecordModel?> GetAutomaticThought(int id)
         {
-            var data = await _service.GetAutomaticThought(id);
+            var data = await _automaticThoughtService.GetAutomaticThought(id);
 
             return new AutomaticThoughtDiaryRecordModel().Convert(data);
         }
@@ -172,9 +175,66 @@ namespace CBT.SharedComponents.Blazor.Services
 
         public async Task EditAutomaticThoughtFull(AutomaticThoughtDiaryRecordModel model, string? userId)
         {
-            await _service.EditAutomaticThoughtFull((data, patientId) =>
+            await _automaticThoughtService.EditAutomaticThoughtFull((data, patientId) =>
             {
                 model.ConvertBack(patientId, DiaryType.ThreeColumnsTechnique, data);
+            }, model.Id, userId);
+        }
+
+        #endregion
+
+
+
+
+        #region GetAllAntiprocrastinationRecords
+
+        public async Task<List<AntiProcrastinationDiaryRecordModel>> GetAllAntiprocrastinationRecords(string? userId = null)
+        {
+            var data = await _antiProcrastinationRecordService.GetAllAntiProcrastinationRecords(userId);
+
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            return data
+                .Select(AntiProcrastinationDiaryRecordModel.Convert)
+                .ToList();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+        }
+
+        #endregion
+
+
+        #region AddAntiprocrastinationRecordFull
+
+        public async Task<int> AddAntiprocrastinationRecordFull(AntiProcrastinationDiaryRecordModel model, string? userId)
+        {
+            var patient = await _dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
+
+            var data = model.ConvertBack(patient.Id);
+
+            return await _antiProcrastinationRecordService.AddAntiProcrastinationRecordFull(data, userId);
+        }
+
+        #endregion
+
+
+        #region GetAntiprocrastinationRecord
+
+        public async Task<AntiProcrastinationDiaryRecordModel?> GetAntiprocrastinationRecord(int id)
+        {
+            var data = await _antiProcrastinationRecordService.GetAntiProcrastinationRecord(id);
+
+            return AntiProcrastinationDiaryRecordModel.Convert(data);
+        }
+
+        #endregion
+
+
+        #region EditAntiprocrastinationRecordFull
+
+        public async Task EditAntiprocrastinationRecordFull(AntiProcrastinationDiaryRecordModel model, string? userId)
+        {
+            await _antiProcrastinationRecordService.EditAntiProcrastinationRecordFull((data, patientId) =>
+            {
+                model.ConvertBack(patientId, data);
             }, model.Id, userId);
         }
 

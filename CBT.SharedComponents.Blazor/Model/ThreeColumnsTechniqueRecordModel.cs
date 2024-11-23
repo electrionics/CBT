@@ -16,7 +16,7 @@ namespace CBT.SharedComponents.Blazor.Model
 
         public ThreeColumnsTechniqueRecordModel() 
         {
-            Errors = new List<int>();
+            Errors = [];
         }
 
 
@@ -46,8 +46,7 @@ namespace CBT.SharedComponents.Blazor.Model
         {
             var model = this;
 
-            if (data == null)
-               data = new AutomaticThought();
+            data ??= new AutomaticThought();
 
             data.Id = model.Id;
             data.Thought = model.Thought;
@@ -57,8 +56,8 @@ namespace CBT.SharedComponents.Blazor.Model
                 {
                     ThoughtId = data.Id,
                     CognitiveErrorId = x
-                }).ToList() ?? new List<ThoughtCognitiveError>();
-            data.Emotions = new List<ThoughtEmotion>();
+                }).ToList() ?? [];
+            data.Emotions = [];
             data.Type = type;
             data.PatientId = patientId;
             data.Sent = model.Sent;

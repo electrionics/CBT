@@ -40,10 +40,10 @@ namespace CBT.SharedComponents.Blazor.Model
 
         public AutomaticThoughtDiaryRecordModel() : base()
         {
-            BeginningEmotionValues = new Dictionary<int, int>();
-            ResultingEmotionValues = new Dictionary<int, int>();
+            BeginningEmotionValues = [];
+            ResultingEmotionValues = [];
 
-            BindEmotionIds = new List<int>();
+            BindEmotionIds = [];
         }
 
 
