@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Pages\TaskList.razor" />
+    <Content Remove="Pages\AntiProcrastinationDiaryList.razor" />
   </ItemGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -75,7 +75,7 @@
 	  <Content Update="Pages\Index.razor">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Content>
-	  <Content Update="Pages\TaskEdit.razor">
+	  <Content Update="Pages\AntiProcrastinationDiaryEdit.razor">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Content>
 	  <Content Update="Pages\ThoughtReviewPopup.razor">
@@ -104,7 +104,7 @@
 	  </Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <None Include="Pages\TaskList.razor" />
+	  <None Include="Pages\AntiProcrastinationDiaryList.razor" />
 	</ItemGroup>
 	<ItemGroup>
 	  <UpToDateCheckInput Remove="Pages\Identity\Login.razor" />

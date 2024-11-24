@@ -11,6 +11,7 @@ namespace CBT.Logic.Services
 
         private const string DemoUserId = "DemoClient";
 
+
         #region GetAllAntiProcrastinationRecords
 
         public async Task<List<AntiProcrastinationRecord>> GetAllAntiProcrastinationRecords(string? userId = null)
@@ -83,6 +84,22 @@ namespace CBT.Logic.Services
                 .FirstAsync(x => x.Id == recordId);
 
             convertBack(data, patient.Id);
+
+            await _dataContext.SaveChangesAsync();
+        }
+
+        #endregion
+
+
+        #region DeleteAntiProcrastinationRecord
+
+        public async Task DeleteAntiProcrastinationRecord(int id)
+        {
+            var data = await _dataContext.Set<AntiProcrastinationRecord>()
+                .FirstAsync(x => x.Id == id);
+
+            _dataContext.Set<AntiProcrastinationRecord>()
+                .Remove(data);
 
             await _dataContext.SaveChangesAsync();
         }

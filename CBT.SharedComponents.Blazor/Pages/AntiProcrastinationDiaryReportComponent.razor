@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+
+<PageTitle>Псионик - Дневник антипрокрастинации - Персональный отчет</PageTitle>
+
+<Loading @ref="Loader" />
+
+<h1>Дневник антипрокрастинации - Персональный отчет</h1>
+
+<h3>Уровень дисциплинированности - доля запланированых задач, которые были выполнены</h3>
+<DisciplineReportComponent UserId="@UserIdDisplayFor"></DisciplineReportComponent>
+
+<h3>Реалистичность оценки - близость предполагаемых и реальных показателей</h3>
+<EstimateRealismReportComponent UserId="@UserIdDisplayFor"></EstimateRealismReportComponent>
+
+<h3>Изменения мотивации - насколько легче и приятнее оказались задачи</h3>
+<MotivationChangeReportComponent UserId="@UserIdDisplayFor"></MotivationChangeReportComponent>
+
+<h3>Уровень продуктивности - реальные трудозатраты на все выполненные задачи</h3>
+<ProductivityReportComponent UserId="@UserIdDisplayFor"></ProductivityReportComponent>
+
+<h3>Усилия воли, которые потребовались для выполнения задач</h3>
+<WillPowerReportComponent UserId="@UserIdDisplayFor"></WillPowerReportComponent>
+
+
+@code {
+    Loading Loader;
+
+    protected string? UserIdDisplayFor { get; set; }
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        return currentUserId;
+    }
+
+    protected virtual bool ReadOnly => _readOnly;
+
+    private bool _readOnly;
+
+    private async Task<bool> InitReadOnly() => _readOnly = await GetCurrentUserId() == null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitReadOnly();
+        UserIdDisplayFor = ReadOnly 
+            ? null 
+            : await GetCurrentUserId();
+    }
+}

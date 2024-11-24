@@ -239,5 +239,15 @@ namespace CBT.SharedComponents.Blazor.Services
         }
 
         #endregion
+
+
+        #region DeleteAntiprocrastinationRecord
+
+        public async Task DeleteAntiprocrastinationRecord(int id)
+        {
+            await _antiProcrastinationRecordService.DeleteAntiProcrastinationRecord(id);
+        }
+
+        #endregion
     }
 }

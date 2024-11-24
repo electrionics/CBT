@@ -6,10 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="Pages\AntiProcrastinationDiaryListComponent.razor" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -30,10 +26,6 @@
     <PackageReference Include="Syncfusion.Blazor.Popups" Version="25.2.7" />
     <PackageReference Include="Syncfusion.Blazor.Spinner" Version="25.2.7" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="25.2.7" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Pages\AntiProcrastinationDiaryListComponent.razor" />
   </ItemGroup>
 
   <ItemGroup>

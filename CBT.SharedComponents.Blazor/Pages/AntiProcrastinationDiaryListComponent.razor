@@ -11,34 +11,36 @@
 
 <PageTitle>Псионик - Мои задачи</PageTitle>
 
-<h1>Мои задачи</h1>
+<h1>Дневник антипрокрастинации</h1>
 
 <div class="alert alert-secondary mt-4">
     Приветствую тебя на странице дневника антипрокрастинации. Здесь ты можешь добавлять новые задачи в список,
-    изменять статус и отслеживать прогресс выполнения. Это важная часть, 
+    изменять статус и отслеживать прогресс выполнения. Это важная часть,
     поскольку именно сделанные дела являются доказательством того, что твое поведение меняется. А значит, меняешься и ты!
     Рекомендую создавать задачи на основе записей из дневников:
     <ul>
         <li>
-            <a href="/diary/three-columns">Техника трёх колонок</a>,
-            <a href="/diary/automatic-thoughts">Дневник автоматических мыслей</a>.
+            <a href="/diary/three-columns">Техника трёх колонок</a>
+        </li>
+        <li>
+            <a href="/diary/automatic-thoughts">Дневник автоматических мыслей</a>
         </li>
     </ul>
     <br />
     @{
         if (!ReadOnly)
         {
-            <NavLink class="nav-link" href="diary/automatic-thoughts/example">
-                <span class="oi oi-list-rich" aria-hidden="true"></span>  Примеры проработок "Дневника автоматических мыслей"
+            <NavLink class="nav-link" href="diary/anti-procrastination/example">
+                <span class="oi oi-list-rich" aria-hidden="true"></span>  Примеры проработок "Дневника антипрокрастинации"
             </NavLink>
-            <NavLink class="nav-link" href="diary/automatic-thoughts/report">
-                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Мой отчет когнитивных ошибок и эмоций
+            <NavLink class="nav-link" href="diary/anti-procrastination/report">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Мой отчет эффективности
             </NavLink>
         }
         else
         {
-            <NavLink class="nav-link" href="diary/automatic-thoughts/report/example">
-                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Пример отчета когнитивных ошибок и эмоций
+            <NavLink class="nav-link" href="diary/anti-procrastination/report/example">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Пример отчета эффективности
             </NavLink>
         }
     }
@@ -46,7 +48,7 @@
 
 @if (items == null)
 {
-    <Loading Visible="true"/>
+    <Loading Visible="true" />
 }
 else
 {
@@ -54,9 +56,9 @@ else
         Всего @(items.Count) записей.
         <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="async () => await AddBtnClick()" CssClass="@(!ReadOnly? "" : "hidden")" />
     </div>
-    @code{
-        private string? activeBreakpoint;
-        private RowDirection rowDirection;
+    @code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
     }
     <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
     @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
@@ -67,124 +69,55 @@ else
     {
         rowDirection = RowDirection.Horizontal;
     }
-    <SfGrid @ref="DataGrid" 
-            EnableAdaptiveUI="true" 
-            AdaptiveUIMode="AdaptiveMode.Both" 
-            RowRenderingMode="@rowDirection" 
-            Height="100%" 
-            Width="100%" 
-            DataSource="items" 
-            AllowTextWrap="true" 
+    <SfGrid @ref="DataGrid"
+            EnableAdaptiveUI="true"
+            AdaptiveUIMode="AdaptiveMode.Both"
+            RowRenderingMode="@rowDirection"
+            Height="100%"
+            Width="100%"
+            DataSource="items"
+            AllowTextWrap="true"
             AllowPaging="true"
             AllowSorting="true"
             AllowFiltering="true">
         <GridPageSettings PageSize="25"></GridPageSettings>
         <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
-            <GridColumn 
-                Visible="!ReadOnly" 
-                HeaderText=""
-                AllowFiltering="false"
-                AllowSorting="false">
-                <Template>
-                    @{
-                        var model = (AutomaticThoughtDiaryRecordModel)context;
-                        if (!model.Sent)
-                        {
-                            <button class="btn btn-success" @onclick="@(async () => await SendBtnClick(model.Id))">
-                                Психологу
-                            </button>
-                        }
-                        else
-                        {
-                            <text>
-                                <i class="oi oi-circle-check" style="color: blue;" /> Отправлено!
-                            </text>
-                            if (reviewExists.TryGetValue(model.Id, out var exists) && !exists)
-                            {
-                                <text>
-                                    <br/>
-                                    <i class="oi oi-circle-check" style="color: red;" /> В обработке!
-                                </text>
-                            }
-                            else
-                            {
-                                <button class="btn btn-primary" @onclick="@(async () => await CheckReviewBtnClick(model.Id))">
-                                    Проверить
-                                </button>
-                            }
-                        }
-                    }
-                </Template>
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.PlanDate)"
+                        HeaderText="Дата"
+                        AllowFiltering="true"
+                        AllowSorting="false" />
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.Task)"
+                        HeaderText="Задание"
+                        AllowFiltering="true"
+                        AllowSorting="false">
             </GridColumn>
-            <GridColumn 
-                Field="@nameof(AutomaticThoughtDiaryRecordModel.Situation)"
-                HeaderText="Ситуация"
-                AllowFiltering="true"
-                AllowSorting="false" />
-            <GridColumn 
-                Field="@nameof(AutomaticThoughtDiaryRecordModel.BeginningEmotionValues)"
-                HeaderText="Эмоции"
-                AllowFiltering="false"
-                AllowSorting="false">
-                <Template>
-                    @{
-                        var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).BeginningEmotionValues;
-                        foreach (var emotion in recordEmotions)
-                        {
-                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
-                            <br />
-                        }
-                    }
-                </Template>
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.SupposedEffort)"
+                        HeaderText="Предполагаемая трудность"
+                        AllowFiltering="true"
+                        AllowSorting="true" />
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.SupposedPleasure)"
+                        HeaderText="Предполагаемое удовольствие"
+                        AllowFiltering="true"
+                        AllowSorting="true">
             </GridColumn>
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Thought)"
-                HeaderText="Автоматическая мысль"
-                AllowFiltering="true"
-                AllowSorting="false"/>
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.Errors)"
-                HeaderText="Когнитивные искажения"
-                AllowFiltering="false"
-                AllowSorting="false">
-                <Template>
-                    @{
-                        var errors = ((AutomaticThoughtDiaryRecordModel)context).Errors;
-                        foreach (var error in errors)
-                        {
-                            <span>@cognitiveErrors[(int)error].Title</span>
-                            <br />
-                        }
-                    }
-                </Template>
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.ActualEffort)"
+                        HeaderText="Действительная трудность"
+                        AllowFiltering="true"
+                        AllowSorting="true" />
+            <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.ActualPleasure)"
+                        HeaderText="Действительное удовольствие"
+                        AllowFiltering="true"
+                        AllowSorting="true">
             </GridColumn>
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.RationalAnswer)"
-                HeaderText="Рациональный ответ"
-                AllowFiltering="true"
-                AllowSorting="false"/>
-            <GridColumn Field="@nameof(AutomaticThoughtDiaryRecordModel.ResultingEmotionValues)"
-                HeaderText="Результат"
-                AllowFiltering="false"
-                AllowSorting="false">
+            <GridColumn Visible="!ReadOnly"
+                        Field="@nameof(AntiProcrastinationDiaryRecordModel.Id)"
+                        HeaderText=""
+                        AllowFiltering="true"
+                        AllowSorting="true">
                 <Template>
                     @{
-                        var recordEmotions = ((AutomaticThoughtDiaryRecordModel)context).ResultingEmotionValues;
-                        foreach (var emotion in recordEmotions)
-                        {
-                            <span class="emotion @(emotions[emotion.Key].Positive ? "positive" : "negative")">@emotions[emotion.Key].Name - @(emotion.Value)%</span>
-                            <br />
-                        }
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn 
-                Visible="!ReadOnly" 
-                Field="@nameof(AutomaticThoughtDiaryRecordModel.Id)"
-                HeaderText=""
-                AllowFiltering="true"
-                AllowSorting="true">
-                <Template>
-                    @{
-                        var id = ((AutomaticThoughtDiaryRecordModel)context).Id;
+                        var id = ((AntiProcrastinationDiaryRecordModel)context).Id;
 
                         <button class="btn btn-danger" @onclick="@(async () => await DeleteBtnClick(id))">
                             <i class="oi oi-trash" /> Удалить
@@ -198,24 +131,16 @@ else
         </GridColumns>
     </SfGrid>
 
-    <AutomaticThoughtDiaryEditComponent @ref="EditableThought" CognitiveErrors="cognitiveErrors" Emotions="emotions">
-    </AutomaticThoughtDiaryEditComponent>
-
-    <ThoughtReviewPopupComponent @ref="ThoughtReview" CognitiveErrors="cognitiveErrors">
-    </ThoughtReviewPopupComponent>
+    <AntiProcrastinationDiaryEditComponent @ref="EditableRecord">
+    </AntiProcrastinationDiaryEditComponent>
 }
 
 @code {
     Loading Loader;
-
-    SfGrid<AutomaticThoughtDiaryRecordModel> DataGrid;
-
-    AutomaticThoughtDiaryEditComponent EditableRecord;
-    ThoughtReviewPopupComponent RecordReview;
+    SfGrid<AntiProcrastinationDiaryRecordModel> DataGrid;
+    AntiProcrastinationDiaryEditComponent EditableRecord;
 
     private List<AntiProcrastinationDiaryRecordModel> items;
-
-    private Dictionary<int, bool> reviewExists;
 
     protected override async Task OnInitializedAsync()
     {
@@ -224,8 +149,6 @@ else
         await InitShowButtons();
 
         items = await DiariesFacade.GetAllAntiprocrastinationRecords(currentUserId);
-
-        reviewExists = new Dictionary<int, bool>();
     }
 
     #region Event Handlers
@@ -235,12 +158,10 @@ else
         await using var usage = new LoadingUsage(Loader);
         await usage.StartAsync();
 
-        EditableThought.Model = new AntiProcrastinationDiaryRecordModel();
-
-        EditableThought.IsEdit = false;
-        EditableThought.IsVisible = true;
-
-        EditableThought.SuccessCallback = async () => await Refresh();
+        EditableRecord.Model = new AntiProcrastinationDiaryRecordModel();
+        EditableRecord.IsEdit = false;
+        EditableRecord.IsVisible = true;
+        EditableRecord.SuccessCallback = async () => await Refresh();
     }
 
     public async Task DeleteBtnClick(int id)
@@ -248,22 +169,22 @@ else
         await using var usage = new LoadingUsage(Loader);
         await usage.StartAsync();
 
-        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new ()
-        {
-            ShowCloseIcon = true,
-            PrimaryButtonOptions = new()
+        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new()
             {
-                IconCss = "oi oi-trash"
-            },
-            CancelButtonOptions = new()
-            {
-                Content = "Отмена",
-            }
-        });
+                ShowCloseIcon = true,
+                PrimaryButtonOptions = new()
+                {
+                    IconCss = "oi oi-trash"
+                },
+                CancelButtonOptions = new()
+                {
+                    Content = "Отмена",
+                }
+            });
 
         if (confirmed)
         {
-            await AutomaticThoughtsService.DeleteThought(id);
+            await DiariesFacade.DeleteThought(id);
             await Refresh();
         }
     }
@@ -273,42 +194,13 @@ else
         await using var usage = new LoadingUsage(Loader);
         await usage.StartAsync();
 
-        var model = await AutomaticThoughtsService.GetAutomaticThought(id);
+        var model = await DiariesFacade.GetAntiprocrastinationRecord(id);
         if (model != null)
         {
-            EditableThought.Model = model;
-            EditableThought.IsEdit = true;
-            EditableThought.IsVisible = true;
-            EditableThought.SuccessCallback = async () => await Refresh();
-        }
-    }
-
-
-    public async Task SendBtnClick(int id)
-    {
-        await using var usage = new LoadingUsage(Loader);
-        await usage.StartAsync();
-
-        await AutomaticThoughtsService.SendThoughtToPsychologist(id);
-
-        items.First(x => x.Id == id).Sent = true;
-    }
-
-    public async Task CheckReviewBtnClick(int id)
-    {
-        await using var usage = new LoadingUsage(Loader);
-        await usage.StartAsync();
-
-        var reviews = await AutomaticThoughtsService.GetPsychologistReviews(id);
-        if (reviews?.Any() ?? false)
-        {
-            ThoughtReview.Model = reviews;
-            ThoughtReview.IsVisible = true;
-            reviewExists[id] = true;
-        }
-        else
-        {
-            reviewExists[id] = false;
+            EditableRecord.Model = model;
+            EditableRecord.IsEdit = true;
+            EditableRecord.IsVisible = true;
+            EditableRecord.SuccessCallback = async () => await Refresh();
         }
     }
 
@@ -319,7 +211,7 @@ else
 
         var currentUserId = await GetCurrentUserId();
 
-        items = await AutomaticThoughtsService.GetAllAutomaticThoughts(currentUserId);
+        items = await DiariesFacade.GetAllAntiprocrastinationRecords(currentUserId);
 
         await InvokeAsync(StateHasChanged);
         await DataGrid.Refresh();
