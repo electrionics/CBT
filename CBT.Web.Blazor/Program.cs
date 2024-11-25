@@ -1,4 +1,4 @@
-using Serilog;
+ using Serilog;
 
 using CBT.SharedComponents.Blazor;
 using CBT.Web.Blazor;

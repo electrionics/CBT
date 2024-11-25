@@ -65,8 +65,6 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddTransient<PeopleService>();
             builderServices.AddTransient<LinkingService>();
             builderServices.AddTransient<NotificationsService>();
-            builderServices.AddTransient<SfDialogService>();
-            builderServices.AddTransient<UserManager<User>>();
 
             builderServices.AddTransient<DiariesFacade>();
             builderServices.AddTransient<PsychologistReviewFacade>();
@@ -75,6 +73,9 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddTransient<LinkingFacade>();
 
             builderServices.AddTransient<IEmailSender, EmailSender>();
+
+            builderServices.AddScoped<SfDialogService>(); // important to be scoped!
+            builderServices.AddScoped<UserManager<User>>();
 
             return builderServices;
         }

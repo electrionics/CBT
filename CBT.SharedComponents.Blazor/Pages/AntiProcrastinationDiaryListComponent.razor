@@ -9,7 +9,9 @@
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
 @inject UserManager<User> UserManager;
 
-<PageTitle>Псионик - Мои задачи</PageTitle>
+<PageTitle>Псионик - Дневник антипрокрастинации</PageTitle>
+
+<Loading @ref="Loader" />
 
 <h1>Дневник антипрокрастинации</h1>
 
@@ -17,7 +19,9 @@
     Приветствую тебя на странице дневника антипрокрастинации. Здесь ты можешь добавлять новые задачи в список,
     изменять статус и отслеживать прогресс выполнения. Это важная часть,
     поскольку именно сделанные дела являются доказательством того, что твое поведение меняется. А значит, меняешься и ты!
-    Рекомендую создавать задачи на основе записей из дневников:
+    Рекомендую создавать задачи на основе записей из дневников: 
+    <br />
+    <br />
     <ul>
         <li>
             <a href="/diary/three-columns">Техника трёх колонок</a>
@@ -26,7 +30,7 @@
             <a href="/diary/automatic-thoughts">Дневник автоматических мыслей</a>
         </li>
     </ul>
-    <br />
+    <br/>
     @{
         if (!ReadOnly)
         {
@@ -70,21 +74,22 @@ else
         rowDirection = RowDirection.Horizontal;
     }
     <SfGrid @ref="DataGrid"
-            EnableAdaptiveUI="true"
-            AdaptiveUIMode="AdaptiveMode.Both"
-            RowRenderingMode="@rowDirection"
-            Height="100%"
-            Width="100%"
-            DataSource="items"
-            AllowTextWrap="true"
-            AllowPaging="true"
-            AllowSorting="true"
-            AllowFiltering="true">
+    EnableAdaptiveUI="true"
+    AdaptiveUIMode="AdaptiveMode.Both"
+    RowRenderingMode="@rowDirection"
+    Height="100%"
+    Width="100%"
+    DataSource="items"
+    AllowTextWrap="true"
+    AllowPaging="true"
+    AllowSorting="true"
+    AllowFiltering="true">
         <GridPageSettings PageSize="25"></GridPageSettings>
         <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
         <GridColumns>
             <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.PlanDate)"
                         HeaderText="Дата"
+                        Format="dd/MM/yyyy"
                         AllowFiltering="true"
                         AllowSorting="false" />
             <GridColumn Field="@nameof(AntiProcrastinationDiaryRecordModel.Task)"
@@ -162,13 +167,12 @@ else
         EditableRecord.IsEdit = false;
         EditableRecord.IsVisible = true;
         EditableRecord.SuccessCallback = async () => await Refresh();
+
+        await EditableRecord.ChangeState();
     }
 
     public async Task DeleteBtnClick(int id)
     {
-        await using var usage = new LoadingUsage(Loader);
-        await usage.StartAsync();
-
         var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new()
             {
                 ShowCloseIcon = true,
@@ -184,7 +188,10 @@ else
 
         if (confirmed)
         {
-            await DiariesFacade.DeleteThought(id);
+            await using var usage = new LoadingUsage(Loader);
+            await usage.StartAsync();
+
+            await DiariesFacade.DeleteAntiProcrastinationRecord(id);
             await Refresh();
         }
     }
@@ -201,6 +208,8 @@ else
             EditableRecord.IsEdit = true;
             EditableRecord.IsVisible = true;
             EditableRecord.SuccessCallback = async () => await Refresh();
+
+            await EditableRecord.ChangeState();
         }
     }
 

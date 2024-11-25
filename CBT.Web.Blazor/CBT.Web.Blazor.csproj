@@ -7,10 +7,6 @@
     <UserSecretsId>a016d3a8-9b17-4648-96ac-f0911c8a17f5</UserSecretsId>
 	<SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Remove="Pages\AntiProcrastinationDiaryList.razor" />
-  </ItemGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
@@ -102,9 +98,6 @@
 	  <Content Update="Pages\ThreeColumnsTechniqueReviewList.razor">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	  </Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="Pages\AntiProcrastinationDiaryList.razor" />
 	</ItemGroup>
 	<ItemGroup>
 	  <UpToDateCheckInput Remove="Pages\Identity\Login.razor" />

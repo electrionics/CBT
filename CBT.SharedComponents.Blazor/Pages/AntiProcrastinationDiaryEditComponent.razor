@@ -5,63 +5,81 @@
 @using Syncfusion.Blazor.Inputs;
 @using Syncfusion.Blazor.Calendars;
 
+@using CBT.SharedComponents.Blazor.Model.Validators.Diaries;
+
 @inject DiariesFacade DiariesFacade;
 @inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
 @inject UserManager<User> UserManager;
 
-<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditThought">
+<Loading @ref="Loader" />
+
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditRecord" Header="@(IsEdit ? "Дополнить запись" : "Добавить запись")">
     <DialogEvents Opened="Opened"></DialogEvents>
     <DialogTemplates>
-        <Header>
-            @(IsEdit ? "Дополнить" : "Добавить") запись
-        </Header>
         <Content>
-            <div class="mb-4">
-                <label for="situation" class="form-label">Дата</label>
-                <SfDatePicker @bind-Value="Model.PlanDate" Placeholder="Дата" aria-describedby="plandateHelp" />
-                <textarea @bind="Model.PlanDate" class="form-control" id="plandate" aria-describedby="plandateHelp"></textarea>
-                <div id="plandateHelp" class="form-text">Выберите дату, на которую запланировано задание.</div>
-            </div>
-            <div class="mb-4">
-                <label for="situation" class="form-label">Задание</label>
-                <input type="text" @bind="Model.Task" class="form-control" id="task" aria-describedby="taskHelp"></input>
-                <div id="taskHelp" class="form-text">Опишите задание, которые Вам необходимо выполнить.</div>
-            </div>
-            <div class="mb-4">
-                <label for="supposedEffort" class="form-label">Предполагаемая трудность</label>
-                <SfSlider @ref="sliderSupposedEffort" Type="SliderType.MinRange" @bind-Value="@Model.SupposedEffort" Min="0" Max="100" Step="1">
-                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
-                </SfSlider>
-            </div>
-            <div class="mb-4">
-                <label for="supposedPleasure" class="form-label">Предполагаемое удовольствие</label>
-                <SfSlider @ref="sliderSupposedPleasure" Type="SliderType.MinRange" @bind-Value="@Model.SupposedPleasure" Min="0" Max="100" Step="1">
-                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
-                </SfSlider>
-            </div>
-            <div class="mb-4">
-                <label for="actualEffort" class="form-label">Действительная трудность</label>
-                <SfSlider @ref="sliderActualEffort" Type="SliderType.MinRange" @bind-Value="@Model.ActualEffort" Min="0" Max="100" Step="1">
-                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
-                </SfSlider>
-            </div>
-            <div class="mb-4">
-                <label for="actualPleasure" class="form-label">Действительное удовольствие</label>
-                <SfSlider @ref="sliderActualPleasure" Type="SliderType.MinRange" @bind-Value="@Model.ActualPleasure" Min="0" Max="100" Step="1">
-                    <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
-                </SfSlider>
-            </div>
+            <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+                <FluentValidationValidator TValidator="AntiProcrastinationDiaryRecordModelValidator" />
+                <ValidationSummary />
+
+                <div class="mb-4">
+                    <label for="situation" class="form-label">Дата</label>
+                    <SfDatePicker @bind-Value="Model.PlanDate" Placeholder="Дата" aria-describedby="plandateHelp" Format="dd/MM/yyyy" />
+                    <div id="plandateHelp" class="form-text">Выберите дату, на которую запланировано задание.</div>
+                    <ValidationMessage For="@(() => Model.PlanDate)" />
+                </div>
+                <div class="mb-4">
+                    <label for="situation" class="form-label">Задание</label>
+                    <input type="text" @bind="Model.Task" class="form-control" id="task" aria-describedby="taskHelp"></input>
+                    <div id="taskHelp" class="form-text">Опишите задание, которые Вам необходимо выполнить.</div>
+                    <ValidationMessage For="@(() => Model.Task)" />
+                </div>
+                <div class="mb-4">
+                    <label for="supposedEffort" class="form-label">Предполагаемая трудность</label>
+                    <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int?" @bind-Value="@Model.SupposedEffort" /><br />
+                    <SfSlider @ref="sliderSupposedEffort" Type="SliderType.MinRange" @bind-Value="@Model.SupposedEffort" Min="0" Max="100" Step="5">
+                        <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                    </SfSlider>
+                    <ValidationMessage For="@(() => Model.SupposedEffort)" />
+                </div>
+                <div class="mb-4">
+                    <label for="supposedPleasure" class="form-label">Предполагаемое удовольствие</label>
+                    <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int?" @bind-Value="@Model.SupposedPleasure" /><br />
+                    <SfSlider @ref="sliderSupposedPleasure" Type="SliderType.MinRange" @bind-Value="@Model.SupposedPleasure" Min="0" Max="100" Step="5">
+                        <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                    </SfSlider>
+                    <ValidationMessage For="@(() => Model.SupposedPleasure)" />
+                </div>
+                <div class="mb-4">
+                    <label for="actualEffort" class="form-label">Действительная трудность</label>
+                    <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int?" @bind-Value="@Model.ActualEffort" /><br />
+                    <SfSlider @ref="sliderActualEffort" Type="SliderType.MinRange" @bind-Value="@Model.ActualEffort" Min="0" Max="100" Step="5">
+                        <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                    </SfSlider>
+                    <ValidationMessage For="@(() => Model.ActualEffort)" />
+                </div>
+                <div class="mb-4">
+                    <label for="actualPleasure" class="form-label">Действительное удовольствие</label>
+                    <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int?" @bind-Value="@Model.ActualPleasure" /><br />
+                    <SfSlider @ref="sliderActualPleasure" Type="SliderType.MinRange" @bind-Value="@Model.ActualPleasure" Min="0" Max="100" Step="5">
+                        <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                    </SfSlider>
+                    <ValidationMessage For="@(() => Model.ActualPleasure)" />
+                </div>
+                <div class="e-footer-content">
+                    <button class="btn btn-success" type="submit">@(IsEdit ? "Сохранить" : "Добавить")</button>
+                    <button class="btn" @onclick="CloseBtnClick">Отмена</button>
+                </div>
+            </EditForm>
         </Content>
     </DialogTemplates>
-    <DialogButtons>
-        <DialogButton Content="@(IsEdit ? "Сохранить" : "Добавить")" IsPrimary="true" CssClass="btn btn-success"
-                      OnClick="SaveButtonClick" />
-        <DialogButton Content="Отмена"
-                      OnClick="CloseBtnClick" />
-    </DialogButtons>
 </SfDialog>
 
 @code {
+    Loading Loader;
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
     private SfSlider<int?> sliderSupposedEffort { get; set; }
     private SfSlider<int?> sliderSupposedPleasure { get; set; }
     private SfSlider<int?> sliderActualEffort { get; set; }
@@ -75,8 +93,16 @@
 
     public Action? SuccessCallback { get; set; }
 
+    public async Task ChangeState(){
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void Initialize()
     {
+        Model = new();
+
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
     }
 
     #region Fix Sliders Initialization In Popup
@@ -103,8 +129,11 @@
         IsVisible = false;
     }
 
-    private async Task SaveButtonClick()
+    private async Task OnValidSubmit()
     {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
         var currentUserId = UserManager.GetUserId(user);

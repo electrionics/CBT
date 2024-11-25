@@ -1,5 +1,4 @@
-﻿using CBT.Domain.Entities.Enums;
-using CBT.Domain.Entities;
+﻿using CBT.Domain.Entities;
 
 namespace CBT.SharedComponents.Blazor.Model
 {
