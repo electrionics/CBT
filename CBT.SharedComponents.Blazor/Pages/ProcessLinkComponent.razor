@@ -1,22 +1,26 @@
 ﻿@using System.Timers;
 @using System.Net.Http.Json;
 
+@using CBT.SharedComponents.Blazor.Model.ResultData
 @using Microsoft.AspNetCore.Identity
 
 @inject NavigationManager NavigationManager;
 @inject IHttpClientFactory ClientFactory;
 @inject ApiConfig ApiConfig;
+@inject JsInterop JsInterop;
 
 <PageTitle>Псионик - Привязка пользователя</PageTitle>
 
-<Loading Visible="true" />
+<Loading 
+    Text="Ожидайте, вы будете перенаправлены..." 
+    Visible="true" />
 
 <SfToast ID="toast_default" @ref="ToastObj" Title="Привязка пользователя" Content="@Message" Timeout="@MillisecondsToRedirect" Icon="e-meeting">
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
 @code {
-    private const int MillisecondsToRedirect = 3000;
+    private const int MillisecondsToRedirect = 4000;
 
     [SupplyParameterFromQuery(Name = "publicId")]
     private string? PublicId { get; set; }
@@ -24,11 +28,13 @@
     private SfToast ToastObj { get; set; }
     private string Message { get; set; }
 
+    private string? RedirectUrl { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         if (PublicId == null)
         {
-            Message = "Неверная ссылка";
+            Message = "Неверная ссылка.";
         }
         else
         {
@@ -36,20 +42,29 @@
             {
                 var client = ClientFactory.CreateClient();
                 var apiUrl = ApiConfig.ApiEndpointBaseUrl + $"/linking/process?publicId={PublicId}";
-                var result = await client.GetFromJsonAsync<CommonResult>(apiUrl);
+                var result = await client.GetFromJsonAsync<CommonResult<LinkProcessingResultData>>(apiUrl);
+
+                RedirectUrl = result!.RedirectUrl;
 
                 if (result!.Succeeded)
                 {
-                    Message = "Пользователь успешно привязан";
+                    Message = "Пользователь успешно привязан.";
                 }
                 else
                 {
-                    Message = result.ErrorMessage!;
+                    if (result!.Data?.LinkPublicId != null && RedirectUrl != null)
+                    {
+                        Message = "Войдите в систему и перейдите по ссылке повторно.";
+                    }
+                    else
+                    {
+                        Message = result.ErrorMessage!;
+                    }
                 }
             }
             catch (Exception)
             {
-                Message = "Ошибка при попытке привязать пользователя";
+                Message = "Ошибка при попытке привязать пользователя.";
             }
         }
     }
@@ -63,7 +78,7 @@
         timer.Elapsed += (object? sender, ElapsedEventArgs e) =>
         {
             timer.Stop();
-            NavigationManager.NavigateTo("/profile", true);
+            NavigationManager.NavigateTo(RedirectUrl ?? "/profile", true);
         };
 
         timer.Start();

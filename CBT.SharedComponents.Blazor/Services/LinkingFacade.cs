@@ -3,7 +3,6 @@
 using CBT.Domain.Identity;
 using CBT.SharedComponents.Blazor.Model;
 using CBT.Logic.Services;
-using CBT.Domain.Entities;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
@@ -35,21 +34,43 @@ namespace CBT.SharedComponents.Blazor.Services
                 PublicId = link.PublicId,
 
                 IsPatient = await _userManager.IsInRoleAsync(currentUser!, "Client"),
-                IsPsychologist = await _userManager.IsInRoleAsync(currentUser!, "Psychologist"),
-
-                LinkedUsers = connections.Select(x => new UserLinkingModel
-                {
-                    DisplayName = x.PatientId == patient?.Id
-                        ? x.Psychologist.DisplayName
-                        : x.Patient.DisplayName,
-
-                    IsPatientForCurrent = x.PsychologistId == psychologist?.Id && x.Enabled,
-                    IsPsychologistForCurrent = x.PatientId == patient?.Id && x.Enabled,
-
-                    PatientId = x.PatientId,
-                    PsychologistId = x.PsychologistId,
-                }).ToList(),
+                IsPsychologist = await _userManager.IsInRoleAsync(currentUser!, "Psychologist")
             };
+
+            result.LinkedUsers = connections
+                .SelectMany(connection => new[]
+                {
+                    new
+                    {
+                        LinkUserId = result.IsPatient && connection.Psychologist.UserId != currentUser?.Id 
+                            ? connection.Psychologist.UserId 
+                            : null,
+                        Data = connection
+                    },
+                    new
+                    {
+                        LinkUserId = result.IsPsychologist && connection.Patient.UserId != currentUser?.Id
+                            ? connection.Patient.UserId 
+                            : null,
+                        Data = connection
+                    }
+                })
+                .Where(link => link.LinkUserId != null)
+                .GroupBy(link => link.LinkUserId)
+                .Select(paired => new UserLinkingModel
+                {
+                    DisplayName =
+                            paired.FirstOrDefault(x => x.Data.PsychologistId != psychologist?.Id)?.Data.Psychologist.DisplayName ??
+                            paired.First(x => x.Data.PatientId != patient?.Id).Data.Patient.DisplayName,
+
+                    IsPatientForCurrent = paired.Any(x => x.Data.PsychologistId == psychologist?.Id && x.Data.Enabled),
+                    IsPsychologistForCurrent = paired.Any(x => x.Data.PatientId == patient?.Id && x.Data.Enabled),
+
+                    PatientId = paired.FirstOrDefault(x => x.Data.PatientId != patient?.Id)
+                            ?.Data.PatientId,
+                    PsychologistId = paired.FirstOrDefault(x => x.Data.PsychologistId != psychologist?.Id)
+                            ?.Data.PsychologistId,
+                }).ToList();
 
             return result;
         }
@@ -61,7 +82,7 @@ namespace CBT.SharedComponents.Blazor.Services
             return link.PublicId;
         }
 
-        public async Task SetConnectionWithPatient(string currentUserId, int patientId, bool enable)
+        public async Task<bool> SetConnectionWithPatient(string currentUserId, int patientId, bool enable)
         {
             var currentPsychologist = await _peopleService.GetPsychologist(currentUserId);
 
@@ -69,11 +90,13 @@ namespace CBT.SharedComponents.Blazor.Services
             {
                 var linkedPatient = await _peopleService.GetPatient(patientId);
 
-                await _peopleService.Connect(linkedPatient!, currentPsychologist, enable);
+                return await _peopleService.Connect(linkedPatient!, currentPsychologist, enable);
             }
+
+            return false;
         }
 
-        public async Task SetConnectionWithPsychologist(string currentUserId, int psychologistId, bool enable)
+        public async Task<bool> SetConnectionWithPsychologist(string currentUserId, int psychologistId, bool enable)
         {
             var currentPatient = await _peopleService.GetPatient(currentUserId);
 
@@ -81,8 +104,26 @@ namespace CBT.SharedComponents.Blazor.Services
             {
                 var linkedPsychologist = await _peopleService.GetPsychologist(psychologistId);
 
-                await _peopleService.Connect(currentPatient, linkedPsychologist!, enable);
+                return await _peopleService.Connect(currentPatient, linkedPsychologist!, enable);
             }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteConnectionWithPatient(string currentUserId, int patientId)
+        {
+            var currentPsychologist = await _peopleService.GetPsychologist(currentUserId);
+            var patient = await _peopleService.GetPatient(patientId);
+
+            return await _peopleService.DeleteConnection(patient, currentPsychologist);
+        }
+
+        public async Task<bool> DeleteConnectionWithPsychologist(string currentUserId, int psychologistId)
+        {
+            var currentPatient = await _peopleService.GetPatient(currentUserId);
+            var psychologist = await _peopleService.GetPsychologist(psychologistId);
+
+            return await _peopleService.DeleteConnection(currentPatient, psychologist);
         }
     }
 }

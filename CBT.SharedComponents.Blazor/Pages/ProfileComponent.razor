@@ -10,6 +10,7 @@
 @inject UserManager<User> UserManager;
 
 @inject ClipboardService ClipboardService;
+@inject SfDialogService SfDialogService;
 
 @inject LinkingFacade LinkingFacade;
 
@@ -44,9 +45,9 @@ else
                 <div class="form-field">
                     @Model?.DisplayName
                     <SfTooltip Position="Position.RightCenter"
-                               Target="#infoName"
-                               CssClass="fontTooltip"
-                               Content="Используется для отображения на сайте.">
+                    Target="#infoName"
+                    CssClass="fontTooltip"
+                    Content="Используется для отображения на сайте.">
                     </SfTooltip>
                 </div>
             </div>
@@ -55,12 +56,12 @@ else
                 <div class="form-field">
                     @Model?.Email
                     <SfTooltip Position="Position.RightCenter"
-                               Target="#infoEmail"
-                               CssClass="fontTooltip"
-                               Content="Не показываем никому, кроме Вас.">
+                    Target="#infoEmail"
+                    CssClass="fontTooltip"
+                    Content="Не показываем никому, кроме Вас.">
                     </SfTooltip>
                 </div>
-                
+
             </div>
             <div class="form-floating mb-3">
                 <div for="email" class="form-label">Моя ссылка <span class="oi oi-info" id="infoUrl"></span></div>
@@ -68,9 +69,9 @@ else
                     <button @onclick="CopyLink" class="btn btn-success"><span class="oi oi-copy"></span> Скопировать ссылку</button>
                     <button @onclick="Recreate" class="btn btn-primary"><span class="oi oi-plus"></span> Пересоздать ссылку</button>
                     <SfTooltip Position="Position.RightCenter"
-                               Target="#infoUrl"
-                               CssClass="fontTooltip"
-                               Content="Если Вы получаете помощь - отправьте ссылку тому, кто может Вам помочь. Если Вы оказываете помощь - отправьте ссылку тому, кому Вы хотите помочь.">
+                    Target="#infoUrl"
+                    CssClass="fontTooltip"
+                    Content="Если Вы получаете помощь - отправьте ссылку тому, кто может Вам помочь. Если Вы оказываете помощь - отправьте ссылку тому, кому Вы хотите помочь.">
                     </SfTooltip>
                 </div>
             </div>
@@ -94,29 +95,29 @@ else
             else
             {
                 <SfGrid @ref="DataGrid" 
-                        EnableAdaptiveUI="true" 
-                        AdaptiveUIMode="AdaptiveMode.Both" 
-                        RowRenderingMode="@rowDirection" 
-                        Height="100%" 
-                        Width="100%"
-                        DataSource="Model.LinkedUsers"
-                        AllowTextWrap="true" 
-                        AllowPaging="true"
-                        AllowSorting="true"
-                        AllowFiltering="true">
+                EnableAdaptiveUI="true" 
+                AdaptiveUIMode="AdaptiveMode.Both" 
+                RowRenderingMode="@rowDirection" 
+                Height="100%" 
+                Width="100%"
+                DataSource="Model.LinkedUsers"
+                AllowTextWrap="true" 
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true">
                     <GridPageSettings PageSize="25"></GridPageSettings>
                     <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
                     <GridColumns>
                         <GridColumn Field="@nameof(UserLinkingModel.DisplayName)"
-                                    HeaderText="Имя пользователя"
-                                    AllowFiltering="true"
-                                    AllowSorting="true">
+                        HeaderText="Имя пользователя"
+                        AllowFiltering="true"
+                        AllowSorting="true">
                         </GridColumn>
                         <GridColumn Field="@nameof(UserLinkingModel.IsPatientForCurrent)"
-                                    HeaderText=""
-                                    AllowFiltering="false"
-                                    AllowSorting="false"
-                                    Visible="Model.IsPsychologist">
+                        HeaderText=""
+                        AllowFiltering="false"
+                        AllowSorting="false"
+                        Visible="Model.IsPsychologist">
                             <HeaderTemplate>
                                 Мой клиент <span class="oi oi-info" id="clientInfo"></span>
                                 <SfTooltip Position="Position.TopCenter" Target="#clientInfo" Content="Если переключатель включен - клиент может отправлять вам свои записи для комментирования, а вы можете просматривать и комментировать его записи.">
@@ -131,9 +132,9 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(UserLinkingModel.IsPsychologistForCurrent)"
-                                    AllowFiltering="false"
-                                    AllowSorting="false"
-                                    Visible="Model.IsPatient">
+                        AllowFiltering="false"
+                        AllowSorting="false"
+                        Visible="Model.IsPatient">
                             <HeaderTemplate>
                                 Мой психолог <span class="oi oi-info" id="psyInfo"></span>
                                 <SfTooltip Position="Position.TopCenter" Target="#psyInfo" Content="Если переключатель включен - психолог может просматривать и комментировать отправленные вами записи.">
@@ -147,6 +148,15 @@ else
                                 }
                             </Template>
                         </GridColumn>
+                        <GridColumn HeaderText="Действие">
+                            <Template>
+                                @{
+                                    var model = (UserLinkingModel)context;
+
+                                    <SfButton IconCss="oi oi-trash" OnClick="async () => await DeleteConnection(model.PatientId, model.PsychologistId)">Удалить</SfButton>
+                                }
+                            </Template>
+                        </GridColumn>
                     </GridColumns>
                 </SfGrid>
             }
@@ -154,7 +164,7 @@ else
     </div>
 </div>
 
-<SfToast ID="toast_default" @ref="ToastObj" Title="Действие на странице" Content="@Message" Timeout="@MillisecondsToDisplay" Icon="e-meeting">
+<SfToast ID="toast_default" @ref="ToastObj" Timeout="@MillisecondsToDisplay" Icon="e-meeting">
     <ToastPosition X="Right" Y="Bottom"></ToastPosition>
 </SfToast>
 
@@ -170,6 +180,8 @@ else
     private string CurrentUserId { get; set; }
 
     private ProfileModel Model { get; set; }
+
+    private string Title => "Действие на странице.";
     private string Message { get; set; }
 
     #region Initialization Overrides
@@ -181,8 +193,6 @@ else
         var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         var user = authstate.User;
 
-        Message = string.Empty;
-
         try
         {
             CurrentUserId = UserManager.GetUserId(user)!;
@@ -191,17 +201,15 @@ else
         }
         catch(Exception)
         {
-            Message = "Ошибка при загрузке страницы";
+            Message = "Ошибка при загрузке страницы.";
         }
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !string.IsNullOrEmpty(Message))
         {
-            await ToastObj.ShowAsync();
-            Message = string.Empty;
+            await ToastObj.ShowAsync(new ToastModel { Title = Title, Content = Message });
         }
 
         LoaderVisible = false;
@@ -228,12 +236,12 @@ else
             Message = "Ошибка. Ссылка не обновлена";
         }
 
-        await ToastObj.ShowAsync();
+        await ToastObj.ShowAsync(new ToastModel { Title = Title, Content = Message });
     }
 
     public async Task CopyLink()
     {
-        Message = "Ссылка скопирована";
+        Message = "Ссылка скопирована.";
 
         try
         {
@@ -241,27 +249,70 @@ else
         }
         catch (Exception)
         {
-            Message = "Ошибка. Ссылка не скопирована";
+            Message = "Ошибка. Ссылка не скопирована.";
         }
 
-        await ToastObj.ShowAsync();
+        await ToastObj.ShowAsync(new ToastModel { Title = Title, Content = Message });
     }
 
     public async Task ToggleConnection(int? patientId, int? psychologistId, bool value)
     {
+        var result = false;
+
         if (patientId != null)
         {
-            await LinkingFacade.SetConnectionWithPatient(CurrentUserId, patientId.Value, value);
+            result |= await LinkingFacade.SetConnectionWithPatient(CurrentUserId, patientId.Value, value);
         }
         else if (psychologistId != null)
         {
-            await LinkingFacade.SetConnectionWithPsychologist(CurrentUserId, psychologistId.Value, value);
+            result |= await LinkingFacade.SetConnectionWithPsychologist(CurrentUserId, psychologistId.Value, value);
         }
 
-        await Refresh();
+        Message = result 
+            ? "Сохранено" 
+            : "Отказано";
+        await ToastObj.ShowAsync(new ToastModel { Title = Title, Content = Message });
 
-        Message = "Сохранено";
-        await ToastObj.ShowAsync();
+        await Refresh();
+    }
+
+    public async Task DeleteConnection(int? patientId, int? psychologistId)
+    {
+        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить пользователя? Действие нельзя будет отменить.", "Подтверждение действия", new()
+            {
+                ShowCloseIcon = true,
+                PrimaryButtonOptions = new()
+                {
+                    IconCss = "oi oi-trash"
+                },
+                CancelButtonOptions = new()
+                {
+                    Content = "Отмена",
+                }
+            });
+
+        if (confirmed)
+        {
+            var result = false;
+
+            if (patientId != null)
+                result |= await LinkingFacade.DeleteConnectionWithPatient(CurrentUserId, patientId.Value);
+
+            if (psychologistId != null)
+                result |= await LinkingFacade.DeleteConnectionWithPsychologist(CurrentUserId, psychologistId.Value);
+
+            if (!result)
+            {
+                Message = "Соединение между пользователями уже удалено.";
+            }
+            else
+            {
+                Message = "Соединение между пользователями успешно удалено.";
+            }
+
+            await ToastObj.ShowAsync(new ToastModel { Title = Title, Content = Message });
+            await Refresh();
+        }
     }
 
     #endregion

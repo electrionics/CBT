@@ -63,7 +63,7 @@ namespace CBT.Logic.Services
             return connection;
         }
 
-        public async Task<bool> Connect(Patient patient, Psychologist psychologist, bool enable = true)
+        public async Task<bool> Connect(Patient? patient, Psychologist? psychologist, bool enable = true)
         {
             if (patient == null || psychologist == null)
                 return false;
@@ -86,6 +86,29 @@ namespace CBT.Logic.Services
 
             await _dataContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> DeleteConnection(Patient? patient, Psychologist? psychologist)
+        {
+            if (patient == null || psychologist == null)
+                return false;
+
+            var peopleConnection = await GetExistingConnection(patient.Id, psychologist.Id);
+
+            if (peopleConnection == null)
+                return false;
+
+            try
+            {
+                _dataContext.Set<PatientPsychologist>().Remove(peopleConnection);
+
+                await _dataContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public async Task<List<PatientPsychologist>> GetConnectionsFor(int? patientId, int? psychologistId)

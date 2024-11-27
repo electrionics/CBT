@@ -1,4 +1,9 @@
-﻿<SfSpinner @ref="Loader" @bind-Visible="Visible">
+﻿@if (Text != null)
+{
+    <b>@(Text)</b>
+}
+
+<SfSpinner @ref="Loader" @bind-Visible="Visible">
     <SpinnerTemplates>
         <Template>
             <img src="_content/CBT.SharedComponents.Blazor/double_ring_loader.gif" />
@@ -9,6 +14,9 @@
 @code {
     [Parameter]
     public bool Visible { get; set; }
+
+    [Parameter]
+    public string? Text { get; set; }
 
     private SfSpinner Loader { get; set; }
 

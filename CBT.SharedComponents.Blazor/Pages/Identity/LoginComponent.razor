@@ -48,6 +48,10 @@
                     <br/>
                     <a href="/account/resetpassword">Забыли пароль?</a>
                 </div>
+                <div>
+                    <br />
+                    <a href="/account/register">Зарегистрироваться</a>
+                </div>
             </EditForm>
         </section>
     </div>
@@ -88,6 +92,8 @@
         await usage.StartAsync();
 
         LastServerErrorMessage = null;
+
+        await JsInterop.ClearAuth();
 
         var client = ClientFactory.CreateClient();
         var apiUrl = ApiConfig.ApiEndpointBaseUrl + "/account/login";

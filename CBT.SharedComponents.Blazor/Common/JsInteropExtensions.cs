@@ -13,5 +13,10 @@
                 await jsInterop.WriteAuthCookie(authCookie);
             }
         }
+
+        public static async Task ClearAuth(this JsInterop jsInterop)
+        {
+            await jsInterop.WriteAuthCookie("");
+        }
     }
 }
