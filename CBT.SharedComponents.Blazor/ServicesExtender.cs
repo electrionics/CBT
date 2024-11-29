@@ -71,6 +71,7 @@ namespace CBT.SharedComponents.Blazor
             builderServices.AddTransient<CognitiveErrorsFacade>();
             builderServices.AddTransient<EmotionsFacade>();
             builderServices.AddTransient<LinkingFacade>();
+            builderServices.AddTransient<IndicatorsFacade>(); 
 
             builderServices.AddTransient<IEmailSender, EmailSender>();
 

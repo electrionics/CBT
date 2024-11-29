@@ -1,4 +1,4 @@
-﻿namespace CBT.SharedComponents.Blazor.Model
+﻿namespace CBT.SharedComponents.Blazor.Model.Reports
 {
     public class EmotionReportItem
     {

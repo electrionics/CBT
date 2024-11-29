@@ -2,8 +2,9 @@
 
 using CBT.Domain;
 using CBT.Domain.Entities;
-using CBT.SharedComponents.Blazor.Model;
 using CBT.Domain.Entities.Enums;
+using CBT.SharedComponents.Blazor.Model;
+using CBT.SharedComponents.Blazor.Model.Reports;
 
 namespace CBT.SharedComponents.Blazor.Services
 {

@@ -1,4 +1,57 @@
-﻿@code {
+﻿@using Microsoft.AspNetCore.Identity
+
+@using Syncfusion.Blazor.Charts
+
+@using CBT.SharedComponents.Blazor.Model.Reports
+
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+@inject IndicatorsFacade IndicatorsFacade;
+
+<Loading @ref="Loader" />
+
+@code {
+    private string? activeBreakpoint;
+    private ChartSeriesType chartType;
+}
+<SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+@if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+{
+    chartType = ChartSeriesType.StackingBar;
+}
+else
+{
+    chartType = ChartSeriesType.StackingColumn;
+}
+
+<SfChart @ref="DataChart1" Title="График уровня реалистичности оценки заданий">
+    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTimeCategory" />
+
+    <ChartSeriesCollection>
+        <ChartSeries DataSource="@items"
+                     XName="Date"
+                     YName="RealismValue"
+                     Type="@chartType"
+                     EnableTooltip="true"
+                     Name="Реалистичность оценки заданий"
+                     Fill="green">
+        </ChartSeries>
+    </ChartSeriesCollection>
+    <ChartTooltipSettings Header="<b>${point.tooltip}</b>" Enable="true" Shared="true"></ChartTooltipSettings>
+</SfChart>
+
+@code {
+    Loading Loader;
+
+    SfChart DataChart1;
+
+    private IEnumerable<RealismReportItem> items;
+
     [Parameter]
     public string? UserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await IndicatorsFacade.GetEstimationRealismReport(UserId);
+    }
 }
