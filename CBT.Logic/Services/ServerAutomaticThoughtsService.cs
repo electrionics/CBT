@@ -3,11 +3,12 @@
 using CBT.Domain;
 using CBT.Domain.Entities;
 using CBT.Domain.Entities.Enums;
+using CBT.Logic.Contracts;
 
 namespace CBT.Logic.Services
 {
-    public class AutomaticThoughtsService(
-        CBTDataContext dataContext)
+    public class ServerAutomaticThoughtsService(
+        CBTDataContext dataContext): IAutomaticThoughtsService
     {
         private readonly CBTDataContext _dataContext = dataContext;
 

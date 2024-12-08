@@ -38,7 +38,9 @@ try
     builderServices
         .WithConfigurations(builder.Configuration)
         .WithDatabase(builder.Configuration)
-        .WithServices()
+        .WithServerLogic()
+        .WithThirdPartyServices()
+        .WithFacades()
         .WithValidators()
         .WithIdentity()
         .WithCommon()

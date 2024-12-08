@@ -2,10 +2,11 @@
 
 using CBT.Domain;
 using CBT.Domain.Entities;
+using CBT.Logic.Contracts;
 
 namespace CBT.Logic.Services
 {
-    public class PeopleService(CBTDataContextMARS dataContext)
+    public class ServerPeopleService(CBTDataContextMARS dataContext):IPeopleService
     {
         private readonly CBTDataContext _dataContext = dataContext;
 

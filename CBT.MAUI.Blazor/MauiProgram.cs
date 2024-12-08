@@ -40,7 +40,9 @@ namespace CBT.MAUI.Blazor
             builderServices
                 .WithConfigurations(builder.Configuration)
                 .WithDatabase(builder.Configuration)
-                .WithServices()
+                .WithServerLogic() //TODO: replace with client logic
+                .WithThirdPartyServices()
+                .WithFacades()
                 .WithValidators()
                 .WithIdentity()
                 .WithCommon();

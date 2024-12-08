@@ -67,6 +67,10 @@ namespace CBT.Domain
             modelBuilder.Entity<AutomaticThought>(entity =>
             {
                 entity.HasKey(x => x.Id);
+
+                entity.HasOne(x => x.Patient)
+                    .WithMany(x => x.AutomaticThoughts)
+                    .HasForeignKey(x => x.PatientId);
             });
 
             modelBuilder.Entity<AntiProcrastinationRecord>(entity =>
@@ -75,6 +79,15 @@ namespace CBT.Domain
 
                 entity.HasOne(x => x.Patient)
                     .WithMany(x => x.AntiProcrastinationRecords)
+                    .HasForeignKey(x => x.PatientId);
+            });
+
+            modelBuilder.Entity<MoodRecord>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+
+                entity.HasOne(x => x.Patient)
+                    .WithMany(x => x.MoodRecords)
                     .HasForeignKey(x => x.PatientId);
             });
 

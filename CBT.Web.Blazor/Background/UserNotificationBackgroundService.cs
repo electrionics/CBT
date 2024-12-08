@@ -36,7 +36,7 @@ namespace CBT.Web.Blazor.Background
 #pragma warning restore CA2254 // Template should be a static expression
 
                     using var dbContext = new CBTDataContextMARS(databaseConfig.SingleConnectionStringMARS);
-                    var notificationService = new NotificationsService(dbContext);
+                    var notificationService = new ServerNotificationsService(dbContext);
 
                     var sw = Stopwatch.StartNew();
 

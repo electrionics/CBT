@@ -8,6 +8,15 @@
 
         public List<PatientPsychologist> Psychologists { get; set; }
 
+
+        #region Diary Records
+
+        public List<AutomaticThought> AutomaticThoughts { get; set; }
+
         public List<AntiProcrastinationRecord> AntiProcrastinationRecords { get; set; }
+
+        public List<MoodRecord> MoodRecords { get; set; }
+
+        #endregion
     }
 }

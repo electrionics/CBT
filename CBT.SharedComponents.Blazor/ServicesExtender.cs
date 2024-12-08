@@ -22,6 +22,7 @@ using CBT.SharedComponents.Blazor.Services;
 using CBT.SharedComponents.Blazor.Model;
 using CBT.SharedComponents.Blazor.Model.Validators.Diaries;
 using CBT.Logic.Services;
+using CBT.Logic.Contracts;
 
 namespace CBT.SharedComponents.Blazor
 {
@@ -58,21 +59,32 @@ namespace CBT.SharedComponents.Blazor
             return builderServices;
         }
 
-        public static IServiceCollection WithServices(this IServiceCollection builderServices)
+        public static IServiceCollection WithServerLogic(this IServiceCollection builderServices)
         {
-            builderServices.AddTransient<AutomaticThoughtsService>();
-            builderServices.AddTransient<AntiProcrastinationRecordService>();
-            builderServices.AddTransient<PeopleService>();
-            builderServices.AddTransient<LinkingService>();
-            builderServices.AddTransient<NotificationsService>();
+            builderServices.AddTransient<IAutomaticThoughtsService, ServerAutomaticThoughtsService>();
+            builderServices.AddTransient<IAntiProcrastinationRecordService, ServerAntiProcrastinationRecordService>();
+            builderServices.AddTransient<IMoodRecordService, ServerMoodRecordService>(); 
+            builderServices.AddTransient<IPeopleService, ServerPeopleService>();
+            builderServices.AddTransient<ILinkingService, ServerLinkingService>();
+            builderServices.AddTransient<INotificationsService, ServerNotificationsService>();
 
+            return builderServices;
+        }
+
+        public static IServiceCollection WithFacades(this IServiceCollection builderServices)
+        {
             builderServices.AddTransient<DiariesFacade>();
             builderServices.AddTransient<PsychologistReviewFacade>();
             builderServices.AddTransient<CognitiveErrorsFacade>();
             builderServices.AddTransient<EmotionsFacade>();
             builderServices.AddTransient<LinkingFacade>();
-            builderServices.AddTransient<IndicatorsFacade>(); 
+            builderServices.AddTransient<IndicatorsFacade>();
 
+            return builderServices;
+        }
+
+        public static IServiceCollection WithThirdPartyServices(this IServiceCollection builderServices)
+        {
             builderServices.AddTransient<IEmailSender, EmailSender>();
 
             builderServices.AddScoped<SfDialogService>(); // important to be scoped!

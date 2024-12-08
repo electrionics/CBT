@@ -2,10 +2,11 @@
 
 using CBT.Domain;
 using CBT.Domain.Entities;
+using CBT.Logic.Contracts;
 
 namespace CBT.Logic.Services
 {
-    public class AntiProcrastinationRecordService(CBTDataContext dataContext)
+    public class ServerAntiProcrastinationRecordService(CBTDataContext dataContext): IAntiProcrastinationRecordService
     {
         private readonly CBTDataContext _dataContext = dataContext;
 

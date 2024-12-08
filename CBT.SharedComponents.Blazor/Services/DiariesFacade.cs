@@ -6,14 +6,16 @@ using CBT.Domain;
 using CBT.Domain.Entities;
 using CBT.Domain.Entities.Enums;
 using CBT.Logic.Services;
+using CBT.Logic.Contracts;
 using CBT.SharedComponents.Blazor.Model;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
-    public class DiariesFacade(AutomaticThoughtsService automaticThoughtService, AntiProcrastinationRecordService antiProcrastinationRecordService, CBTDataContext dataContext)
+    public class DiariesFacade(IAutomaticThoughtsService automaticThoughtService, IAntiProcrastinationRecordService antiProcrastinationRecordService, IMoodRecordService moodRecordService, CBTDataContext dataContext)
     {
-        private readonly AutomaticThoughtsService _automaticThoughtService = automaticThoughtService;
-        private readonly AntiProcrastinationRecordService _antiProcrastinationRecordService = antiProcrastinationRecordService;
+        private readonly IAutomaticThoughtsService _automaticThoughtService = automaticThoughtService;
+        private readonly IAntiProcrastinationRecordService _antiProcrastinationRecordService = antiProcrastinationRecordService;
+        private readonly IMoodRecordService _moodRecordService = moodRecordService;
         private readonly CBTDataContext _dataContext = dataContext;
 
         private const string DemoUserId = "DemoClient";
@@ -246,6 +248,73 @@ namespace CBT.SharedComponents.Blazor.Services
         public async Task DeleteAntiProcrastinationRecord(int id)
         {
             await _antiProcrastinationRecordService.DeleteAntiProcrastinationRecord(id);
+        }
+
+        #endregion
+
+
+
+
+        #region GetAllMoodRecords
+
+        public async Task<List<MoodDiaryRecordModel>> GetAllMoodRecords(string? userId = null)
+        {
+            var data = await _moodRecordService.GetAllMoodRecords(userId);
+
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            return data
+                .Select(MoodDiaryRecordModel.Convert)
+                .ToList();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+        }
+
+        #endregion
+
+
+        #region AddMoodRecordFull
+
+        public async Task<int> AddMoodRecordFull(MoodDiaryRecordModel model, string? userId)
+        {
+            var patient = await _dataContext.Set<Patient>().FirstAsync(x => x.UserId == (userId ?? DemoUserId));
+
+            var data = model.ConvertBack(patient.Id);
+
+            return await _moodRecordService.AddMoodRecordFull(data, userId);
+        }
+
+        #endregion
+
+
+        #region GetMoodRecord
+
+        public async Task<MoodDiaryRecordModel?> GetMoodRecord(int id)
+        {
+            var data = await _moodRecordService.GetMoodRecord(id);
+
+            return MoodDiaryRecordModel.Convert(data);
+        }
+
+        #endregion
+
+
+        #region EditMoodRecordFull
+
+        public async Task EditMoodRecordFull(MoodDiaryRecordModel model, string? userId)
+        {
+            await _moodRecordService.EditMoodRecordFull((data, patientId) =>
+            {
+                model.ConvertBack(patientId, data);
+            }, model.Id, userId);
+        }
+
+        #endregion
+
+
+        #region DeleteMoodRecord
+
+        public async Task DeleteMoodRecord(int id)
+        {
+            await _moodRecordService.DeleteMoodRecord(id);
         }
 
         #endregion

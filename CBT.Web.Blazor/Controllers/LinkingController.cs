@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using CBT.Domain.Identity;
-using CBT.Logic.Services;
+using CBT.Logic.Contracts;
 using CBT.SharedComponents.Blazor.Model;
 using CBT.SharedComponents.Blazor.Model.ResultData;
 
@@ -10,12 +10,12 @@ namespace CBT.Web.Blazor.Controllers
 {
     public class LinkingController(
         UserManager<User> userManager, 
-        LinkingService linkingService, 
-        PeopleService peopleService) : Controller
+        ILinkingService linkingService, 
+        IPeopleService peopleService) : Controller
     {
         private readonly UserManager<User> _userManager = userManager;
-        private readonly LinkingService _linkingService = linkingService;
-        private readonly PeopleService _peopleService = peopleService;
+        private readonly ILinkingService _linkingService = linkingService;
+        private readonly IPeopleService _peopleService = peopleService;
 
         [Route("/api/linking/process")]
         [HttpGet]

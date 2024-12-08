@@ -5,10 +5,10 @@
 @using Microsoft.Net.Http.Headers;
 
 @using CBT.Domain.Identity
-@using CBT.Logic.Services;
+@using CBT.Logic.Contracts
 
-@inject NotificationsService NotificationsService;
-@inject PeopleService PeopleService;
+@inject INotificationsService NotificationsService;
+@inject IPeopleService PeopleService;
 @inject UserManager<User> UserManager;
 @inject IHttpContextAccessor HttpContextAccessor;
 

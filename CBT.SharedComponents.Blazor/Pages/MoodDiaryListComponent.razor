@@ -1,0 +1,224 @@
+﻿@using Microsoft.AspNetCore.Identity;
+
+@using Syncfusion.Blazor.Buttons;
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Grids;
+
+@inject DiariesFacade DiariesFacade;
+@inject SfDialogService SfDialogService;
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync
+@inject UserManager<User> UserManager;
+
+<PageTitle>Псионик - Дневник настроения</PageTitle>
+
+<Loading @ref="Loader" />
+
+<h1>Дневник настроения</h1>
+
+<div class="alert alert-secondary mt-4">
+    Фиксируйте уровень вашего настроения и события, которые могли на него повлиять. Рекомендуется записывать каждый час в период бодрствования.
+    <br/>
+    @{
+        if (!ReadOnly)
+        {
+            <NavLink class="nav-link" href="diary/mood/example">
+                <span class="oi oi-list-rich" aria-hidden="true"></span>  Пример заполнения "Дневника настроения"
+            </NavLink>
+            <NavLink class="nav-link" href="diary/mood/report">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Мой отчет настроения
+            </NavLink>
+        }
+        else
+        {
+            <NavLink class="nav-link" href="diary/mood/report/example">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span>  Пример отчета настроения
+            </NavLink>
+        }
+    }
+</div>
+
+@if (items == null)
+{
+    <Loading Visible="true" />
+}
+else
+{
+    <div class="alert alert-secondary mt-4">
+        Всего @(items.Count) записей.
+        <SfButton IconCss="oi oi-plus" Content="Добавить" IsPrimary="true" @onclick="async () => await AddBtnClick()" CssClass="@(!ReadOnly? "" : "hidden")" />
+    </div>
+    @code {
+    private string? activeBreakpoint;
+    private RowDirection rowDirection;
+    }
+    <SfMediaQuery @bind-ActiveBreakpoint="activeBreakpoint"></SfMediaQuery>
+    @if (activeBreakpoint == "Medium" || activeBreakpoint == "Small")
+    {
+        rowDirection = RowDirection.Vertical;
+    }
+    else
+    {
+        rowDirection = RowDirection.Horizontal;
+    }
+    <SfGrid @ref="DataGrid"
+    EnableAdaptiveUI="true"
+    AdaptiveUIMode="AdaptiveMode.Both"
+    RowRenderingMode="@rowDirection"
+    Height="100%"
+    Width="100%"
+    DataSource="items"
+    AllowTextWrap="true"
+    AllowPaging="true"
+    AllowSorting="true"
+    AllowFiltering="true">
+        <GridPageSettings PageSize="25"></GridPageSettings>
+        <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(MoodDiaryRecordModel.Date)"
+                        HeaderText="Дата"
+                        Format="dd/MM/yyyy"
+                        AllowFiltering="true"
+                        AllowSorting="true" />
+            <GridColumn Field="@nameof(MoodDiaryRecordModel.Time)"
+                        HeaderText="Время"
+                        Format="HH:mm"
+                        AllowFiltering="true"
+                        AllowSorting="true">
+            </GridColumn>
+            <GridColumn Field="@nameof(MoodDiaryRecordModel.Value)"
+                        HeaderText="Значение"
+                        AllowFiltering="true"
+                        AllowSorting="true" />
+            <GridColumn Field="@nameof(MoodDiaryRecordModel.Events)"
+                        HeaderText="События"
+                        AllowFiltering="true"
+                        AllowSorting="true">
+            </GridColumn>
+            <GridColumn Visible="!ReadOnly"
+                        Field="@nameof(MoodDiaryRecordModel.Id)"
+                        HeaderText=""
+                        AllowFiltering="true"
+                        AllowSorting="true">
+                <Template>
+                    @{
+                        var id = ((MoodDiaryRecordModel)context).Id;
+
+                        <button class="btn btn-danger" @onclick="@(async () => await DeleteBtnClick(id))">
+                            <i class="oi oi-trash" /> Удалить
+                        </button>
+                        <button class="btn btn-success" @onclick="@(async () => await EditBtnClick(id))">
+                            <i class="oi oi-pencil" /> Изменить
+                        </button>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+    <MoodDiaryEditComponent @ref="EditableRecord">
+    </MoodDiaryEditComponent>
+}
+
+@code {
+    Loading Loader;
+    SfGrid<MoodDiaryRecordModel> DataGrid;
+    MoodDiaryEditComponent EditableRecord;
+
+    private List<MoodDiaryRecordModel> items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUserId = await GetCurrentUserId();
+
+        await InitShowButtons();
+
+        items = await DiariesFacade.GetAllMoodRecords(currentUserId);
+    }
+
+    #region Event Handlers
+
+    public async Task AddBtnClick()
+    {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
+        EditableRecord.Model = new MoodDiaryRecordModel();
+        EditableRecord.IsEdit = false;
+        EditableRecord.IsVisible = true;
+        EditableRecord.SuccessCallback = async () => await Refresh();
+
+        await EditableRecord.ChangeState();
+    }
+
+    public async Task DeleteBtnClick(int id)
+    {
+        var confirmed = await SfDialogService.ConfirmAsync("Вы действительно хотите удалить запись?", "Подтверждение действия", new()
+            {
+                ShowCloseIcon = true,
+                PrimaryButtonOptions = new()
+                {
+                    IconCss = "oi oi-trash"
+                },
+                CancelButtonOptions = new()
+                {
+                    Content = "Отмена",
+                }
+            });
+
+        if (confirmed)
+        {
+            await using var usage = new LoadingUsage(Loader);
+            await usage.StartAsync();
+
+            await DiariesFacade.DeleteMoodRecord(id);
+            await Refresh();
+        }
+    }
+
+    public async Task EditBtnClick(int id)
+    {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
+        var model = await DiariesFacade.GetMoodRecord(id);
+        if (model != null)
+        {
+            EditableRecord.Model = model;
+            EditableRecord.IsEdit = true;
+            EditableRecord.IsVisible = true;
+            EditableRecord.SuccessCallback = async () => await Refresh();
+
+            await EditableRecord.ChangeState();
+        }
+    }
+
+    private async Task Refresh()
+    {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
+        var currentUserId = await GetCurrentUserId();
+
+        items = await DiariesFacade.GetAllMoodRecords(currentUserId);
+
+        await InvokeAsync(StateHasChanged);
+        await DataGrid.Refresh();
+    }
+
+    #endregion
+
+    protected virtual async Task<string?> GetCurrentUserId()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        return currentUserId;
+    }
+
+    protected virtual bool ReadOnly => _readOnly;
+
+    private bool _readOnly;
+
+    private async Task<bool> InitShowButtons() => _readOnly = await GetCurrentUserId() == null;
+}

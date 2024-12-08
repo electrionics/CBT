@@ -16,6 +16,7 @@ using CBT.SharedComponents.Blazor.Common;
 using CBT.SharedComponents.Blazor.Model;
 
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+using CBT.Logic.Contracts;
 
 
 namespace CBT.Web.Blazor.Controllers
@@ -29,8 +30,8 @@ namespace CBT.Web.Blazor.Controllers
         IValidator<RegisterModel> registerValidator,
         IValidator<ResendConfirmationModel> resendConfirmationValidator,
         IValidator<ResetPasswordModel> resetPasswordValidator,
-        LinkingService linkingService,
-        PeopleService peopleService) : Controller
+        ILinkingService linkingService,
+        IPeopleService peopleService) : Controller
     {
         #region Dependencies
 
@@ -48,8 +49,8 @@ namespace CBT.Web.Blazor.Controllers
         private readonly IValidator<ResendConfirmationModel> _resendConfirmationValidator = resendConfirmationValidator;
         private readonly IValidator<ResetPasswordModel> _resetPasswordValidator = resetPasswordValidator;
 
-        private readonly LinkingService _linkingService = linkingService;
-        private readonly PeopleService _peopleService = peopleService;
+        private readonly ILinkingService _linkingService = linkingService;
+        private readonly IPeopleService _peopleService = peopleService;
 
         #endregion
 

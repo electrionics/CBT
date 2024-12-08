@@ -1,0 +1,136 @@
+﻿@using Microsoft.AspNetCore.Identity;
+
+@using Syncfusion.Blazor.Popups;
+@using Syncfusion.Blazor.DropDowns;
+@using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor.Calendars;
+
+@using CBT.SharedComponents.Blazor.Model.Validators.Diaries;
+
+@inject DiariesFacade DiariesFacade;
+@inject BaseAuthenticationStateProvider GetAuthenticationStateAsync;
+@inject UserManager<User> UserManager;
+
+<Loading @ref="Loader" />
+
+<SfDialog Width="500px" IsModal="true" @bind-Visible="@IsVisible" ShowCloseIcon="true" ID="EditRecord" Header="@(IsEdit ? "Дополнить запись" : "Добавить запись")">
+    <DialogEvents Opened="Opened"></DialogEvents>
+    <DialogTemplates>
+        <Content>
+            <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+                <FluentValidationValidator TValidator="MoodDiaryRecordModelValidator" />
+                <ValidationSummary />
+
+                <div class="mb-4">
+                    <label class="form-label">Дата</label>
+                    <SfDatePicker @bind-Value="Model.Date" Placeholder="Дата" aria-describedby="dateHelp" Format="dd/MM/yyyy" />
+                    <div id="dateHelp" class="form-text">Выберите дату записи.</div>
+                    <ValidationMessage For="@(() => Model.Date)" />
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Время</label>
+                    <SfTimePicker @bind-Value="Model.Time" TValue="TimeOnly?" Placeholder="Час" aria-describedby="timeHelp" Step=60 Format="HH:mm" />
+                    <div id="timeHelp" class="form-text">Выберите время записи.</div>
+                    <ValidationMessage For="@(() => Model.Time)" />
+                </div>
+                <div class="mb-4">
+                    <label for="supposedEffort" class="form-label">Уровень настроения</label>
+                    <SfNumericTextBox Min="0" Max="100" Step="5" TValue="int?" @bind-Value="@Model.Value" /><br />
+                    <SfSlider @ref="sliderValue" Type="SliderType.MinRange" @bind-Value="@Model.Value" Min="0" Max="100" Step="5">
+                        <SliderTicks Placement="Placement.After" LargeStep="5"></SliderTicks>
+                    </SfSlider>
+                    <ValidationMessage For="@(() => Model.Value)" />
+                </div>
+                <div class="mb-4">
+                    <label for="events" class="form-label">События</label>
+                    <textarea @bind="@Model.Events" class="form-control" id="events" aria-describedby="eventsHelp"></textarea><br />
+                    <div id="eventsHelp" class="form-text">Опишите события, которые происходили в выбранное время.</div>
+                    <ValidationMessage For="@(() => Model.Events)" />
+                </div>
+                <div class="e-footer-content">
+                    <button class="btn btn-success" type="submit">@(IsEdit ? "Сохранить" : "Добавить")</button>
+                    <button class="btn" @onclick="CloseBtnClick">Отмена</button>
+                </div>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    Loading Loader;
+
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
+    private SfSlider<int?> sliderValue { get; set; }
+
+    public bool IsEdit { get; set; }
+
+    public bool IsVisible { get; set; } = false;
+
+    public MoodDiaryRecordModel Model { get; set; }
+
+    public Action? SuccessCallback { get; set; }
+
+    public async Task ChangeState()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Initialize()
+    {
+        Model = new();
+
+        editContext = new EditContext(Model);
+        messageStore = new(editContext);
+    }
+
+    #region Fix Sliders Initialization In Popup
+
+    protected override void OnInitialized()
+    {
+        Initialize();
+
+        base.OnInitialized();
+    }
+
+    public void Opened()
+    {
+        sliderValue.RepositionAsync();
+    }
+
+    #endregion
+
+    private void CloseBtnClick()
+    {
+        IsVisible = false;
+    }
+
+    private async Task OnValidSubmit()
+    {
+        await using var usage = new LoadingUsage(Loader);
+        await usage.StartAsync();
+
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        if (IsEdit)
+        {
+            await DiariesFacade.EditMoodRecordFull(Model, currentUserId);
+        }
+        else
+        {
+            await DiariesFacade.AddMoodRecordFull(Model, currentUserId);
+        }
+
+        Model = new MoodDiaryRecordModel();
+
+        if (SuccessCallback != null)
+        {
+            SuccessCallback();
+        }
+
+        IsVisible = false;
+    }
+}

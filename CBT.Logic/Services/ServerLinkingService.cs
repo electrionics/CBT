@@ -2,11 +2,12 @@
 
 using CBT.Domain;
 using CBT.Domain.Entities;
+using CBT.Logic.Contracts;
 
 namespace CBT.Logic.Services
 {
-    public class LinkingService(
-        CBTDataContextMARS dataContext)
+    public class ServerLinkingService(
+        CBTDataContextMARS dataContext):ILinkingService
     {
         private readonly CBTDataContext _dataContext = dataContext;
 

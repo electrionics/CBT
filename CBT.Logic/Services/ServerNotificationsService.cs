@@ -2,17 +2,13 @@
 
 using CBT.Domain;
 using CBT.Domain.Entities;
+using CBT.Logic.Contracts;
 
 namespace CBT.Logic.Services
 {
-    public class NotificationsService
+    public class ServerNotificationsService(CBTDataContextMARS dataContext) : INotificationsService
     {
-        private readonly CBTDataContextMARS dataContext;
-
-        public NotificationsService(CBTDataContextMARS dataContext) 
-        {
-            this.dataContext = dataContext;
-        }
+        private readonly CBTDataContextMARS dataContext = dataContext;
 
         public async Task<Dictionary<int, int>> GetPsychologistNotifications(IEnumerable<int>? psychologistIds, CancellationToken stoppingToken = default)
         {

@@ -2,19 +2,19 @@
 
 using CBT.Domain.Identity;
 using CBT.SharedComponents.Blazor.Model;
-using CBT.Logic.Services;
+using CBT.Logic.Contracts;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
     public class LinkingFacade(
         UserManager<User> userManager,
-        LinkingService linkingService,
-        PeopleService peopleService)
+        ILinkingService linkingService,
+        IPeopleService peopleService)
     {
         private readonly UserManager<User> _userManager = userManager;
 
-        private readonly LinkingService _linkingService = linkingService;
-        private readonly PeopleService _peopleService = peopleService;
+        private readonly ILinkingService _linkingService = linkingService;
+        private readonly IPeopleService _peopleService = peopleService;
 
         public async Task<ProfileModel> GetModelByUserId(string userId) 
         {
