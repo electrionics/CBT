@@ -104,17 +104,7 @@
 
         // load suggestions
 
-        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
-        var user = authstate.User;
-        var currentUserId = UserManager.GetUserId(user);
-
-        if (currentUserId != null)
-        {
-            var suggesions = await DiariesFacade.GetSuggestions(currentUserId);
-
-            DateSuggestions = suggesions.Where(x => x.Date != null).Select(x => x.Date!.Value).ToList();
-            TimeSuggestions = suggesions.Where(x => x.Time != null).Select(x => x.Time!.Value).ToList();
-        }
+        await ResetSuggestions();
     }
 
     #region Fix Sliders Initialization In Popup
@@ -126,9 +116,11 @@
         await base.OnInitializedAsync();
     }
 
-    public void Opened()
+    public async Task Opened()
     {
-        sliderValue.RepositionAsync();
+        await sliderValue.RepositionAsync();
+
+        await ResetSuggestions();
     }
 
     #endregion
@@ -174,5 +166,20 @@
     private void SetTime(TimeOnly timeValue)
     {
         Model.Time = timeValue;
+    }
+
+    private async Task ResetSuggestions()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        if (currentUserId != null)
+        {
+            var suggesions = await DiariesFacade.GetSuggestions(currentUserId);
+
+            DateSuggestions = suggesions.Where(x => x.Date != null).Select(x => x.Date!.Value).ToList();
+            TimeSuggestions = suggesions.Where(x => x.Time != null).Select(x => x.Time!.Value).ToList();
+        }
     }
 }
