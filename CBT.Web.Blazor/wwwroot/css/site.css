@@ -91,3 +91,8 @@ a, .btn-link {
 .fontTooltip .e-tip-content {
     font-size: 16px!important;
 }
+
+.btn-primary.rounded-corners {
+    border-radius: 5px;
+    cursor: pointer;
+}

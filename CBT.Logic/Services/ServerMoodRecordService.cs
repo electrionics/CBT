@@ -92,6 +92,76 @@ namespace CBT.Logic.Services
             await _dataContext.SaveChangesAsync();
         }
 
+        public async Task<List<DateTime>> GetDateSuggestions(string userId)
+        {
+            var lastSavedRecord = await _dataContext.Set<MoodRecord>().AsNoTracking()
+                .Where(x => x.Patient.UserId == userId)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            var lastDateRecord = await _dataContext.Set<MoodRecord>().AsNoTracking()
+                .Where(x => x.Patient.UserId == userId)
+                .OrderByDescending(x => x.DateTime)
+                .FirstOrDefaultAsync();
+
+            var nowDate = DateTime.Now.Date;
+
+            var dates = new HashSet<DateTime> { nowDate, nowDate.AddDays(-1) };
+
+            if (lastSavedRecord != null)
+            {
+                dates.Add(lastSavedRecord.DateTime.Date);
+                dates.Add(lastSavedRecord.DateTime.Date.AddDays(-1));
+                dates.Add(lastSavedRecord.DateTime.Date.AddDays(1));
+            }
+
+            if (lastDateRecord != null)
+            {
+                dates.Add(lastDateRecord.DateTime.Date);
+                dates.Add(lastDateRecord.DateTime.Date.AddDays(-1));
+                dates.Add(lastDateRecord.DateTime.Date.AddDays(1));
+            }
+
+            return [.. dates.OrderBy(x => x)];
+        }
+
+        public async Task<List<TimeOnly>> GetTimeSuggestions(string userId)
+        {
+            var lastSavedRecord = await _dataContext.Set<MoodRecord>().AsNoTracking()
+                .Where(x => x.Patient.UserId == userId)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            var lastDateRecord = await _dataContext.Set<MoodRecord>().AsNoTracking()
+                .Where(x => x.Patient.UserId == userId)
+                .OrderByDescending(x => x.DateTime)
+                .FirstOrDefaultAsync();
+
+            var nowTime = TimeOnly.FromTimeSpan(DateTime.Now.TimeOfDay);
+
+            var times = new HashSet<TimeOnly> { new(nowTime.Hour, 0), new(nowTime.Hour - 1, 0) };
+
+            if (lastSavedRecord != null)
+            {
+                var timeOnly = TimeOnly.FromTimeSpan(lastSavedRecord.DateTime.TimeOfDay);
+
+                times.Add(new(timeOnly.Hour, 0));
+                times.Add(new(timeOnly.Hour - 1, 0));
+                times.Add(new(timeOnly.Hour + 1, 0));
+            }
+
+            if (lastDateRecord != null)
+            {
+                var timeOnly = TimeOnly.FromTimeSpan(lastDateRecord.DateTime.TimeOfDay);
+
+                times.Add(new(timeOnly.Hour, 0));
+                times.Add(new(timeOnly.Hour - 1, 0));
+                times.Add(new(timeOnly.Hour + 1, 0));
+            }
+
+            return [.. times.OrderBy(x => x)];
+        }
+
         #endregion
     }
 }

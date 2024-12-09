@@ -23,12 +23,26 @@
 
                 <div class="mb-4">
                     <label class="form-label">Дата</label>
+                    @{
+                        foreach(var suggestion in DateSuggestions)
+                        {
+                            <span>&nbsp;</span>
+                            <label class="rounded-corners btn-primary" @onclick="() => SetDate(suggestion)">@suggestion.ToString("dd/MM/yy")</label>
+                        }
+                    }
                     <SfDatePicker @bind-Value="Model.Date" Placeholder="Дата" aria-describedby="dateHelp" Format="dd/MM/yyyy" />
                     <div id="dateHelp" class="form-text">Выберите дату записи.</div>
                     <ValidationMessage For="@(() => Model.Date)" />
                 </div>
                 <div class="mb-4">
                     <label class="form-label">Время</label>
+                    @{
+                        foreach (var suggestion in TimeSuggestions)
+                        {
+                            <span>&nbsp;</span>
+                            <label class="rounded-corners btn-primary" @onclick="() => SetTime(suggestion)">@suggestion.ToString("HH:mm")</label>
+                        }
+                    }
                     <SfTimePicker @bind-Value="Model.Time" TValue="TimeOnly?" Placeholder="Час" aria-describedby="timeHelp" Step=60 Format="HH:mm" />
                     <div id="timeHelp" class="form-text">Выберите время записи.</div>
                     <ValidationMessage For="@(() => Model.Time)" />
@@ -72,26 +86,44 @@
 
     public Action? SuccessCallback { get; set; }
 
+    public List<DateTime> DateSuggestions { get; set; }
+
+    public List<TimeOnly> TimeSuggestions { get; set; }
+
     public async Task ChangeState()
     {
         await InvokeAsync(StateHasChanged);
     }
 
-    private void Initialize()
+    private async Task InitializeAsync()
     {
         Model = new();
 
         editContext = new EditContext(Model);
         messageStore = new(editContext);
+
+        // load suggestions
+
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var user = authstate.User;
+        var currentUserId = UserManager.GetUserId(user);
+
+        if (currentUserId != null)
+        {
+            var suggesions = await DiariesFacade.GetSuggestions(currentUserId);
+
+            DateSuggestions = suggesions.Where(x => x.Date != null).Select(x => x.Date!.Value).ToList();
+            TimeSuggestions = suggesions.Where(x => x.Time != null).Select(x => x.Time!.Value).ToList();
+        }
     }
 
     #region Fix Sliders Initialization In Popup
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Initialize();
+        await InitializeAsync();
 
-        base.OnInitialized();
+        await base.OnInitializedAsync();
     }
 
     public void Opened()
@@ -132,5 +164,15 @@
         }
 
         IsVisible = false;
+    }
+
+    private void SetDate(DateTime dateValue)
+    {
+        Model.Date = dateValue;
+    }
+
+    private void SetTime(TimeOnly timeValue)
+    {
+        Model.Time = timeValue;
     }
 }

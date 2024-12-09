@@ -318,5 +318,23 @@ namespace CBT.SharedComponents.Blazor.Services
         }
 
         #endregion
+
+
+        #region GetSuggestions
+
+        public async Task<List<MoodDiaryRecordModel>> GetSuggestions(string userId)
+        {
+            var dateSuggestions = await _moodRecordService.GetDateSuggestions(userId);
+            var timeSuggestions = await _moodRecordService.GetTimeSuggestions(userId);
+
+            var result = new List<MoodDiaryRecordModel>();
+
+            result.AddRange(dateSuggestions.Select(suggestion => new MoodDiaryRecordModel { Date = suggestion }));
+            result.AddRange(timeSuggestions.Select(suggestion => new MoodDiaryRecordModel { Time = suggestion }));
+
+            return result;
+        }
+
+        #endregion
     }
 }
