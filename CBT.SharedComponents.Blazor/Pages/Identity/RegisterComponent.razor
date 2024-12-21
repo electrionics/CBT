@@ -42,19 +42,19 @@
                     <div class="form-label">Тип пользователя:</div>
                     <div>
                         <InputCheckbox id="client" @bind-Value="Model.IsClient" />
-                        Я <b>Клиент</b> и хочу получать психологическую помощь <span class="oi oi-info" id="infoClient"></span>
+                        Я <b>Представитель другой профессии</b> и хочу получить псионическую помощь <span class="oi oi-info" id="infoClient"></span>
                     </div>
                     <SfTooltip Position="Position.RightCenter" 
                                Target="#infoClient" 
                                CssClass="fontTooltip"
-                               Content="Вам будет доступно ведение личных дневников и своего отслеживание прогресса.">
+                               Content="Вам будет доступно ведение личных дневников и отслеживание прогресса.">
                     </SfTooltip>
                     <div>
                         <InputCheckbox id="psy" @bind-Value="Model.IsPsychologist" />
-                        Я <b>Психолог</b> и хочу оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
+                        Я <b>Псионик</b> и хочу оказывать помощь <span class="oi oi-info" id="infoPsychologist"></span>
                     </div>
                     <SfTooltip Position="Position.RightCenter"
-                               Target="#infoPsychologist" 
+                               Target="#infoPsychologist"
                                CssClass="fontTooltip"
                                Content="Вам будет доступна проверка дневников ваших подопечных.">
                     </SfTooltip>
