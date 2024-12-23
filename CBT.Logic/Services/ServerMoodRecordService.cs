@@ -146,8 +146,8 @@ namespace CBT.Logic.Services
                 var timeOnly = TimeOnly.FromTimeSpan(lastSavedRecord.DateTime.TimeOfDay);
 
                 times.Add(new(timeOnly.Hour, 0));
-                times.Add(new(timeOnly.Hour - 1, 0));
-                times.Add(new(timeOnly.Hour + 1, 0));
+                times.Add(new(timeOnly.AddHours(-1).Hour, 0));
+                times.Add(new(timeOnly.AddHours(1).Hour, 0));
             }
 
             if (lastDateRecord != null)
@@ -155,8 +155,8 @@ namespace CBT.Logic.Services
                 var timeOnly = TimeOnly.FromTimeSpan(lastDateRecord.DateTime.TimeOfDay);
 
                 times.Add(new(timeOnly.Hour, 0));
-                times.Add(new(timeOnly.Hour - 1, 0));
-                times.Add(new(timeOnly.Hour + 1, 0));
+                times.Add(new(timeOnly.AddHours(-1).Hour, 0));
+                times.Add(new(timeOnly.AddHours(1).Hour, 0));
             }
 
             return [.. times.OrderBy(x => x)];
