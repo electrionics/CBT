@@ -8,6 +8,7 @@ using CBT.SharedComponents.Blazor.Model.Reports;
 
 namespace CBT.SharedComponents.Blazor.Services
 {
+    //TODO: стоит ли сделать все фасады дополнительно прокси, чтобы часть?
     public class EmotionsFacade(
         CBTDataContextMARS dataContext)
     {
